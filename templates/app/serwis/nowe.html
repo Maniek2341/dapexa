@@ -1,0 +1,1382 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/shared_dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/service_list.css' %}">
+{% endblock %}
+
+{% block content %}
+<style>
+    .schedule-input[type="datetime-local"]{
+  color-scheme: dark;
+}
+
+[data-theme="light"] .schedule-input[type="datetime-local"]{
+  color-scheme: light;
+}
+
+.service-filter-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.service-filter-card .form-control,
+.service-filter-card .form-select{
+  min-height:50px;
+  background:var(--body);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:14px;
+}
+
+.service-filter-card .form-control:focus,
+.service-filter-card .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.content-card-header-modern p{
+  margin:.2rem 0 0;
+  color:var(--muted) !important;
+  font-size:.85rem;
+}
+
+.content-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.content-card-header-modern{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.content-card-icon{
+  width:52px;
+  height:52px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.3rem;
+  flex-shrink:0;
+}
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+/* Główny przycisk listy serwisów musi mieć ten sam akcent co pozostałe moduły. */
+.modern-btn-primary{
+  background:var(--brand-gradient)!important;
+  box-shadow:0 10px 30px rgba(20,104,245,.26)!important;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+.content-card-header-modern h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:800;
+}
+
+.content-card-header-modern p{
+  margin:.2rem 0 0;
+  color:var(--text-muted);
+  font-size:.85rem;
+}
+
+@media(max-width:768px){
+
+  .service-filter-card{
+    padding:1rem;
+  }
+
+  .content-card-header-modern{
+    padding:1rem;
+  }
+
+}
+  .icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.service-filter-card .form-control,
+.service-filter-card .form-select {
+  background: transparent !important;
+}
+
+.icon-btn-blue{
+  color:#7aa7ff;
+}
+
+.icon-btn-green{
+  color:#47d18c;
+}
+
+.icon-btn-warning{
+  color:#ffb24d;
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+}
+
+.icon-btn-orange{
+  color:#ff9f2f;
+  border-color:rgba(20,104,245,.25);
+}
+
+.icon-btn-green{
+  color:#00ff2a;
+  border-color:rgba(0,255,42,.18);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.72rem 1rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+</style>
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon">
+      <i class="bi bi-wrench-adjustable"></i>
+    </div>
+
+    <div>
+      <h1>Lista serwisów</h1>
+      <p>Podgląd zgłoszeń serwisowych i obsługi.</p>
+    </div>
+  </div>
+
+  {% if can_manage_services %}
+    <div class="top-actions">
+      <a href="{% url 'serwis_add' %}" class="modern-btn modern-btn-primary">
+        <i class="bi bi-plus-lg"></i>
+        Nowe zgłoszenie
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Łącznie zgłoszeń</div>
+    <div class="stat-value">{{ services|length }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Aktualny filtr</div>
+    <div class="stat-value">
+      {% if active_status == "all" %}
+        Wszystkie
+      {% else %}
+        {{ services|length }}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Nowe</div>
+    <div class="stat-value">{{ new_count|default:"0" }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Obsługa</div>
+    <div class="stat-value">{{ obsluga_count|default:"0" }}</div>
+  </div>
+</div>
+
+<div class="service-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+
+      <div class="col-12 col-md">
+        <input
+          type="text"
+          name="q"
+          class="form-control"
+          placeholder="Szukaj serwisu..."
+          value="{{ request.GET.q }}"
+        >
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="status" class="form-select">
+          <option value="all" {% if active_status == "all" %}selected{% endif %}>
+            Wszystkie statusy
+          </option>
+
+          <option value="new" {% if active_status == "new" %}selected{% endif %}>
+            Nowe
+          </option>
+
+          <option value="forgoted" {% if active_status == "forgoted" %}selected{% endif %}>
+            Zapomniane
+          </option>
+
+          <option value="obsluga" {% if active_status == "obsluga" %}selected{% endif %}>
+            Obsługa
+          </option>
+
+          <option value="done" {% if active_status == "done" %}selected{% endif %}>
+            Zakończone
+          </option>
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-auto d-flex gap-2">
+        <button class="btn-orange w-100">
+          <i class="bi bi-search"></i>
+          Szukaj
+        </button>
+
+        <a href="{% url 'serwis_nowe' %}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<div class="content-card">
+
+  <div class="content-card-header-modern">
+
+    <div class="content-card-icon">
+      <i class="bi bi-tools"></i>
+    </div>
+
+    <div>
+      <h3>Lista serwisów</h3>
+      <p>Zlecenia serwisowe, obsługa oraz wykonane prace.</p>
+    </div>
+
+  </div>
+
+  <!-- tabela -->
+
+  {% if services %}
+
+    <div class="table-responsive desktop-table">
+      <table class="table table-modern align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Serwis</th>
+            {% if active_status != 'all' %}
+              {% if active_status == 'obsluga' %}
+                <th>Status obsługi</th>
+              {% else %}
+                <th>Data wykonania</th>
+              {% endif %}
+              <th>Wyznaczone osoby</th>
+            {% endif %}
+            {% if can_manage_services %}<th></th>{% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for s in services %}
+            <tr>
+              <td style="min-width:320px;">
+                <div class="service-main">
+                  <div class="service-icon {% if s.status == 'in_progress' %}service-icon-progress{% elif s.status == 'new' %}service-icon-new{% endif %}">
+                    <i class="bi bi-wrench-adjustable"></i>
+                  </div>
+
+                  <div>
+                    <a href="{% url 'serwis_detail' s.pk %}" class="service-title">
+                      {{ s.client }}
+                    </a>
+
+                    <div class="service-subtitle">
+                      {{ s.title|default:"Brak tytułu" }}
+                    </div>
+
+                    <div class="service-subtitle">
+                      {{ s.number|default:"Brak numeru" }}
+                    </div>
+
+                    <div class="mt-2">
+                      {% if s.priority == 'critical' %}
+                        <span class="badge-soft badge-priority-critical">Krytyczny</span>
+                      {% elif s.priority == 'high' %}
+                        <span class="badge-soft badge-priority-high">Wysoki</span>
+                      {% elif s.priority == 'normal' %}
+                        <span class="badge-soft badge-priority-normal">Normalny</span>
+                      {% else %}
+                        <span class="badge-soft badge-priority-low">Niski</span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              {% if active_status != 'all' %}
+                <td>
+                  {% if s.status == 'zgrania' %}
+                    {% if s.status_zgrania %}
+                      <span class="badge-soft badge-zgranie">
+                        {{ s.get_status_zgrania_display }}
+                      </span>
+                    {% else %}
+                      —
+                    {% endif %}
+                  {% else %}
+                    <div class="info-stack">
+                      <div class="info-value">
+                        {% if s.planned_start %}
+                          {{ s.planned_start|date:"d.m.Y H:i" }}
+                          {% if s.planned_end %} - {{ s.planned_end|date:"H:i" }}{% endif %}
+                        {% else %}
+                          —
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div class="assigned-list">
+                    {% for u in s.assigned_to.all %}
+                      <span class="mini-count">
+                        <i class="bi bi-person"></i>
+                        {{ u.first_name }} {{ u.last_name }}
+                      </span>
+                    {% empty %}
+                      —
+                    {% endfor %}
+                  </div>
+                </td>
+              {% endif %}
+
+              {% if can_manage_services %}
+                <td>
+                  <div>
+                    <a href="{% url 'serwis_edit' s.pk %}" class="icon-btn icon-btn-green">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+
+                    <button type="button"
+                            class="icon-btn icon-btn-danger"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteServiceModal"
+                            data-delete-url="{% url 'serwis_delete' s.pk %}"
+                            data-title="{{ s.number }} – {{ s.title|escape }}">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+
+                    <button type="button"
+                            class="icon-btn icon-btn-blue"
+                            data-bs-toggle="modal"
+                            data-bs-target="#scheduleServiceModal"
+                            data-action-url="{% url 'serwis_schedule_update' s.pk %}"
+                            data-start="{% if s.planned_start %}{{ s.planned_start|date:'Y-m-d\\TH:i' }}{% endif %}"
+                            data-end="{% if s.planned_end %}{{ s.planned_end|date:'Y-m-d\\TH:i' }}{% endif %}"
+                            data-title="{{ s.number }} – {{ s.title|escape }}">
+                      <i class="bi bi-calendar2-event"></i>
+                    </button>
+
+                    <button type="button"
+                            class="icon-btn icon-btn-warning"
+                            data-bs-toggle="modal"
+                            data-bs-target="#assignWorkersModal"
+                            data-action-url="{% url 'serwis_assign_workers' s.pk %}"
+                            data-title="{{ s.number }} – {{ s.title|escape }}"
+                            data-selected="{% for u in s.assigned_to.all %}{{ u.pk }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                      <i class="bi bi-people"></i>
+                    </button>
+                  </div>
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mobile-list">
+      {% for s in services %}
+        <div class="mobile-card">
+
+          <div class="mobile-card-top">
+            <div class="service-icon {% if s.status == 'in_progress' %}service-icon-progress{% elif s.status == 'new' %}service-icon-new{% endif %}">
+              <i class="bi bi-wrench-adjustable"></i>
+            </div>
+
+            <div class="mobile-card-info">
+              <a href="{% url 'serwis_detail' s.pk %}" class="mobile-card-title">
+                {{ s.client }}
+              </a>
+
+              <div class="mobile-card-muted">
+                {{ s.title|default:"Brak tytułu" }}
+              </div>
+
+              <div class="mobile-card-number">
+                {{ s.number|default:"Brak numeru" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-3">
+            {% if s.priority == 'critical' %}
+              <span class="badge-soft badge-priority-critical">Krytyczny</span>
+            {% elif s.priority == 'high' %}
+              <span class="badge-soft badge-priority-high">Wysoki</span>
+            {% elif s.priority == 'normal' %}
+              <span class="badge-soft badge-priority-normal">Normalny</span>
+            {% else %}
+              <span class="badge-soft badge-priority-low">Niski</span>
+            {% endif %}
+          </div>
+
+          {% if active_status != 'all' %}
+            <div class="mobile-card-meta">
+              {% if active_status == 'obsluga' %}
+                <div class="info-label">Status obsługi</div>
+                <div class="info-value">
+                  {% if s.status_zgrania %}
+                    {{ s.get_status_zgrania_display }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </div>
+              {% else %}
+                <div class="info-label">Planowana data</div>
+                <div class="info-value">
+                  {% if s.planned_start %}
+                    {{ s.planned_start|date:"d.m.Y H:i" }}
+                  {% else %}
+                    —
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="mobile-card-meta">
+              <div class="info-label">Wyznaczone osoby</div>
+              <div class="assigned-list mt-1">
+                {% for u in s.assigned_to.all %}
+                  <span class="mini-count">{{ u.first_name }}</span>
+                {% empty %}
+                  <span class="text-muted small">—</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+          {% if can_manage_services %}
+            <div class="mobile-card-actions">
+              <a href="{% url 'serwis_edit' s.pk %}" class="mobile-action">
+                <i class="fa-solid fa-pen-to-square" style="color:#00ff2a;"></i>
+                Edytuj
+              </a>
+
+              <button type="button"
+                      class="mobile-action"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteServiceModal"
+                      data-delete-url="{% url 'serwis_delete' s.pk %}"
+                      data-title="{{ s.number }} – {{ s.title|escape }}">
+                <i class="fa-solid fa-trash" style="color:#ea5455;"></i>
+                Usuń
+              </button>
+
+              <button type="button"
+                      class="mobile-action"
+                      data-bs-toggle="modal"
+                      data-bs-target="#scheduleServiceModal"
+                      data-action-url="{% url 'serwis_schedule_update' s.pk %}"
+                      data-next="{{ request.get_full_path }}"
+                      data-start="{% if s.planned_start %}{{ s.planned_start|date:'Y-m-d\\TH:i' }}{% endif %}"
+                      data-end="{% if s.planned_end %}{{ s.planned_end|date:'Y-m-d\\TH:i' }}{% endif %}"
+                      data-title="{{ s.number }} – {{ s.title|escape }}">
+                <i class="bi bi-calendar2-event" style="color:#7aa7ff;"></i>
+                Data
+              </button>
+
+              <button type="button"
+                      class="mobile-action"
+                      data-bs-toggle="modal"
+                      data-bs-target="#assignWorkersModal"
+                      data-action-url="{% url 'serwis_assign_workers' s.pk %}"
+                      data-next="{{ request.get_full_path }}"
+                      data-title="{{ s.number }} – {{ s.title|escape }}"
+                      data-selected="{% for u in s.assigned_to.all %}{{ u.pk }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                <i class="bi bi-people" style="color:#ffb24d;"></i>
+                Osoby
+              </button>
+            </div>
+          {% endif %}
+
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="bi bi-wrench"></i>
+      </div>
+
+      <h4>Brak serwisów</h4>
+
+      <p>Nie znaleziono żadnych zgłoszeń serwisowych dla wybranego filtra.</p>
+
+      {% if can_manage_services %}
+        <a href="{% url 'serwis_add' %}" class="modern-btn modern-btn-primary">
+          <i class="bi bi-plus-lg"></i>
+          Dodaj pierwszy serwis
+        </a>
+      {% endif %}
+    </div>
+
+  {% endif %}
+
+</div>
+
+{% if can_manage_services %}
+  <!-- Modal: potwierdzenie usunięcia serwisu -->
+  <div class="modal fade" id="deleteServiceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content delete-modal">
+
+      <form id="deleteServiceForm" method="post" action="">
+        {% csrf_token %}
+
+        <div class="delete-modal-header">
+          <div class="delete-modal-icon">
+            <i class="bi bi-trash3"></i>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij">
+          </button>
+        </div>
+
+        <div class="delete-modal-body">
+          <h4 class="delete-modal-title">
+            Usunąć serwis?
+          </h4>
+
+          <p class="delete-modal-text">
+            Ta operacja jest nieodwracalna i usunie zgłoszenie serwisowe.
+          </p>
+
+          <div class="delete-list">
+            <div class="delete-list-item">
+              <i class="bi bi-check2-circle"></i>
+              Dane serwisu
+            </div>
+
+            <div class="delete-list-item">
+              <i class="bi bi-check2-circle"></i>
+              Przypisania pracowników
+            </div>
+
+            <div class="delete-list-item">
+              <i class="bi bi-check2-circle"></i>
+              Historię i statusy
+            </div>
+          </div>
+
+          <div class="delete-contract-box">
+            <div class="small text-muted mb-1">
+              Usuwasz:
+            </div>
+
+            <div id="deleteServicePreview" class="fw-bold">
+              —
+            </div>
+          </div>
+        </div>
+
+        <div class="delete-modal-footer">
+          <button type="button"
+                  class="btn-cancel"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-delete">
+            <i class="bi bi-trash3"></i>
+            Usuń serwis
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+  </div>
+  <div class="modal fade" id="scheduleServiceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content schedule-modal">
+
+      <form method="post" id="scheduleServiceForm" action="">
+        {% csrf_token %}
+        <input type="hidden" name="next" id="scheduleNext" value="">
+
+        <div class="schedule-modal-header">
+
+          <div class="schedule-modal-icon">
+            <i class="bi bi-calendar2-week"></i>
+          </div>
+
+          <div class="flex-grow-1">
+            <h4 class="schedule-modal-title">
+              Ustal termin serwisu
+            </h4>
+
+            <div class="schedule-modal-subtitle" id="scheduleServiceTitle">
+              —
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij">
+          </button>
+
+        </div>
+
+        <div class="schedule-modal-body">
+
+          <div class="schedule-grid">
+
+            <div class="schedule-card">
+              <div class="schedule-card-top">
+                <div class="schedule-card-icon">
+                  <i class="bi bi-play-circle"></i>
+                </div>
+
+                <div>
+                  <div class="schedule-card-label">
+                    Rozpoczęcie
+                  </div>
+
+                  <div class="schedule-card-sub">
+                    Data rozpoczęcia serwisu
+                  </div>
+                </div>
+              </div>
+
+              <input
+                type="datetime-local"
+                name="planned_start"
+                id="plannedStart"
+                class="form-control schedule-input"
+                step="60"
+                min=""
+                max=""
+                value="">
+            </div>
+
+            <div class="schedule-card">
+              <div class="schedule-card-top">
+                <div class="schedule-card-icon">
+                  <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                  <div class="schedule-card-label">
+                    Czas trwania
+                  </div>
+
+                  <div class="schedule-card-sub">
+                    Automatyczne wyliczenie końca
+                  </div>
+                </div>
+              </div>
+
+              <select name="duration_min"
+                      id="durationMin"
+                      class="form-select schedule-input">
+
+                <option value="">— wybierz —</option>
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60">1 godzina</option>
+                <option value="90">1h 30m</option>
+                <option value="120">2 godziny</option>
+                <option value="180">3 godziny</option>
+                <option value="240">4 godziny</option>
+              </select>
+
+              <label class="schedule-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="autoEnd"
+                       name="auto_end"
+                       value="1"
+                       checked>
+
+                <span>
+                  Wylicz zakończenie automatycznie
+                </span>
+              </label>
+            </div>
+
+            <div class="schedule-card schedule-card-full">
+              <div class="schedule-card-top">
+                <div class="schedule-card-icon">
+                  <i class="bi bi-stop-circle"></i>
+                </div>
+
+                <div>
+                  <div class="schedule-card-label">
+                    Zakończenie
+                  </div>
+
+                  <div class="schedule-card-sub">
+                    Możesz ustawić ręcznie
+                  </div>
+                </div>
+              </div>
+
+              <input
+                type="datetime-local"
+                name="planned_end"
+                id="plannedEnd"
+                class="form-control schedule-input"
+                step="60"
+                min=""
+                max=""
+                value="">
+
+              <div class="schedule-hint">
+                <i class="bi bi-info-circle"></i>
+                Odznacz automatyczne wyliczanie, aby ustawić własną godzinę zakończenia.
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="schedule-modal-footer">
+
+          <button type="button"
+                  class="schedule-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="schedule-btn-primary">
+            <i class="bi bi-check2-circle"></i>
+            Zapisz termin
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+  </div>
+  <div class="modal fade" id="assignWorkersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content workers-modal">
+
+      <form method="post" id="assignWorkersForm" action="">
+        {% csrf_token %}
+        <input type="hidden" name="next" id="workersNext" value="">
+
+        <div class="workers-modal-header">
+
+          <div class="workers-modal-icon">
+            <i class="bi bi-people"></i>
+          </div>
+
+          <div>
+            <h4 class="workers-modal-title">
+              Wyznacz serwisantów
+            </h4>
+
+            <div class="workers-modal-subtitle" id="assignWorkersTitle">
+              —
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal">
+          </button>
+
+        </div>
+
+        <div class="workers-modal-body">
+
+          <div class="workers-section">
+
+            <div class="workers-section-title">
+              Wybór pracowników
+            </div>
+
+            <div class="workers-select-box">
+
+              <div class="workers-select-top">
+                <div>
+                  <div class="workers-label">
+                    Lista pracowników
+                  </div>
+
+                  <div class="workers-help">
+                    Maksymalnie 3 przypisane osoby
+                  </div>
+                </div>
+
+                <div class="workers-counter">
+                  <span id="assignedCount">0</span>/3
+                </div>
+              </div>
+
+              <select
+                name="workers"
+                id="workersSelect"
+                class="form-select workers-select"
+                multiple
+                size="6"
+                data-max="3">
+
+                {% for u in workers %}
+                  <option value="{{ u.pk }}">
+                    {{ u.first_name }} {{ u.last_name }}
+                  </option>
+                {% endfor %}
+
+              </select>
+
+            </div>
+
+          </div>
+
+          <div class="workers-divider"></div>
+
+          <div class="workers-section">
+
+            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+
+              <div>
+                <div class="workers-section-title mb-1">
+                  Przypisane osoby
+                </div>
+
+                <div class="workers-help">
+                  Kliknij ✕ aby usunąć przypisanie
+                </div>
+              </div>
+
+              <button type="button"
+                      class="workers-clear-btn"
+                      id="assignedClear">
+                <i class="bi bi-x-circle"></i>
+                Wyczyść
+              </button>
+
+            </div>
+
+            <div id="assignedChips"
+                 class="workers-chips">
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="workers-modal-footer">
+
+          <button type="button"
+                  class="workers-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="workers-btn-primary">
+            <i class="bi bi-check2-circle"></i>
+            Zapisz przypisania
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+  </div>
+{% endif %}
+<script>
+  (function(){
+    const scheduleModal = document.getElementById('scheduleServiceModal');
+    if (!scheduleModal) return;
+  
+    const form   = document.getElementById('scheduleServiceForm');
+    const title  = document.getElementById('scheduleServiceTitle');
+    const startEl = document.getElementById('plannedStart');
+    const endEl   = document.getElementById('plannedEnd');
+    const durEl   = document.getElementById('durationMin');
+    const autoEl  = document.getElementById('autoEnd');
+    const nextEl = document.getElementById('scheduleNext');
+    const dayStart = '{{ workday_start_time }}';
+    const dayEnd = '{{ workday_end_time }}';
+
+    scheduleModal.addEventListener('show.bs.modal', (ev)=>{
+      const btn = ev.relatedTarget;
+      const next = btn?.getAttribute('data-next') || window.location.pathname + window.location.search;
+
+      if(nextEl) nextEl.value = next;
+
+      // reszta twojego kodu: form.action, title, start/end itd.
+    });
+  
+    if(!form || !startEl || !endEl || !durEl || !autoEl) return;
+    [startEl, endEl].forEach(input => input.addEventListener('change', ()=>{
+      input.setCustomValidity(!input.value || (input.value.slice(11,16) >= dayStart && input.value.slice(11,16) <= dayEnd) ? '' : `Godzina musi mieścić się w zakresie ${dayStart}–${dayEnd}.`);
+    }));
+    form.addEventListener('submit', (event)=>{
+      if((startEl.value && (startEl.value.slice(11,16) < dayStart || startEl.value.slice(11,16) > dayEnd)) || (endEl.value && (endEl.value.slice(11,16) < dayStart || endEl.value.slice(11,16) > dayEnd))){
+        event.preventDefault();
+        alert(`Godzina musi mieścić się w zakresie ${dayStart}–${dayEnd}.`);
+      }
+    });
+  
+    function pad(n){ return String(n).padStart(2,'0'); }
+  
+    function calcEnd(){
+      if(!autoEl.checked) return;
+      const mins = parseInt(durEl.value || '0', 10);
+      if(!startEl.value || !mins) return;
+  
+      const s = new Date(startEl.value);
+      s.setMinutes(s.getMinutes() + mins);
+  
+      const v = `${s.getFullYear()}-${pad(s.getMonth()+1)}-${pad(s.getDate())}T${pad(s.getHours())}:${pad(s.getMinutes())}`;
+      endEl.value = v;
+    }
+  
+    // jeśli start+end wchodzą z danych, spróbuj dopasować duration
+    function guessDurationFromStartEnd(){
+      if(!startEl.value || !endEl.value) return;
+      const s = new Date(startEl.value);
+      const e = new Date(endEl.value);
+      const diffMin = Math.round((e - s) / 60000);
+      const opt = [...durEl.options].find(o => o.value && parseInt(o.value,10) === diffMin);
+      durEl.value = opt ? String(diffMin) : '';
+    }
+  
+    // FIX: gdy auto_end OFF i user ręcznie zmieni "do" -> wyczyść duration
+    function bindManualEndClearsDuration(){
+      endEl.addEventListener('input', ()=>{
+        if(autoEl.checked) return;     // jeśli auto, nie czyść
+        if(durEl.value) durEl.value = '';
+      });
+    }
+  
+    // tryb readonly gdy auto
+    function syncEndReadonly(){
+      endEl.readOnly = autoEl.checked;
+    }
+  
+    autoEl.addEventListener('change', ()=>{
+      syncEndReadonly();
+  
+      if(autoEl.checked){
+        // przy włączeniu auto: próbujemy sensownie ustawić duration (jak da się wyliczyć),
+        // a potem przeliczamy end
+        if(!durEl.value) guessDurationFromStartEnd();
+        calcEnd();
+      } else {
+        // przy wyłączeniu auto: user będzie ręcznie zmieniał end
+        // (duration zostawiamy — ale jeśli ruszy end ręcznie, input handler wyczyści)
+      }
+    });
+  
+    startEl.addEventListener('change', ()=>{ calcEnd(); });
+    durEl.addEventListener('change', ()=>{
+      if(autoEl.checked) calcEnd();
+    });
+  
+    bindManualEndClearsDuration();
+  
+    scheduleModal.addEventListener('show.bs.modal', (ev)=>{
+      const btn = ev.relatedTarget;
+  
+      const action = btn?.getAttribute('data-action-url') || '';
+      const titleTxt = btn?.getAttribute('data-title') || '—';
+      const start = btn?.getAttribute('data-start') || '';
+      const end = btn?.getAttribute('data-end') || '';
+  
+      form.action = action;
+      if (title) title.textContent = titleTxt;
+  
+      startEl.value = start;
+      endEl.value = end;
+  
+      // startowe ustawienia
+      autoEl.checked = true;
+      syncEndReadonly();
+  
+      // spróbuj zgadnąć duration, ale tylko jeśli jest start+end
+      guessDurationFromStartEnd();
+  
+      // jak jest duration i auto włączone, to pilnuj end (żeby było spójne)
+      calcEnd();
+    });
+  })();
+  </script>
+  <script>
+    (function(){
+      const workersModal = document.getElementById('assignWorkersModal');
+      if (!workersModal) return;
+    
+      const form = document.getElementById('assignWorkersForm');
+      const titleEl = document.getElementById('assignWorkersTitle');
+      const sel = document.getElementById('workersSelect');
+    
+      const chipsWrap = document.getElementById('assignedChips');
+      const countEl = document.getElementById('assignedCount');
+      const clearBtn = document.getElementById('assignedClear');
+
+      const nextElW = document.getElementById('workersNext');
+
+      workersModal.addEventListener('show.bs.modal', (ev)=>{
+        const btn = ev.relatedTarget;
+        const next = btn?.getAttribute('data-next') || window.location.pathname + window.location.search;
+
+        if(nextElW) nextElW.value = next;
+
+        // reszta: form.action, title, selected...
+      });
+    
+      if (!form || !sel) return;
+    
+      const max = parseInt(sel.getAttribute('data-max') || '3', 10);
+    
+      function selectedOptions(){
+        return [...sel.options].filter(o => o.selected);
+      }
+    
+      function enforceMax(){
+        const selected = selectedOptions();
+        if (selected.length <= max) return;
+    
+        // odznacz nadmiar od końca
+        selected.slice(max).forEach(o => o.selected = false);
+      }
+    
+      function render(){
+        const selected = selectedOptions();
+        if (countEl) countEl.textContent = String(selected.length);
+    
+        // chips
+        if (chipsWrap){
+          chipsWrap.innerHTML = '';
+          selected.forEach(opt => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
+            chip.className = 'btn btn-sm btn-outline-primary rounded-pill d-inline-flex align-items-center gap-2';
+            chip.innerHTML = `<span>${opt.text}</span><span aria-hidden="true">✕</span>`;
+            chip.title = 'Usuń przypisanie';
+    
+            chip.addEventListener('click', () => {
+              opt.selected = false;
+              sel.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+    
+            chipsWrap.appendChild(chip);
+          });
+        }
+    
+        // blokuj dalszy wybór po limicie
+        const limitReached = selected.length >= max;
+        [...sel.options].forEach(opt => {
+          if (!opt.selected) opt.disabled = limitReached;
+        });
+      }
+    
+      function applySelected(csv){
+        const ids = (csv || '').split(',').map(s => s.trim()).filter(Boolean);
+        [...sel.options].forEach(o => {
+          o.selected = ids.includes(String(o.value));
+          o.disabled = false;
+        });
+        enforceMax();
+        render();
+      }
+    
+      sel.addEventListener('change', () => {
+        // odblokuj żeby logika limitu działała poprawnie
+        [...sel.options].forEach(o => o.disabled = false);
+        enforceMax();
+        render();
+      });
+    
+      clearBtn?.addEventListener('click', () => {
+        [...sel.options].forEach(o => { o.selected = false; o.disabled = false; });
+        render();
+      });
+    
+      workersModal.addEventListener('show.bs.modal', (ev) => {
+        const btn = ev.relatedTarget;
+        const action = btn?.getAttribute('data-action-url') || '';
+        const title = btn?.getAttribute('data-title') || '—';
+        const selected = btn?.getAttribute('data-selected') || '';
+    
+        form.action = action;
+        if (titleEl) titleEl.textContent = title;
+    
+        applySelected(selected);
+      });
+    
+    })();
+    </script>
+<script>
+(function(){
+  const modalEl = document.getElementById('deleteServiceModal');
+  if (!modalEl) return;
+
+  const form = document.getElementById('deleteServiceForm');
+  const previewEl = document.getElementById('deleteServicePreview');
+
+  modalEl.addEventListener('show.bs.modal', (event) => {
+    const btn = event.relatedTarget;
+    const url = btn?.getAttribute('data-delete-url') || '';
+    const preview = btn?.getAttribute('data-title') || '—';
+
+    if (form) form.action = url;
+    if (previewEl) previewEl.textContent = preview;
+  });
+})();
+</script>
+<script>
+  (function(){
+    const list = document.getElementById('mobileList');
+    if(!list) return;
+  
+    let openRow = null;
+  
+    function closeRow(row){
+      if(!row) return;
+      row.classList.remove('is-open');
+      openRow = null;
+    }
+  
+    document.addEventListener('click', (e)=>{
+      if(openRow && !openRow.contains(e.target)) closeRow(openRow);
+    });
+  
+    // swipe (touch)
+    list.querySelectorAll('.swipe-row').forEach(row=>{
+      const front = row.querySelector('.swipe-front');
+      if(!front) return;
+  
+      let startX = 0, startY = 0, currentX = 0;
+      let dragging = false;
+      let moved = false;
+  
+      const MAX = 110;     // musi być takie samo jak szerokość .swipe-actions
+      const OPEN_AT = 55;  // próg otwarcia
+      const DEADZONE = 6;  // ignoruj mikro-ruch
+  
+      front.addEventListener('touchstart', (ev)=>{
+        if(ev.touches.length !== 1) return;
+        const t = ev.touches[0];
+        startX = t.clientX;
+        startY = t.clientY;
+        currentX = 0;
+        dragging = true;
+        moved = false;
+  
+        if(openRow && openRow !== row) closeRow(openRow);
+      }, { passive: true });
+  
+      front.addEventListener('touchmove', (ev)=>{
+        if(!dragging || ev.touches.length !== 1) return;
+  
+        const t = ev.touches[0];
+        const dx = t.clientX - startX;
+        const dy = t.clientY - startY;
+  
+        // jeśli to pion -> nie przejmujemy (pozwól scroll)
+        if(Math.abs(dy) > Math.abs(dx)) return;
+  
+        // to jest poziomy gest -> blokuj scroll
+        ev.preventDefault();
+  
+        if(Math.abs(dx) > DEADZONE) moved = true;
+  
+        // tylko w lewo (odsłanianie)
+        currentX = Math.max(-MAX, Math.min(0, dx));
+        front.style.transition = 'none';
+        front.style.transform = `translateX(${currentX}px)`;
+      }, { passive: false }); // ✅ kluczowe
+  
+      front.addEventListener('touchend', ()=>{
+        if(!dragging) return;
+        dragging = false;
+  
+        front.style.transition = '';
+  
+        if(Math.abs(currentX) > OPEN_AT){
+          row.classList.add('is-open');
+          openRow = row;
+        } else {
+          row.classList.remove('is-open');
+          openRow = null;
+        }
+  
+        front.style.transform = '';
+      });
+  
+      // jeśli było przesunięcie, nie pozwalaj kliknąć w link
+      row.addEventListener('click', (e)=>{
+        if(row.classList.contains('is-open')){
+          // gdy otwarte, klik w kartę ma zamykać
+          const insideActions = e.target.closest('.swipe-actions');
+          if(!insideActions){
+            e.preventDefault();
+            e.stopPropagation();
+            closeRow(row);
+          }
+        }
+      }, true);
+    });
+  })();
+  </script>
+<script>
+(function(){
+  const root = document.documentElement;
+  const key = 'dashboard-theme';
+  const saved = localStorage.getItem(key) || 'dark';
+  root.setAttribute('data-theme', saved);
+
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+
+  const setIcon = () => {
+    btn.innerHTML = root.getAttribute('data-theme') === 'light'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  };
+
+  setIcon();
+
+  btn.addEventListener('click', ()=>{
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem(key, next);
+    setIcon();
+  });
+})();
+</script>
+<script>
+(function(){
+
+  const cards = document.querySelectorAll('.mobile-card');
+
+  cards.forEach(card => {
+
+    let startX = 0;
+    let currentX = 0;
+    let dragging = false;
+
+    card.addEventListener('touchstart', (e) => {
+      if(e.touches.length !== 1) return;
+
+      startX = e.touches[0].clientX;
+      dragging = true;
+    }, { passive:true });
+
+    card.addEventListener('touchmove', (e) => {
+      if(!dragging) return;
+
+      currentX = e.touches[0].clientX - startX;
+
+      if(Math.abs(currentX) > 8){
+        card.classList.add('mobile-card-touch');
+      }
+    }, { passive:true });
+
+    card.addEventListener('touchend', () => {
+      dragging = false;
+
+      setTimeout(() => {
+        card.classList.remove('mobile-card-touch');
+      }, 120);
+    });
+
+  });
+
+})();
+</script>
+{% endblock %}

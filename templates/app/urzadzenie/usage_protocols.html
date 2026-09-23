@@ -1,0 +1,92 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+
+{% include "app/urzadzenie/partials/usage_style.html" %}
+
+<div class="usage-header">
+  <div class="usage-title">
+    <div class="usage-icon">
+      <i class="bi bi-tools"></i>
+    </div>
+    <div>
+      <h1>Użycie w protokołach</h1>
+      <p>{{ product.name }}</p>
+    </div>
+  </div>
+
+  <a href="{% url 'product_detail' product.pk %}" class="btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+    Wróć do produktu
+  </a>
+</div>
+
+<div class="usage-card">
+  <div class="table-responsive">
+    <table class="table usage-table align-middle">
+      <thead>
+        <tr>
+          <th>Protokół</th>
+          <th>Klient</th>
+          <th>Ilość</th>
+          <th>Wartość</th>
+          <th>Status</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>
+              <a href="{% url 'protokol_detail' item.protokol.pk %}"
+                 class="fw-bold text-decoration-none"
+                 style="color:var(--text);">
+                {{ item.protokol.number }}
+              </a>
+
+              {% if item.protokol.title %}
+                <div class="text-muted small">
+                  {{ item.protokol.title }}
+                </div>
+              {% endif %}
+            </td>
+
+            <td>{{ item.protokol.client }}</td>
+
+            <td>
+              <strong>{{ item.sztuki|default:0 }}</strong>
+              <span class="text-muted small">{{ product.unit }}</span>
+            </td>
+
+            <td>
+              {% if item.cenarazem %}
+                {{ item.cenarazem|floatformat:2 }} zł
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>
+              <span class="detail-badge">
+                {{ item.protokol.get_status_display }}
+              </span>
+            </td>
+
+            <td>{{ item.protokol.created_at|date:"d.m.Y" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-5">
+              Produkt nie został użyty w żadnym protokole.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "app/urzadzenie/partials/pagination.html" %}
+</div>
+
+{% endblock %}

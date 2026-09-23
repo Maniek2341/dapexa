@@ -1,0 +1,1166 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  /* =========================
+   SELECT2 SIMPLE DARK
+========================= */
+
+.select2-container{
+  width:100% !important;
+}
+
+/* select */
+
+.select2-container--default .select2-selection--single{
+  height:48px !important;
+
+  background:var(--card) !important;
+
+  border:1px solid var(--border) !important;
+
+  border-radius:10px !important;
+
+  display:flex !important;
+  align-items:center !important;
+
+  transition:.2s ease;
+  box-shadow:none !important;
+}
+
+/* hover/focus */
+
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default .select2-selection--single:hover{
+  border-color:#1468f5 !important;
+  box-shadow:none !important;
+}
+
+/* text */
+
+.select2-container--default .select2-selection--single .select2-selection__rendered{
+  color:var(--text) !important;
+
+  line-height:48px !important;
+
+  padding-left:.75rem !important;
+  padding-right:2rem !important;
+
+  font-size:.95rem;
+}
+
+/* placeholder */
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder{
+  color:var(--text-muted) !important;
+}
+
+/* arrow */
+
+.select2-container--default .select2-selection--single .select2-selection__arrow{
+  height:100% !important;
+  right:10px !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b{
+  border-color:
+    #1468f5
+    transparent
+    transparent
+    transparent !important;
+}
+
+/* dropdown */
+
+.select2-dropdown{
+  background:var(--card) !important;
+
+  border:1px solid var(--border) !important;
+
+  border-radius:10px !important;
+
+  overflow:hidden;
+
+  box-shadow:none !important;
+}
+
+/* search */
+
+.select2-search--dropdown{
+  padding:.75rem !important;
+  background:var(--card) !important;
+}
+
+.select2-search__field{
+  height:42px;
+
+  border:1px solid var(--border) !important;
+
+  border-radius:8px !important;
+
+  background:var(--surface) !important;
+
+  color:var(--text) !important;
+
+  padding:.5rem .75rem !important;
+
+  outline:none !important;
+}
+
+.select2-search__field:focus{
+  border-color:#1468f5 !important;
+  box-shadow:none !important;
+}
+
+/* options */
+
+.select2-results{
+  background:var(--card) !important;
+}
+
+.select2-results__option{
+  padding:.75rem .9rem !important;
+
+  color:var(--text) !important;
+
+  transition:.15s ease;
+}
+
+/* hover */
+
+.select2-results__option--highlighted{
+  background:#1468f5 !important;
+  color:#fff !important;
+}
+
+/* selected */
+
+.select2-results__option[aria-selected=true]{
+  background:rgba(20,104,245,.15) !important;
+  color:var(--text) !important;
+}
+</style>
+
+<style>
+.protocol-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.protocol-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.protocol-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.protocol-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.protocol-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.protocol-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.protocol-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.protocol-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.protocol-section-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.protocol-card-header h2{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.protocol-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.protocol-card-body{
+  padding:1.5rem;
+}
+
+.protocol-label{
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:800;
+  margin-bottom:.45rem;
+}
+
+.protocol-card .form-control,
+.protocol-card .form-select,
+.protocol-card select,
+.protocol-card textarea{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.protocol-card textarea{
+  min-height:130px;
+}
+
+.protocol-card .form-control:focus,
+.protocol-card .form-select:focus,
+.protocol-card select:focus,
+.protocol-card textarea:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.protocol-divider{
+  border-color:var(--border);
+  margin:1.5rem 0;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.protocol-preview{
+  position:sticky;
+  top:90px;
+}
+
+.preview-box{
+  padding:1.25rem;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 42%),
+    rgba(255,255,255,.03);
+  border:1px solid var(--border);
+}
+
+.preview-title{
+  color:var(--text);
+  font-size:1.2rem;
+  font-weight:900;
+}
+
+.preview-muted{
+  color:var(--muted);
+  font-size:.86rem;
+}
+
+.preview-list{
+  display:grid;
+  gap:.75rem;
+  margin-top:1rem;
+}
+
+.preview-item{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.85rem .95rem;
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--border);
+  font-size:.86rem;
+}
+
+.preview-item span:first-child{
+  color:var(--muted);
+}
+
+.preview-item span:last-child{
+  color:var(--text);
+  font-weight:800;
+  text-align:right;
+}
+
+.devices-table{
+  color:var(--text);
+  margin:0;
+}
+
+.devices-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+}
+
+.devices-table tbody td{
+  border-color:var(--border);
+  padding:.85rem;
+}
+
+.upload-hint{
+  color:var(--muted);
+  font-size:.84rem;
+  margin-top:.5rem;
+}
+
+@media(max-width:991px){
+  .protocol-preview{
+    position:static;
+  }
+}
+
+@media(max-width:768px){
+  .protocol-page-head{
+    flex-direction:column;
+  }
+
+  .protocol-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .protocol-actions .btn,
+  .protocol-actions a{
+    width:100%;
+    justify-content:center;
+  }
+
+  .protocol-title-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .protocol-title{
+    font-size:1.3rem;
+  }
+
+  .protocol-card-body{
+    padding:1rem;
+  }
+}
+.protocol-form-section{
+  padding:1.25rem;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.025);
+  border-radius:22px;
+  margin-bottom:1.25rem;
+}
+
+.protocol-form-section:last-child{
+  margin-bottom:0;
+}
+
+.protocol-form-section-head{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  margin-bottom:1.25rem;
+}
+
+.protocol-form-section-head h3{
+  margin:0;
+  color:var(--text);
+  font-size:1rem;
+  font-weight:900;
+}
+
+.protocol-form-section-head p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.84rem;
+}
+
+.protocol-mini-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.11);
+  border:1px solid rgba(20,104,245,.17);
+  color:#1468f5;
+  font-size:1.15rem;
+  flex-shrink:0;
+}
+
+.protocol-upload-info{
+  margin-top:.9rem;
+  padding:.9rem 1rem;
+  border-radius:16px;
+  background:rgba(255,193,7,.08);
+  border:1px solid rgba(255,193,7,.15);
+  color:#ffcf66;
+  font-size:.84rem;
+  display:flex;
+  gap:.6rem;
+  align-items:flex-start;
+}
+
+.protocol-form-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+  padding-top:.5rem;
+  flex-wrap:wrap;
+}
+
+@media(max-width:768px){
+  .protocol-form-section{
+    padding:1rem;
+    border-radius:18px;
+  }
+
+  .protocol-form-section-head{
+    align-items:flex-start;
+  }
+
+  .protocol-form-footer{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .protocol-form-footer a,
+  .protocol-form-footer button{
+    width:100%;
+    text-align:center;
+    justify-content:center;
+  }
+}
+</style>
+<div class="protocol-page-head">
+  <div class="protocol-title-wrap">
+    <div class="protocol-title-icon">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+
+    <div>
+      <h1 class="protocol-title">
+        {% if from_service %}
+          Utwórz protokół z serwisu {{ service.number }}
+        {% elif from_work %}
+          Utwórz protokół z pracy {{ work.number }}
+        {% else %}
+          Dodaj nowy protokół
+        {% endif %}
+      </h1>
+
+      <div class="protocol-subtitle">
+        Uzupełnij dane protokołu, wykonane prace i użyte materiały.
+      </div>
+    </div>
+  </div>
+
+  <div class="protocol-actions">
+    {% if from_service %}
+      <a href="{% url 'serwis_detail' service.pk %}" class="btn-soft">
+    {% elif from_work %}
+      <a href="{% url 'work_detail' work.pk %}" class="btn-soft">
+    {% else %}
+      <a href="{% url 'protokol_nowe' %}" class="btn-soft">
+    {% endif %}
+      <i class="bi bi-arrow-left me-1"></i>
+      Wróć
+    </a>
+
+    <button form="serviceForm" class="btn-orange">
+      <i class="bi bi-save me-1"></i>
+      Zapisz
+    </button>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    <div class="protocol-card">
+  <div class="protocol-card-header">
+  <div class="protocol-section-icon">
+    <i class="bi bi-clipboard-check"></i>
+  </div>
+
+  <div>
+    <h2>Dane protokołu</h2>
+    <p>Uzupełnij podstawowe informacje, zakres prac, materiały i załączniki.</p>
+  </div>
+</div>
+
+<div class="protocol-card-body">
+  <form id="serviceForm" class="needs-validation" method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    <div class="protocol-form-section">
+      <div class="protocol-form-section-head">
+        <div class="protocol-mini-icon">
+          <i class="bi bi-person-vcard"></i>
+        </div>
+        <div>
+          <h3>Podstawowe informacje</h3>
+          <p>Klient, tytuł, lokalizacja i data wykonania.</p>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        {% if not from_service and not from_work %}
+          <div class="col-md-6">
+            <label class="protocol-label required">{{ form.title.label }}</label>
+            {{ form.title }}
+            <div class="invalid-feedback">Podaj tytuł.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="protocol-label required">{{ form.client.label }}</label>
+            {{ form.client }}
+            <div class="invalid-feedback">Wybierz klienta.</div>
+          </div>
+        {% endif %}
+
+        <div class="col-md-6">
+          <label class="protocol-label required">{{ form.end_time.label }}</label>
+          {{ form.end_time }}
+          <div class="invalid-feedback">Podaj datę zakończenia.</div>
+        </div>
+
+        {% if not from_service and not from_work %}
+          <div class="col-md-6 d-none" id="locationWrapper">
+            <label class="protocol-label">{{ form.location.label }}</label>
+            {{ form.location }}
+            <div class="form-text">Wybierz lokalizację klienta, jeśli dotyczy.</div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="protocol-form-section">
+      <div class="protocol-form-section-head">
+        <div class="protocol-mini-icon">
+          <i class="bi bi-tools"></i>
+        </div>
+        <div>
+          <h3>Zakres wykonanych prac</h3>
+          <p>Opis wykonanych czynności oraz rodzaj pracy.</p>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12">
+          <label class="protocol-label required">{{ form.wykonane_prace.label }}</label>
+          {{ form.wykonane_prace }}
+          <div class="invalid-feedback">Opisz wykonane prace.</div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="protocol-label required">{{ form.robocizna.label }}</label>
+          {{ form.robocizna }}
+          <div class="invalid-feedback">Podaj czas pracy.</div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="protocol-label required">{{ form.pracownicy_szt.label }}</label>
+          {{ form.pracownicy_szt }}
+          <div class="invalid-feedback">Podaj ilość pracowników.</div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="protocol-label required">{{ form.dojazdy_szt.label }}</label>
+          {{ form.dojazdy_szt }}
+          <div class="invalid-feedback">Podaj ilość dojazdów.</div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="protocol-label required">{{ form.rodzaj_prac.label }}</label>
+          {{ form.rodzaj_prac }}
+          <div class="invalid-feedback">Wybierz rodzaj prac.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="protocol-form-section">
+      <div class="protocol-form-section-head">
+        <div class="protocol-mini-icon">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <div>
+          <h3>Użyte urządzenia i materiały</h3>
+          <p>Produkty pobrane z magazynu lub dodane ręcznie.</p>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="mb-0 fw-bold">Lista pozycji</h6>
+
+        <button type="button" id="addDevice" class="btn-soft btn-sm">
+          <i class="bi bi-plus-lg me-1"></i>
+          Dodaj pozycję
+        </button>
+      </div>
+
+      {{ formset.management_form }}
+
+      <div class="table-responsive">
+        <table class="table devices-table align-middle" id="devicesTable">
+          <thead>
+            <tr>
+              <th style="width:60%">Produkt</th>
+              <th style="width:20%">Ilość</th>
+              <th style="width:10%"></th>
+            </tr>
+          </thead>
+
+          <tbody id="formset-body">
+            {% for form in formset %}
+              <tr class="formset-row">
+                <td>
+                  {{ form.urzadzenia }}
+                  {% if form.urzadzenia.errors %}
+                    <div class="text-danger small">{{ form.urzadzenia.errors }}</div>
+                  {% endif %}
+                </td>
+
+                <td>
+                  {{ form.sztuki }}
+                  {% if form.sztuki.errors %}
+                    <div class="text-danger small">{{ form.sztuki.errors }}</div>
+                  {% endif %}
+                </td>
+
+                <td class="text-end">
+                  <button type="button" class="btn-soft btn-sm remove-row">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        <script type="text/template" id="empty-form-template">
+          <tr class="formset-row">
+            <td>__URZADZENIA__</td>
+            <td>__SZTUKI__</td>
+            <td class="text-end">
+              <button type="button" class="btn-soft btn-sm remove-row">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </script>
+      </div>
+
+      <div class="mt-3">
+        <label class="protocol-label">{{ form.dodatkowe_materialy.label }}</label>
+        {{ form.dodatkowe_materialy }}
+        <div class="form-text">
+          Opcjonalnie wpisz materiały, których nie ma na liście produktów.
+        </div>
+      </div>
+    </div>
+
+    <div class="protocol-form-section">
+      <div class="protocol-form-section-head">
+        <div class="protocol-mini-icon">
+          <i class="bi bi-paperclip"></i>
+        </div>
+        <div>
+          <h3>Załączniki</h3>
+          <p>Zdjęcia wykonanych prac, dokumenty PDF lub inne pliki.</p>
+        </div>
+      </div>
+
+      <label class="protocol-label">{{ form.attachments.label }}</label>
+      {{ form.attachments }}
+
+      <div id="attachmentsPreview" class="upload-hint"></div>
+
+      <div class="protocol-upload-info">
+        <i class="bi bi-info-circle"></i>
+        Możesz dodać zdjęcia wykonanych prac lub dokumenty potrzebne do protokołu.
+      </div>
+    </div>
+
+    <div class="protocol-form-footer">
+      {% if from_service %}
+        <a href="{% url 'serwis_detail' service.pk %}" class="btn-soft">Anuluj</a>
+      {% elif from_work %}
+        <a href="{% url 'work_detail' work.pk %}" class="btn-soft">Anuluj</a>
+      {% else %}
+        <a href="{% url 'protokol_nowe' %}" class="btn-soft">Anuluj</a>
+      {% endif %}
+
+      <button type="submit" class="btn-orange">
+        <i class="bi bi-save me-1"></i>
+        Zapisz protokół
+      </button>
+    </div>
+  </form>
+</div>
+    </div>
+  </div>
+
+  <!-- Panel podglądu -->
+  <div class="col-xl-4">
+  <div class="protocol-preview">
+    <div class="protocol-card">
+      <div class="protocol-card-header">
+        <div class="protocol-section-icon">
+          <i class="bi bi-eye"></i>
+        </div>
+
+        <div>
+          <h2>Podgląd</h2>
+          <p>Szybkie podsumowanie protokołu.</p>
+        </div>
+      </div>
+
+      <div class="protocol-card-body">
+        <div class="preview-box">
+          <div class="preview-title" id="pvTitle">—</div>
+          <div class="preview-muted mt-1">
+            Podgląd protokołu
+          </div>
+        </div>
+
+        <div class="preview-list">
+          <div class="preview-item">
+            <span>Klient</span>
+            <span id="pvClient">—</span>
+          </div>
+
+          <div class="preview-item">
+            <span>Data zakończenia</span>
+            <span id="pvEndDate">—</span>
+          </div>
+
+          <div class="preview-item">
+            <span>Wykonane prace</span>
+            <span id="pvPerformed">—</span>
+          </div>
+
+          <div class="preview-item">
+            <span>Czas pracy</span>
+            <span id="pvWorkHours">—</span>
+          </div>
+
+          <div class="preview-item">
+            <span>Pracownicy</span>
+            <span id="pvWorkersCount">—</span>
+          </div>
+
+          <div class="preview-item">
+            <span>Dojazdy</span>
+            <span id="pvTripsCount">—</span>
+          </div>
+
+          <div class="preview-item">
+            <span>Dodatkowe materiały</span>
+            <span id="pvExtraMaterials">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Przełącznik motywu (zapisywany w localStorage)
+  (function () {
+    const root = document.documentElement;
+    const key = 'dashboard-theme';
+    const saved = localStorage.getItem(key) || 'dark';
+    root.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+
+    const setIcon = () => {
+      if (!btn) return;
+      btn.innerHTML = root.getAttribute('data-theme') === 'light'
+        ? '<i class="bi bi-sun"></i>'
+        : '<i class="bi bi-moon-stars"></i>';
+    };
+
+    setIcon();
+
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem(key, next);
+        setIcon();
+      });
+    }
+  })();
+</script>
+
+  <script>
+    (function () {
+      const f = document.getElementById('serviceForm');
+      if (!f) return;
+
+      const getField = (name) => f.querySelector(`[name="${name}"]`);
+
+      // Elementy podglądu
+      const pv = {
+        client: document.getElementById('pvClient'),
+        title: document.getElementById('pvTitle'),
+        end_date: document.getElementById('pvEndDate'),
+        performed: document.getElementById('pvPerformed'),
+        work_hours: document.getElementById('pvWorkHours'),
+        workers_count: document.getElementById('pvWorkersCount'),
+        trips_count: document.getElementById('pvTripsCount'),
+        extra_materials: document.getElementById('pvExtraMaterials'),
+      };
+
+      const attachmentsInput = getField('attachments');
+      const attachmentsPreview = document.getElementById('attachmentsPreview');
+
+      function updateAttachmentsPreview() {
+        if (!attachmentsInput || !attachmentsPreview) return;
+        const files = attachmentsInput.files;
+        if (!files || files.length === 0) {
+          attachmentsPreview.textContent = '';
+          return;
+        }
+        const items = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          // file.name zawiera już nazwę i rozszerzenie
+          items.push(file.name);
+        }
+        attachmentsPreview.textContent = 'Wybrane pliki: ' + items.join(', ');
+      }
+
+    function formatDateTimeLocal(val) {
+      if (!val) return '—';
+      try {
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return val;
+        return d.toLocaleString('pl-PL');
+      } catch (e) {
+        return val;
+      }
+    }
+
+    function updatePreview() {
+      const clientField = getField('client');
+      const clientText = clientField && clientField.selectedOptions[0]
+        ? clientField.selectedOptions[0].text
+        : '—';
+    
+      pv.client.textContent = clientText || '—';
+      pv.title.textContent = (getField('title')?.value || '—');
+      pv.end_date.textContent = formatDateTimeLocal(getField('end_time')?.value);
+      pv.performed.textContent = (getField('wykonane_prace')?.value || '—');
+      const extraMaterials = getField('dodatkowe_materialy')?.value;
+      pv.extra_materials.textContent = extraMaterials || '—';
+    
+      const workHours = getField('robocizna')?.value;
+      pv.work_hours.textContent = workHours ? workHours + ' h' : '—';
+    
+      const workersCount = getField('pracownicy_szt')?.value;
+      pv.workers_count.textContent = workersCount || '—';
+    
+      const tripsCount = getField('dojazdy_szt')?.value;
+      pv.trips_count.textContent = tripsCount || '—';
+    
+      updateAttachmentsPreview();
+    }
+    
+
+      // Aktualizuj podgląd na input
+      f.addEventListener('input', updatePreview);
+      if (attachmentsInput) {
+        attachmentsInput.addEventListener('change', updateAttachmentsPreview);
+      }
+      updatePreview();
+
+    // Walidacja bootstrapowa
+    f.addEventListener('submit', function (e) {
+      if (!f.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      f.classList.add('was-validated');
+    });
+
+ 
+  })();
+</script>
+<script>
+(function () {
+  const addBtn = document.getElementById("addDevice");
+  const tableBody = document.getElementById("formset-body");
+
+  if (!addBtn || !tableBody) return;
+
+  const totalForms = document.querySelector('input[name$="-TOTAL_FORMS"]');
+
+  if (!totalForms) {
+    console.error("Brak pola TOTAL_FORMS w formsecie.");
+    return;
+  }
+
+  const emptyFormHtml = `
+    <tr class="formset-row">
+      <td>{{ formset.empty_form.urzadzenia|escapejs }}</td>
+      <td>{{ formset.empty_form.sztuki|escapejs }}</td>
+      <td class="text-end">
+        <button type="button" class="btn-soft btn-sm remove-row">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `;
+
+  function refreshTotalForms() {
+    totalForms.value = tableBody.querySelectorAll(".formset-row").length;
+  }
+
+  addBtn.addEventListener("click", function () {
+    const formIndex = parseInt(totalForms.value, 10);
+
+    const newRowHtml = emptyFormHtml.replace(/__prefix__/g, formIndex);
+
+    tableBody.insertAdjacentHTML("beforeend", newRowHtml);
+
+    const addedRow = tableBody.lastElementChild;
+
+    if (typeof initAjaxSelect === "function") {
+      initAjaxSelect(addedRow);
+    }
+
+    refreshTotalForms();
+  });
+
+  tableBody.addEventListener("click", function (e) {
+    const btn = e.target.closest(".remove-row");
+    if (!btn) return;
+
+    btn.closest(".formset-row").remove();
+
+    const rows = tableBody.querySelectorAll(".formset-row");
+
+    rows.forEach((row, index) => {
+      row.querySelectorAll("input, select, textarea").forEach((field) => {
+        if (field.name) {
+          field.name = field.name.replace(/-\d+-/, `-${index}-`);
+        }
+
+        if (field.id) {
+          field.id = field.id.replace(/-\d+-/, `-${index}-`);
+        }
+      });
+    });
+
+    refreshTotalForms();
+  });
+})();
+</script>
+  
+  <script>
+    (function(){
+    
+      const form = document.getElementById('serviceForm');
+      if (!form) return;
+    
+      const clientSelect = form.querySelector('[name="client"]');
+      const locationSelect = form.querySelector('[name="location"]');
+      const locationWrapper = document.getElementById('locationWrapper');
+    
+      if (!clientSelect || !locationSelect || !locationWrapper) return;
+    
+      function resetLocation(){
+        locationSelect.innerHTML = '<option value="">---------</option>';
+        locationWrapper.classList.add('d-none');
+        locationSelect.value = "";
+      }
+    
+      function loadLocations(clientId, selectedLocationId=null){
+    
+        fetch(`/serwis/api/client-locations/?client=${clientId}`)
+          .then(res => res.json())
+          .then(data => {
+    
+            if (!data.length){
+              resetLocation();
+              return;
+            }
+    
+            locationSelect.innerHTML = '<option value="">Wybierz lokalizację</option>';
+    
+            data.forEach(loc => {
+              const selected = selectedLocationId == loc.id ? 'selected' : '';
+              locationSelect.innerHTML += 
+                `<option value="${loc.id}" ${selected}>${loc.name}</option>`;
+            });
+    
+            locationWrapper.classList.remove('d-none');
+          })
+          .catch(() => resetLocation());
+      }
+    
+      // 🔁 ZMIANA KLIENTA
+      clientSelect.addEventListener('change', function(){
+        const clientId = this.value;
+    
+        if (!clientId){
+          resetLocation();
+          return;
+        }
+    
+        loadLocations(clientId);
+      });
+    
+      // 🔥 AUTO-LOAD PRZY EDYCJI / RELOAD
+      if (clientSelect.value){
+        const currentLocation = locationSelect.value || null;
+        loadLocations(clientSelect.value, currentLocation);
+      }
+    
+    })();
+    </script>
+
+    <script>
+function initAjaxSelect(context = document) {
+  $(context).find(".ajax-select").each(function () {
+    const $select = $(this);
+
+    if ($select.hasClass("select2-hidden-accessible")) {
+      return;
+    }
+
+    $select.select2({
+      width: "100%",
+      placeholder: $select.data("placeholder") || "Wyszukaj...",
+      allowClear: true,
+      language: {
+
+      noResults: function () {
+          return "Brak wyników";
+        },
+
+        searching: function () {
+          return "Wyszukiwanie...";
+        },
+
+        inputTooShort: function () {
+          return "Wpisz nazwę";
+        }
+
+      },
+      minimumInputLength: 0,
+
+      ajax: {
+        url: $select.data("url"),
+        dataType: "json",
+        delay: 250,
+
+        data: function (params) {
+          return {
+            q: params.term || "",
+            page: params.page || 1
+          };
+        },
+
+        processResults: function (data) {
+          return {
+            results: data.results,
+            pagination: {
+              more: data.has_next
+            }
+          };
+        },
+
+        cache: true
+      }
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  initAjaxSelect();
+});
+</script>
+{% endblock %}

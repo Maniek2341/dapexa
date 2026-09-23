@@ -1,0 +1,84 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1 fw-bold">Archiwum klientów</h1>
+    <div class="text-muted" style="color:var(--muted)!important">
+      Lista dezaktywowanych klientów
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'klient' %}">
+      <i class="bi bi-arrow-left me-2"></i>Powrót do aktywnych
+    </a>
+  </div>
+</div>
+
+<div class="row g-4 mt-1">
+  <div class="col-12">
+    <div class="card border-0">
+      <div class="card-body p-4">
+
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Nazwa / Imię i nazwisko</th>
+                <th>Typ</th>
+                <th>Telefon</th>
+                {% if can_manage_clients %}<th>Akcje</th>{% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% if clients %}
+                {% for client in clients %}
+                  <tr>
+                    <td>
+                      {% if client.client_type == 'company' %}
+                        <strong>{{ client.name|default:"—" }}</strong>
+                      {% else %}
+                        <strong>{{ client.first_name }} {{ client.last_name }}</strong>
+                      {% endif %}
+                    </td>
+
+                    <td>
+                      <span class="badge text-bg-secondary">
+                        {{ client.get_client_type_display }}
+                      </span>
+                    </td>
+
+                    <td>
+                      {{ client.phone|default:"—" }}
+                    </td>
+                    {% if can_manage_clients %}
+                    <td>
+                        <form method="post" action="{% url 'klient_activate' client.pk %}">
+                            {% csrf_token %}
+                            <button class="btn btn-link btn-sm">
+                                <i class="fa-solid fa-rotate-left" style="color:#00ccff;"></i>
+                            </button>
+                        </form>
+                    </td>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="{% if can_manage_clients %}4{% else %}3{% endif %}" class="text-center text-muted">
+                    Archiwum jest puste.
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

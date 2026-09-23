@@ -1,0 +1,5 @@
+from .product_create_view import ProductCreateView
+from .product_list_view import ProductListView
+from .product_detail_view import ProductDetailView
+from .product_usage_views import ProductOfferUsageView, ProductProtocolUsageView, ProductStockHistoryView
+from .product_update_view import ProductUpdateView

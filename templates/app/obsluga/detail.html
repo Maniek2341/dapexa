@@ -1,0 +1,1308 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+
+<style>
+  .detail-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:1rem;
+    flex-wrap:wrap;
+    margin-bottom:1.5rem;
+  }
+
+  .history-list{
+  display:grid;
+  gap:.8rem;
+}
+
+.history-item{
+  display:flex;
+  gap:.9rem;
+  padding:1rem;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  border-radius:16px;
+}
+
+.history-dot{
+  width:11px;
+  height:11px;
+  border-radius:50%;
+  background:#1468f5;
+  box-shadow:0 0 0 5px rgba(20,104,245,.12);
+  margin-top:.35rem;
+  flex-shrink:0;
+}
+
+.history-title{
+  color:var(--text);
+  font-weight:800;
+  margin-bottom:.15rem;
+}
+
+.history-message{
+  color:var(--text);
+  font-size:.9rem;
+}
+
+.history-meta{
+  color:var(--muted);
+  font-size:.78rem;
+  margin-top:.35rem;
+  display:flex;
+  flex-wrap:wrap;
+  gap:.35rem;
+}
+
+  .detail-title-wrap{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .detail-icon{
+    width:62px;
+    height:62px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(20,104,245,.12);
+    color:#1468f5;
+    font-size:1.55rem;
+    border:1px solid rgba(20,104,245,.22);
+  }
+
+  .detail-title{
+    color:var(--text);
+    font-size:1.55rem;
+    font-weight:900;
+    margin:0;
+  }
+
+  .detail-subtitle{
+    color:var(--muted);
+    font-size:.9rem;
+    margin-top:.25rem;
+  }
+
+  .detail-actions{
+    display:flex;
+    gap:.6rem;
+    flex-wrap:wrap;
+  }
+
+  .btn-orange{
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+    color:#fff;
+    border:0;
+    border-radius:12px;
+    font-weight:700;
+    padding:.65rem 1rem;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+  }
+
+  .btn-orange:hover{
+    color:#fff;
+    filter:brightness(1.05);
+  }
+
+  .btn-soft{
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:12px;
+    padding:.65rem 1rem;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:.45rem;
+  }
+
+  .btn-soft:hover{
+    color:var(--text);
+    background:rgba(255,255,255,.07);
+  }
+
+  .action-modal{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:0 30px 80px rgba(0,0,0,.4);
+  }
+
+  .action-modal .modal-header{
+    padding:1.25rem 1.5rem;
+    border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,rgba(20,104,245,.12),transparent);
+  }
+
+  .action-modal .modal-title{color:var(--text);font-weight:900;}
+  .action-modal .modal-body{padding:1.5rem;}
+  .action-modal .modal-footer{padding:0 1.5rem 1.5rem;border-top:0;gap:.65rem;}
+  .action-modal label{color:var(--muted);font-weight:700;margin-bottom:.35rem;}
+  .action-modal input,
+  .action-modal select,
+  .action-modal textarea{
+    width:100%;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:12px;
+    padding:.65rem .8rem;
+  }
+  .action-modal p{margin-bottom:1rem;}
+  .invoice-modal{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:26px;overflow:hidden;box-shadow:0 35px 90px rgba(0,0,0,.45);}
+  .invoice-modal-header{display:flex;align-items:center;gap:1rem;padding:1.5rem;position:relative;border-bottom:1px solid var(--border);background:radial-gradient(circle at top left,rgba(20,104,245,.16),transparent 45%),rgba(255,255,255,.02);}
+  .invoice-modal-icon{width:58px;height:58px;border-radius:18px;display:flex;align-items:center;justify-content:center;background:rgba(20,104,245,.12);border:1px solid rgba(20,104,245,.2);color:#1468f5;font-size:1.4rem;flex-shrink:0;}
+  .invoice-modal-header h4{margin:0;color:var(--text);font-size:1.2rem;font-weight:900;}
+  .invoice-modal-header p{margin:.25rem 0 0;color:var(--muted);font-size:.86rem;}
+  .invoice-modal-header .btn-close{position:absolute;top:1rem;right:1rem;filter:invert(1);}
+  .invoice-modal-body{padding:1.5rem;}
+  .invoice-modal-body{max-height:65vh;overflow-y:auto;}
+  .invoice-modal-body label{display:block;color:var(--muted);font-size:.8rem;font-weight:800;margin-bottom:.4rem;}
+  .invoice-modal-body input,.invoice-modal-body select,.invoice-modal-body textarea{background:rgba(255,255,255,.04)!important;border:1px solid var(--border)!important;color:var(--text)!important;border-radius:14px!important;min-height:50px;}
+  .invoice-modal-body input,.invoice-modal-body select,.invoice-modal-body textarea{width:100%;max-width:100%;box-sizing:border-box;}
+  .invoice-modal-body p{margin:0 0 1rem;}
+  .invoice-modal-body .helptext,.invoice-modal-body .errorlist{font-size:.8rem;color:var(--muted);}
+  .invoice-modal-footer{padding:0 1.5rem 1.5rem;display:flex;justify-content:flex-end;gap:.75rem;border-top:0;}
+  .invoice-btn-secondary,.invoice-btn-primary{border:0;border-radius:14px;padding:.8rem 1.2rem;font-weight:800;display:inline-flex;align-items:center;gap:.45rem;}
+  .invoice-btn-secondary{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);}
+  .invoice-btn-primary{background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);color:#fff;}
+  .action-modal .modal-header{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    padding:1.5rem 1.75rem;
+    background:radial-gradient(circle at top left,rgba(20,104,245,.18),transparent 45%),linear-gradient(180deg,rgba(255,255,255,.03),transparent);
+  }
+  .action-modal .modal-header .btn-close{position:absolute;top:1rem;right:1rem;filter:invert(1);}
+  .action-modal .modal-title{font-size:1.3rem;}
+  .action-modal .modal-body{padding:1.75rem;}
+  .action-modal .modal-footer{padding:0 1.75rem 1.75rem;}
+
+  .service-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:22px;
+    box-shadow:0 18px 45px rgba(0,0,0,.14);
+  }
+
+  .service-card-header{
+    padding:1rem 1.2rem;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .service-card-title{
+    margin:0;
+    color:var(--text);
+    font-weight:800;
+    font-size:1rem;
+    display:flex;
+    align-items:center;
+    gap:.55rem;
+  }
+
+  .service-card-title i{
+    color:#1468f5;
+  }
+
+  .service-card-body{
+    padding:1.2rem;
+  }
+
+  .info-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:.85rem;
+  }
+
+  .info-pill{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.035);
+    border-radius:16px;
+    padding:.85rem .95rem;
+  }
+
+  .info-label{
+    color:var(--muted);
+    font-size:.78rem;
+    margin-bottom:.22rem;
+  }
+
+  .info-value{
+    color:var(--text);
+    font-weight:800;
+    word-break:break-word;
+  }
+
+  .status-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    border-radius:999px;
+    padding:.45rem .75rem;
+    font-weight:800;
+    font-size:.78rem;
+  }
+
+  .status-active{
+    background:rgba(25,135,84,.13);
+    color:#28c76f;
+  }
+
+  .status-paused{
+    background:rgba(255,193,7,.13);
+    color:#ffb400;
+  }
+
+  .status-ended{
+    background:rgba(220,53,69,.13);
+    color:#ea5455;
+  }
+
+  .muted-empty{
+    color:var(--muted);
+    font-size:.9rem;
+  }
+
+  .asset-list,
+  .param-list,
+  .person-list,
+  .visit-list{
+    display:grid;
+    gap:.8rem;
+  }
+
+  .asset-item,
+  .param-item,
+  .person-item,
+  .visit-item{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.025);
+    border-radius:16px;
+    padding:1rem;
+  }
+
+  .item-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:1rem;
+    flex-wrap:wrap;
+  }
+
+  .item-title{
+    color:var(--text);
+    font-weight:850;
+  }
+
+  .item-muted{
+    color:var(--muted);
+    font-size:.84rem;
+  }
+
+  .small-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    border-radius:999px;
+    padding:.35rem .65rem;
+    background:rgba(20,104,245,.10);
+    color:#1468f5;
+    font-weight:800;
+    font-size:.75rem;
+  }
+
+  .description-box{
+    color:var(--text);
+    line-height:1.65;
+    white-space:pre-line;
+  }
+
+  .side-card{
+    position:sticky;
+    top:90px;
+  }
+
+  @media(max-width:991px){
+    .side-card{
+      position:static;
+    }
+  }
+
+  .media-preview-img{
+  width:100%;
+  max-width:220px;
+  height:140px;
+  object-fit:cover;
+  border-radius:14px;
+  border:1px solid var(--border);
+  margin-top:1rem;
+}
+
+  .modal .form-control,
+.modal .form-select,
+.modal textarea{
+  background:var(--body);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:12px;
+  min-height:44px;
+}
+
+.modal .form-control:focus,
+.modal .form-select:focus,
+.modal textarea:focus{
+  border-color:#1468f5;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.16);
+  background:var(--body);
+  color:var(--text);
+}
+
+.upload-preview-img{
+  width:86px;
+  height:86px;
+  object-fit:cover;
+  border-radius:14px;
+  border:1px solid var(--border);
+}
+
+.modal .form-label{
+  color:var(--text);
+  font-weight:700;
+  font-size:.86rem;
+}
+
+  /* Zakładki jak w szczegółach protokołu */
+  .nav-tabs{
+    border-bottom:1px solid var(--border) !important;
+    gap:.5rem;
+  }
+
+  .nav-tabs .nav-link{
+    color:var(--muted);
+    border:1px solid var(--border) !important;
+    background:rgba(255,255,255,.03);
+    border-radius:999px;
+    font-weight:800;
+    margin-bottom:.75rem;
+    transition:all .2s ease;
+  }
+
+  .nav-tabs .nav-link:hover{
+    color:var(--text);
+    background:rgba(255,255,255,.07);
+  }
+
+  .nav-tabs .nav-link.active{
+    color:#fff !important;
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%) !important;
+    border-color:transparent !important;
+  }
+
+  @media(max-width:768px){
+    .nav-tabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:.3rem;}
+    .nav-tabs .nav-link{white-space:nowrap;}
+  }
+
+  .item-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:.45rem;
+  flex-wrap:wrap;
+  margin-top:.9rem;
+}
+
+.icon-action{
+  width:36px;
+  height:36px;
+  border-radius:11px;
+  border:0px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  transition:.18s ease;
+}
+
+.icon-action:hover{
+  transform:translateY(-1px);
+  background:rgba(20,104,245,.12);
+  border-color:rgba(20,104,245,.35);
+  color:#1468f5;
+}
+
+.icon-action-danger{
+  background:rgba(220,53,69,.08);
+  border-color:rgba(220,53,69,.22);
+  color:#ea5455;
+}
+
+.icon-action-danger:hover{
+  background:rgba(220,53,69,.14);
+  border-color:rgba(220,53,69,.35);
+  color:#ea5455;
+}
+.btn-danger-soft{
+  background:rgba(220,53,69,.10);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ea5455;
+  border-radius:12px;
+  padding:.65rem 1rem;
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+}
+
+.btn-danger-soft:hover{
+  background:rgba(220,53,69,.16);
+  color:#ea5455;
+}
+
+.crm-timeline-scroll{
+  max-height:520px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+
+.crm-item{
+  position:relative;
+  display:flex;
+  gap:.75rem;
+  padding-bottom:1rem;
+}
+
+.crm-item:not(:last-child)::before{
+  content:"";
+  position:absolute;
+  left:17px;
+  top:34px;
+  bottom:0;
+  width:1px;
+  background:var(--border);
+}
+
+.crm-dot{
+  width:34px;
+  height:34px;
+  min-width:34px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+  background:var(--card);
+  z-index:2;
+}
+
+.crm-card{
+  flex:1;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--card);
+  padding:.85rem;
+}
+
+.crm-dot.created{ color:#198754; }
+.crm-dot.updated{ color:#0d6efd; }
+.crm-dot.asset_added,
+.crm-dot.asset_updated,
+.crm-dot.asset_deleted{ color:#20c997; }
+.crm-dot.parameter_added,
+.crm-dot.parameter_updated,
+.crm-dot.parameter_deleted{ color:#fd7e14; }
+.crm-dot.media_added{ color:#6f42c1; }
+.crm-dot.visit_confirmed{ color:#198754; }
+.crm-dot.note{ color:#6c757d; }
+</style>
+
+<div class="detail-head">
+
+  <div class="detail-title-wrap">
+    <div class="detail-icon">
+      <i class="bi bi-building-gear"></i>
+    </div>
+
+    <div>
+      <h1 class="detail-title">{{ contract.title }}</h1>
+      <div class="detail-subtitle">
+        {{ contract.client }}
+        {% if contract.location %}
+          · {{ contract.location }}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-actions">
+    <a href="{% url 'service_contract_list' %}" class="btn-soft">
+      <i class="bi bi-arrow-left"></i>
+      Wróć
+    </a>
+
+    {% if can_edit_obsluga %}
+    <a href="{% url 'service_contract_update' contract.pk %}" class="btn-orange">
+      <i class="bi bi-pencil"></i>
+      Edytuj
+    </a>
+    {% endif %}
+  </div>
+
+</div>
+
+<div class="row g-4">
+
+  <div class="col-xl-8">
+
+    <div class="service-card mb-4">
+      <div class="service-card-header">
+        <h2 class="service-card-title">
+          <i class="bi bi-info-circle"></i>
+          Informacje podstawowe
+        </h2>
+
+        {% if contract.status == "active" %}
+          <span class="status-badge status-active">{{ contract.get_status_display }}</span>
+        {% elif contract.status == "paused" %}
+          <span class="status-badge status-paused">{{ contract.get_status_display }}</span>
+        {% else %}
+          <span class="status-badge status-ended">{{ contract.get_status_display }}</span>
+        {% endif %}
+      </div>
+
+      <div class="service-card-body">
+        <div class="info-grid">
+
+          <div class="info-pill">
+            <div class="info-label">Typ obsługi</div>
+            <div class="info-value">{{ contract.get_contract_type_display }}</div>
+          </div>
+
+          <div class="info-pill">
+            <div class="info-label">Częstotliwość</div>
+            <div class="info-value">{{ contract.get_frequency_display }}</div>
+          </div>
+
+          <div class="info-pill">
+            <div class="info-label">Data rozpoczęcia</div>
+            <div class="info-value">{{ contract.start_date|date:"d.m.Y" }}</div>
+          </div>
+
+          <div class="info-pill">
+            <div class="info-label">Data zakończenia</div>
+            <div class="info-value">
+              {% if contract.end_date %}
+                {{ contract.end_date|date:"d.m.Y" }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="info-pill">
+            <div class="info-label">Następny termin</div>
+            <div class="info-value">
+              {% if contract.next_service_date %}
+                {{ contract.next_service_date|date:"d.m.Y" }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="info-pill">
+            <div class="info-label">Cena miesięczna netto</div>
+            <div class="info-value">{{ contract.monthly_price_net }} zł</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card mb-4">
+      <div class="service-card-header">
+        <h2 class="service-card-title">
+          <i class="bi bi-card-text"></i>
+          Zakres i uwagi
+        </h2>
+      </div>
+
+      <div class="service-card-body">
+        {% if contract.description %}
+          <div class="description-box">{{ contract.description }}</div>
+        {% else %}
+          <div class="muted-empty">Brak opisu zakresu obsługi.</div>
+        {% endif %}
+
+        {% if contract.notes %}
+          <hr style="border-color:var(--border);">
+          <div class="item-muted mb-1">Uwagi wewnętrzne</div>
+          <div class="description-box">{{ contract.notes }}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="service-card mb-4">
+      <div class="service-card-body p-0">
+
+        <ul class="nav nav-tabs px-3 pt-3" role="tablist" style="border-color:var(--border)">
+          <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-assets" type="button">
+              Elementy
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-parameters" type="button">
+              Parametry
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-media" type="button">
+              Pliki i zdjęcia
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-history" type="button">
+              Historia
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content p-3">
+
+          <div class="tab-pane fade show active" id="tab-assets">
+
+            <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+              <h2 class="service-card-title">
+                <i class="bi bi-hdd-network"></i>
+                Elementy instalacji
+              </h2>
+
+              <span class="small-tag">{{ assets|length }}</span>
+            </div>
+
+            {% if assets %}
+              <div class="asset-list">
+                {% for asset in assets %}
+                  <div class="asset-item">
+
+                    <div class="item-top">
+                      <div>
+                        <div class="item-title">{{ asset.name }}</div>
+                        <div class="item-muted">{{ asset.get_asset_type_display }}</div>
+                      </div>
+
+                      <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                        {% if asset.location_description %}
+                          <span class="small-tag">
+                            <i class="bi bi-geo-alt"></i>
+                            {{ asset.location_description }}
+                          </span>
+                        {% endif %}
+
+                        {% if can_asset_edit %}<button type="button"
+                                class="icon-action"
+                                title="Edytuj element"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editAssetModal{{ asset.pk }}">
+                          <i class="bi bi-pencil" style="color:#00ff2a;"></i>
+                        </button>
+                        {% endif %}
+
+                        {% if can_asset_delete %}<button type="button"
+                                class="icon-action icon-action-danger"
+                                title="Usuń element"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteAssetModal{{ asset.pk }}">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <div class="info-grid mt-3">
+                      <div class="info-pill">
+                        <div class="info-label">Producent</div>
+                        <div class="info-value">{{ asset.producer|default:"—" }}</div>
+                      </div>
+
+                      <div class="info-pill">
+                        <div class="info-label">Model</div>
+                        <div class="info-value">{{ asset.model|default:"—" }}</div>
+                      </div>
+
+                      <div class="info-pill">
+                        <div class="info-label">Numer seryjny</div>
+                        <div class="info-value">{{ asset.serial_number|default:"—" }}</div>
+                      </div>
+
+                      <div class="info-pill">
+                        <div class="info-label">Adres IP</div>
+                        <div class="info-value">{{ asset.ip_address|default:"—" }}</div>
+                      </div>
+                    </div>
+
+                    {% if asset.notes %}
+                      <div class="item-muted mt-3">{{ asset.notes }}</div>
+                    {% endif %}
+
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="muted-empty">Nie dodano jeszcze elementów instalacji.</div>
+            {% endif %}
+
+          </div>
+
+          <div class="tab-pane fade" id="tab-parameters">
+
+            <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+              <h2 class="service-card-title">
+                <i class="bi bi-sliders"></i>
+                Parametry
+              </h2>
+
+              <span class="small-tag">{{ parameters|length }}</span>
+            </div>
+
+            {% if parameters %}
+              <div class="param-list">
+                {% for parameter in parameters %}
+                  <div class="param-item">
+
+                    <div class="item-top">
+                      <div>
+                        <div class="item-title">{{ parameter.name }}</div>
+
+                        {% if parameter.group %}
+                          <div class="item-muted">{{ parameter.group }}</div>
+                        {% endif %}
+                      </div>
+
+                      <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                        <span class="small-tag">
+                          {{ parameter.value }}
+                          {% if parameter.unit %}
+                            {{ parameter.unit }}
+                          {% endif %}
+                        </span>
+
+                        {% if can_parameter_edit %}<button type="button"
+                                class="icon-action"
+                                title="Edytuj parametr"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editParameterModal{{ parameter.pk }}">
+                          <i class="bi bi-pencil" style="color:#00ff2a;"></i>
+                        </button>
+                        {% endif %}
+
+                        {% if can_parameter_delete %}<button type="button"
+                                class="icon-action icon-action-danger"
+                                title="Usuń parametr"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteParameterModal{{ parameter.pk }}">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="muted-empty">Brak parametrów dla tej obsługi.</div>
+            {% endif %}
+
+          </div>
+
+          <div class="tab-pane fade" id="tab-media">
+
+            <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap mb-3">
+              <h2 class="service-card-title">
+                <i class="bi bi-images"></i>
+                Pliki i zdjęcia
+              </h2>
+
+              <span class="small-tag">{{ media|length }}</span>
+            </div>
+
+            {% if media %}
+              <div class="asset-list">
+                {% for item in media %}
+                  <div class="asset-item">
+
+                    <div class="item-top">
+                      <div>
+                        <div class="item-title">
+                          {{ item.title|default:item.file.name }}
+                        </div>
+
+                        <div class="item-muted">
+                          {{ item.get_media_type_display }}
+                          · {{ item.uploaded_at|date:"d.m.Y H:i" }}
+
+                          {% if item.uploaded_by %}
+                            · {{ item.uploaded_by.get_full_name|default:item.uploaded_by }}
+                          {% endif %}
+                        </div>
+                      </div>
+
+                      <a href="{{ item.file.url }}"
+                         target="_blank"
+                         class="icon-action"
+                         title="Otwórz plik">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                      </a>
+                    </div>
+
+                    {% if item.is_image %}
+                      <img src="{{ item.file.url }}"
+                           alt="{{ item.title|default:'Zdjęcie' }}"
+                           class="media-preview-img">
+                    {% endif %}
+
+                  </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="muted-empty">Brak plików i zdjęć.</div>
+            {% endif %}
+
+          </div>
+
+          <div class="tab-pane fade" id="tab-history">
+
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+              <div class="d-flex flex-wrap gap-2">
+
+                <button class="btn btn-outline-secondary btn-sm active"
+                        type="button"
+                        data-activity-filter="all">
+                  Wszystko
+                </button>
+
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        data-activity-filter="created">
+                  Utworzenie
+                </button>
+
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        data-activity-filter="updated">
+                  Edycje
+                </button>
+
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        data-activity-filter="asset">
+                  Elementy
+                </button>
+
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        data-activity-filter="parameter">
+                  Parametry
+                </button>
+
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        data-activity-filter="media">
+                  Pliki
+                </button>
+
+                <button class="btn btn-outline-secondary btn-sm"
+                        type="button"
+                        data-activity-filter="visit">
+                  Przeglądy
+                </button>
+
+              </div>
+
+              <div class="small text-muted">
+                Wpisów:
+                <span class="badge text-bg-secondary">
+                  {{ activities_count|default:0 }}
+                </span>
+              </div>
+            </div>
+
+            {% if activities %}
+              <div class="crm-timeline crm-timeline-scroll">
+
+                {% for a in activities %}
+                  <div class="crm-item {% if forloop.counter > 8 %}d-none extra-activity{% endif %}"
+                       data-activity-type="{{ a.activity_type }}">
+
+                    <div class="crm-dot {{ a.activity_type }}">
+                      <i class="bi
+                        {% if a.activity_type == 'created' %} bi-plus-circle
+                        {% elif a.activity_type == 'updated' %} bi-pencil-square
+                        {% elif a.activity_type == 'asset_added' or a.activity_type == 'asset_updated' or a.activity_type == 'asset_deleted' %} bi-hdd-network
+                        {% elif a.activity_type == 'parameter_added' or a.activity_type == 'parameter_updated' or a.activity_type == 'parameter_deleted' %} bi-sliders
+                        {% elif a.activity_type == 'media_added' %} bi-paperclip
+                        {% elif a.activity_type == 'visit_confirmed' %} bi-check-circle
+                        {% else %} bi-dot
+                        {% endif %}">
+                      </i>
+                    </div>
+
+                    <div class="crm-card">
+                      <div class="d-flex justify-content-between align-items-start gap-3">
+
+                        <div>
+                          <span class="badge-soft px-2 py-1">
+                            {{ a.get_activity_type_display }}
+                          </span>
+
+                          <div class="fw-semibold mt-2">
+                            {{ a.message }}
+                          </div>
+                        </div>
+
+                        <div class="text-end small text-muted">
+                          <div>{{ a.created_at|date:"d.m.Y H:i" }}</div>
+
+                          <div>
+                            {% if a.created_by %}
+                              {{ a.created_by.first_name }} {{ a.created_by.last_name }}
+                            {% else %}
+                              System
+                            {% endif %}
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+                {% endfor %}
+
+              </div>
+
+              {% if activities_count > 8 %}
+                <button id="showMoreActivities"
+                        class="btn btn-outline-secondary btn-sm mt-3 w-100">
+                  Pokaż więcej
+                </button>
+              {% endif %}
+            {% else %}
+              <div class="text-muted">
+                Brak historii.
+              </div>
+            {% endif %}
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-xl-4">
+
+    <div class="service-card mb-4">
+      <div class="service-card-header">
+        <h2 class="service-card-title">
+          <i class="bi bi-lightning-charge"></i>
+          Akcje
+        </h2>
+      </div>
+
+      <div class="service-card-body">
+        <div class="d-grid gap-2">
+
+          {% if can_asset_add %}<button type="button" class="btn-soft" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+            <i class="bi bi-file-earmark-text"></i>
+            Dodaj element
+          </button>
+          {% endif %}
+
+          {% if can_parameter_add %}<button type="button" class="btn-soft" data-bs-toggle="modal" data-bs-target="#addParameterModal">
+            <i class="bi bi-tools"></i>
+            Dodaj parametr
+          </button>
+          {% endif %}
+
+          {% if current_period_visit %}
+            <div class="info-pill mb-2">
+              <div>
+                <div class="info-label">Przegląd okresowy zatwierdzony</div>
+
+                <div class="info-value">
+                  {{ period_start|date:"d.m.Y" }} - {{ period_end|date:"d.m.Y" }}
+                </div>
+
+                <div class="item-muted mt-1">
+                  {% if current_period_visit.performed_by %}
+                    {{ current_period_visit.performed_by.get_full_name|default:current_period_visit.performed_by }}
+                  {% endif %}
+
+                  {% if current_period_visit.performed_at %}
+                    · {{ current_period_visit.performed_at|date:"d.m.Y" }}
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% elif can_visit_confirm %}
+            <form method="post" action="{% url 'service_visit_confirm_period' contract.pk %}">
+              {% csrf_token %}
+
+              <button type="submit" class="btn-orange w-100">
+                <i class="bi bi-check2-circle"></i>
+                Zatwierdź przegląd okresowy
+              </button>
+
+              <div class="small text-muted mt-2">
+                Okres:
+                {{ period_start|date:"d.m.Y" }}
+                -
+                {{ period_end|date:"d.m.Y" }}
+              </div>
+            </form>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card side-card mb-4">
+      <div class="service-card-header">
+        <h2 class="service-card-title">
+          <i class="bi bi-person-lines-fill"></i>
+          Klient i opiekun
+        </h2>
+      </div>
+
+      <div class="service-card-body">
+        <div class="info-grid">
+
+          <div class="info-pill">
+            <div class="info-label">Klient</div>
+            <div class="info-value">{{ contract.client }}</div>
+          </div>
+
+          <div class="info-pill">
+            <div class="info-label">Lokalizacja</div>
+            <div class="info-value">
+              {% if contract.location %}
+                {{ contract.location }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="info-pill">
+            <div class="info-label">Opiekun</div>
+            <div class="info-value">
+              {% if contract.caretaker %}
+                {{ contract.caretaker.get_full_name|default:contract.caretaker }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="info-pill">
+            <div class="info-label">Utworzył</div>
+            <div class="info-value">
+              {% if contract.created_by %}
+                {{ contract.created_by.get_full_name|default:contract.created_by }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="service-card mb-4">
+      <div class="service-card-header">
+        <h2 class="service-card-title">
+          <i class="bi bi-calendar-check"></i>
+          Przeglądy
+        </h2>
+
+        <span class="small-tag">{{ visits|length }}</span>
+      </div>
+
+      <div class="service-card-body">
+        {% if visits %}
+          <div class="visit-list">
+            {% for visit in visits %}
+              <div class="visit-item">
+
+                <div class="item-top">
+                  <div>
+                    <div class="item-title">
+                      {{ visit.title|default:"Wizyta obsługi" }}
+                    </div>
+
+                    <div class="item-muted">
+                      Plan:
+                      {% if visit.planned_at %}
+                        {{ visit.planned_at|date:"d.m.Y" }}
+                      {% else %}
+                        —
+                      {% endif %}
+                      · Wykonano:
+                      {% if visit.performed_at %}
+                        {{ visit.performed_at|date:"d.m.Y" }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </div>
+                  </div>
+
+                  <span class="small-tag">
+                    {{ visit.get_status_display }}
+                  </span>
+                </div>
+
+                {% if visit.notes %}
+                  <div class="item-muted mt-3">{{ visit.notes }}</div>
+                {% endif %}
+
+                <div class="mt-3 small-tag">
+                  <i class="bi bi-check-circle"></i>
+                  Konserwacja wykonana
+
+                  {% if visit.performed_at %}
+                    · {{ visit.performed_at|date:"d.m.Y" }}
+                  {% endif %}
+                </div>
+
+                {% if visit.performed_by %}
+                  <div class="item-muted mt-2">
+                    <i class="bi bi-person-check me-1"></i>
+                    Wykonał:
+                    {{ visit.performed_by.get_full_name|default:visit.performed_by }}
+                  </div>
+                {% endif %}
+
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="muted-empty">Brak przeglądów dla tej obsługi.</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+{% if can_asset_add %}
+<div class="modal fade" id="addAssetModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content invoice-modal">
+      <form method="post" action="{% url 'service_contract_asset_add' contract.pk %}">
+        {% csrf_token %}
+        <div class="invoice-modal-header">
+          <div class="invoice-modal-icon"><i class="bi bi-hdd-network"></i></div>
+          <div><h4>Dodaj element instalacji</h4><p>Uzupełnij dane urządzenia lub elementu.</p></div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+        </div>
+        <div class="invoice-modal-body">
+          {{ asset_form.as_p }}
+        </div>
+        <div class="invoice-modal-footer">
+          <button type="button" class="invoice-btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+          <button type="submit" class="invoice-btn-primary"><i class="bi bi-check2-circle"></i>Dodaj element</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if can_parameter_add %}
+<div class="modal fade" id="addParameterModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content invoice-modal">
+      <form method="post" action="{% url 'service_contract_parameter_add' contract.pk %}">
+        {% csrf_token %}
+        <div class="invoice-modal-header">
+          <div class="invoice-modal-icon"><i class="bi bi-sliders"></i></div>
+          <div><h4>Dodaj parametr</h4><p>Dodaj parametr techniczny obsługi.</p></div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+        </div>
+        <div class="invoice-modal-body">
+          {{ parameter_form.as_p }}
+        </div>
+        <div class="invoice-modal-footer">
+          <button type="button" class="invoice-btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+          <button type="submit" class="invoice-btn-primary"><i class="bi bi-check2-circle"></i>Dodaj parametr</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  // Podgląd uploadów
+  (function(){
+    const form = document.getElementById('serviceForm');
+    if (!form) return;
+
+    const imgInput = form.querySelector('input[name="images"]');
+    const attInput = form.querySelector('input[name="attachments"]');
+    const imgPreview = document.getElementById('imgPreview');
+    const fileList = document.getElementById('fileList');
+
+    imgInput?.addEventListener('change', () => {
+      if (!imgPreview) return;
+
+      imgPreview.innerHTML = '';
+
+      [...imgInput.files].forEach(file => {
+        const url = URL.createObjectURL(file);
+
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'upload-preview-img';
+
+        imgPreview.appendChild(img);
+      });
+    });
+
+    attInput?.addEventListener('change', () => {
+      if (!fileList) return;
+
+      fileList.innerHTML = '';
+
+      [...attInput.files].forEach(file => {
+        const li = document.createElement('li');
+        li.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+        fileList.appendChild(li);
+      });
+    });
+  })();
+</script>
+{% endblock %}

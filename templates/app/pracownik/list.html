@@ -1,0 +1,1022 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+/* ── PAGE HEAD ────────────────────────────────────────── */
+.emp-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.emp-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emp-title-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1468f5;
+  font-size: 1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border: 1px solid rgba(20,104,245,.18);
+}
+
+.emp-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.emp-subtitle {
+  margin-top: .25rem;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+/* ── BUTTONS ──────────────────────────────────────────── */
+.btn-orange {
+  border: 0;
+  color: #fff;
+  font-weight: 800;
+  border-radius: 14px;
+  padding: .78rem 1.15rem;
+  background: linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow: 0 14px 32px rgba(20,104,245,.22);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.btn-orange:hover {
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+.btn-soft {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  border-radius: 14px;
+  font-weight: 800;
+  padding: .78rem 1.15rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.btn-soft:hover {
+  background: rgba(255,255,255,.07);
+  color: var(--text);
+}
+
+/* ── STATS ────────────────────────────────────────────── */
+.emp-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
+.emp-stat-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,.1);
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+
+.emp-stat-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20,104,245,.12);
+  border: 1px solid rgba(20,104,245,.18);
+  color: #1468f5;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.emp-stat-icon.success {
+  background: rgba(25,135,84,.15);
+  border-color: rgba(25,135,84,.25);
+  color: #47d18c;
+}
+
+.emp-stat-icon.warning {
+  background: rgba(255,193,7,.14);
+  border-color: rgba(255,193,7,.24);
+  color: #ffc107;
+}
+
+.emp-stat-icon.info {
+  background: rgba(13,110,253,.15);
+  border-color: rgba(13,110,253,.25);
+  color: #7aa7ff;
+}
+
+.emp-stat-card span {
+  color: var(--muted);
+  font-size: .8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.emp-stat-card strong {
+  display: block;
+  margin-top: .2rem;
+  color: var(--text);
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+/* ── LIST CARD ────────────────────────────────────────── */
+.emp-list-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow: 0 18px 55px rgba(0,0,0,.14);
+}
+
+.emp-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.3rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+  flex-wrap: wrap;
+}
+
+.emp-list-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emp-list-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20,104,245,.12);
+  border: 1px solid rgba(20,104,245,.18);
+  color: #1468f5;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.emp-list-header h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.emp-list-header p {
+  margin: .15rem 0 0;
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+.emp-search {
+  min-width: 260px;
+  position: relative;
+}
+
+.emp-search i {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.emp-search input {
+  width: 100%;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: .6rem 1rem .6rem 2.4rem;
+  outline: none;
+  font-size: .88rem;
+  color: var(--text);
+}
+
+.emp-search input::placeholder {
+  color: var(--muted);
+}
+
+.emp-search input:focus {
+  border-color: rgba(20,104,245,.5);
+  box-shadow: 0 0 0 .2rem rgba(20,104,245,.13);
+}
+
+/* ── TABLE ────────────────────────────────────────────── */
+.emp-table {
+  color: var(--text);
+  margin: 0;
+}
+
+.emp-table thead th {
+  color: var(--muted);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-color: var(--border);
+  padding: 1rem 1.2rem;
+  background: rgba(255,255,255,.025);
+  white-space: nowrap;
+}
+
+.emp-table tbody td {
+  border-color: var(--border);
+  padding: 1rem 1.2rem;
+  vertical-align: middle;
+}
+
+.emp-table tbody tr:hover {
+  background: rgba(20,104,245,.04);
+}
+
+/* ── EMPLOYEE CELL ────────────────────────────────────── */
+.emp-person {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+
+.emp-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: .95rem;
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,.25);
+}
+
+.emp-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.emp-name {
+  font-weight: 900;
+  color: var(--text);
+  line-height: 1.2;
+}
+
+.emp-email,
+.emp-position {
+  color: var(--muted);
+  font-size: .82rem;
+  margin-top: .1rem;
+}
+.emp-completion{margin-top:.55rem;max-width:240px}.emp-completion-head{display:flex;justify-content:space-between;gap:.5rem;color:var(--muted);font-size:.68rem;font-weight:800}.emp-completion-head strong{color:#ff9a32}.emp-completion-track{height:6px;margin-top:.3rem;overflow:hidden;background:rgba(255,255,255,.08);border-radius:999px}.emp-completion-bar{height:100%;background:linear-gradient(90deg,#1468f5,#ffb347);border-radius:999px}
+
+/* ── BADGES ───────────────────────────────────────────── */
+.badge-soft {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .42rem .75rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 800;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.04);
+  white-space: nowrap;
+}
+
+.badge-role {
+  color: var(--text);
+  background: rgba(255,255,255,.06);
+  border-color: var(--border);
+}
+
+.badge-active {
+  color: #47d18c;
+  background: rgba(25,135,84,.15);
+  border-color: rgba(25,135,84,.25);
+}
+
+.badge-inactive {
+  color: #adb5bd;
+  background: rgba(108,117,125,.14);
+  border-color: rgba(108,117,125,.24);
+}
+
+.emp-phone {
+  color: var(--text);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.emp-muted {
+  color: var(--muted);
+}
+
+/* ── ACTION BUTTONS ───────────────────────────────────── */
+.emp-actions {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: .18s ease;
+  cursor: pointer;
+}
+
+.icon-btn:hover {
+  background: rgba(255,255,255,.06);
+}
+
+.icon-btn-green {
+  color: #00ff2a;
+  border-color: rgba(0,255,42,.18);
+}
+
+.icon-btn-danger {
+  color: #ff6b6b;
+  border-color: rgba(220,53,69,.25);
+}
+
+.icon-btn-owner {
+  color: #ffb347;
+  border-color: rgba(20,104,245,.3);
+}
+.icon-btn-status{color:#55d99a;border-color:rgba(85,217,154,.28)}.icon-btn-status.off{color:#ffc15a;border-color:rgba(255,193,90,.28)}
+
+.transfer-owner-modal {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 35px 90px rgba(0,0,0,.45);
+}
+
+.transfer-owner-preview {
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(20,104,245,.25);
+  background: rgba(20,104,245,.08);
+}
+
+/* ── DELETE MODAL ──────────────────────────────────────────── */
+.delete-employee-modal {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-employee-header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-employee-header .btn-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.delete-employee-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(220,53,69,.13);
+  border: 1px solid rgba(220,53,69,.25);
+  color: #ff6b6b;
+  font-size: 1.55rem;
+  flex-shrink: 0;
+}
+
+.delete-employee-header h4 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.delete-employee-header p {
+  margin: .25rem 0 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.delete-employee-body {
+  padding: 1.5rem;
+}
+
+.delete-employee-preview {
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(220,53,69,.22);
+  background: rgba(220,53,69,.08);
+}
+
+.delete-employee-footer {
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+}
+
+.btn-danger-modern {
+  border: 0;
+  border-radius: 16px;
+  padding: .9rem 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  background: linear-gradient(135deg, #dc3545, #ff6b6b);
+}
+
+/* ── EMPTY STATE ──────────────────────────────────────── */
+.emp-empty {
+  padding: 5rem 2rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+.emp-empty i {
+  font-size: 2.5rem;
+  color: #1468f5;
+  margin-bottom: .75rem;
+  display: block;
+}
+
+.emp-empty h5 {
+  margin: 0;
+  color: var(--text);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.emp-empty p {
+  margin: .5rem auto 1.5rem;
+  max-width: 380px;
+}
+
+/* ── RESPONSIVE ───────────────────────────────────────── */
+@media (max-width: 992px) {
+  .emp-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .emp-list-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .emp-search {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .emp-page-head {
+    flex-direction: column;
+  }
+  .emp-stats {
+    grid-template-columns: 1fr;
+  }
+  .emp-table-wrap {
+    display: none;
+  }
+  .emp-mobile-list {
+    display: grid;
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+</style>
+
+<!-- PAGE HEAD -->
+<div class="emp-page-head">
+  <div class="emp-title-wrap">
+    <div class="emp-title-icon">
+      <i class="bi bi-people-fill"></i>
+    </div>
+    <div>
+      <h1 class="emp-title">Pracownicy</h1>
+      <div class="emp-subtitle">Zarządzaj użytkownikami przypisanymi do Twojej firmy.</div>
+    </div>
+  </div>
+
+  <a href="{% url 'employee_add' %}" class="btn-orange">
+    <i class="bi bi-person-plus-fill"></i>
+    Dodaj pracownika
+  </a>
+</div>
+
+<!-- STATS -->
+<div class="emp-stats">
+  <div class="emp-stat-card">
+    <div class="emp-stat-icon">
+      <i class="bi bi-people-fill"></i>
+    </div>
+    <div>
+      <span>Łącznie</span>
+      <strong>{{ employees|length }}</strong>
+    </div>
+  </div>
+
+  <div class="emp-stat-card">
+    <div class="emp-stat-icon success">
+      <i class="bi bi-person-check-fill"></i>
+    </div>
+    <div>
+      <span>Aktywni</span>
+      <strong>{{ active_count|default:"0" }}</strong>
+    </div>
+  </div>
+
+  <div class="emp-stat-card">
+    <div class="emp-stat-icon warning">
+      <i class="bi bi-person-badge-fill"></i>
+    </div>
+    <div>
+      <span>Managerowie</span>
+      <strong>{{ manager_count|default:"0" }}</strong>
+    </div>
+  </div>
+
+  <div class="emp-stat-card">
+    <div class="emp-stat-icon info">
+      <i class="bi bi-building-fill"></i>
+    </div>
+    <div>
+      <span>Firma</span>
+      <strong>{{ request.user.company.name|default:"—" }}</strong>
+    </div>
+  </div>
+</div>
+
+<!-- LIST CARD -->
+<div class="emp-list-card">
+  <div class="emp-list-header">
+    <div class="emp-list-header-left">
+      <div class="emp-list-icon">
+        <i class="bi bi-list-ul"></i>
+      </div>
+      <div>
+        <h3>Lista pracowników</h3>
+        <p>Dane kontaktowe, role oraz statusy kont.</p>
+      </div>
+    </div>
+
+    <div class="emp-search">
+      <i class="bi bi-search"></i>
+      <input type="text" id="employeeSearch" placeholder="Szukaj pracownika...">
+    </div>
+  </div>
+
+  {% if employees %}
+    <!-- DESKTOP TABLE -->
+    <div class="table-responsive emp-table-wrap">
+      <table class="table emp-table align-middle mb-0" id="employeesTable">
+        <thead>
+          <tr>
+            <th>Pracownik</th>
+            <th>Rola</th>
+            <th>Telefon prywatny</th>
+            <th>Telefon firmowy</th>
+            <th>Status</th>
+            <th>Akcje</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for employee in employees %}
+            <tr>
+              <td>
+                <div class="emp-person">
+                  <div class="emp-avatar">
+                    {% if employee.avatar %}
+                      <img src="{{ employee.avatar.url }}" alt="">
+                    {% else %}
+                      <img src="{% static 'assets/panel/dist/img/avatar.png' %}" alt="Domyślny avatar">
+                    {% endif %}
+                  </div>
+                  <div>
+                    <div class="emp-name">{{ employee.first_name }} {{ employee.last_name }}</div>
+                    <div class="emp-email">{{ employee.email }}</div>
+                    {% if employee.position %}
+                      <div class="emp-position">{{ employee.position }}</div>
+                    {% endif %}
+                    {% if employee.completion %}<div class="emp-completion"><div class="emp-completion-head"><span>Uzupełnienie danych</span><strong>{{ employee.completion.percent }}%</strong></div><div class="emp-completion-track"><div class="emp-completion-bar" style="width:{{ employee.completion.percent }}%"></div></div></div>{% endif %}
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="badge-soft badge-role">
+                  <i class="bi bi-person-badge"></i>
+                  {{ employee.get_role_display }}
+                </span>
+              </td>
+
+              <td>
+                {% if employee.phone_priv %}
+                  <span class="emp-phone">{{ employee.phone_priv }}</span>
+                {% else %}
+                  <span class="emp-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if employee.phone %}
+                  <span class="emp-phone">{{ employee.phone }}</span>
+                {% else %}
+                  <span class="emp-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if employee.is_active_employee %}
+                  <span class="badge-soft badge-active">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Aktywny
+                  </span>
+                {% else %}
+                  <span class="badge-soft badge-inactive">
+                    <i class="bi bi-pause-circle-fill"></i>
+                    Nieaktywny
+                  </span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="emp-actions">
+                  {% if request.user.role == "owner" or request.user.role == "manager" or request.user.role == "biuro" %}
+                    {% if employee.role != "owner" or request.user.role == "owner" %}
+                      <a href="{% url 'employee_edit' employee.pk %}"
+                         class="icon-btn icon-btn-green"
+                         title="Edytuj">
+                        <i class="bi bi-pencil-square"></i>
+                      </a>
+                    {% endif %}
+
+                    {% if employee.pk != request.user.pk and employee.role != "owner" %}
+                      <form method="post" action="{% url 'employee_status_toggle' employee.pk %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="icon-btn icon-btn-status{% if employee.is_active_employee %} off{% endif %}" title="{% if employee.is_active_employee %}Dezaktywuj{% else %}Aktywuj{% endif %}">
+                          <i class="bi {% if employee.is_active_employee %}bi-person-slash{% else %}bi-person-check{% endif %}"></i>
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    {% if request.user.role == "owner" or perms.core.access_employee_delete %}
+                      {% if employee.pk != request.user.pk and employee.role != "owner" %}
+                        <button type="button"
+                                class="icon-btn icon-btn-danger"
+                                title="Usuń"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteEmployeeModal"
+                                data-delete-url="{% url 'employee_delete' employee.pk %}"
+                                data-employee-name="{{ employee.get_full_name|default:employee.email }}">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      {% endif %}
+                    {% endif %}
+
+                    {% if request.user.role == "owner" %}
+                      {% if employee.pk != request.user.pk and employee.is_active and employee.is_active_employee %}
+                        {% if employee.role == "manager" or employee.role == "biuro" %}
+                      <button type="button"
+                              class="icon-btn icon-btn-owner"
+                              title="Przekaż rolę właściciela"
+                              data-bs-toggle="modal"
+                              data-bs-target="#transferOwnerModal"
+                              data-transfer-url="{% url 'employee_ownership_transfer' employee.pk %}"
+                              data-employee-name="{{ employee.get_full_name|default:employee.email }}"
+                              data-employee-email="{{ employee.email }}">
+                        <i class="bi bi-person-up"></i>
+                      </button>
+                        {% endif %}
+                      {% endif %}
+                    {% endif %}
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- MOBILE CARDS -->
+    <div class="emp-mobile-list" style="display:none;">
+      {% for employee in employees %}
+        <div style="
+          background:var(--card);
+          border:1px solid var(--border);
+          border-radius:22px;
+          padding:1rem;
+          box-shadow:0 14px 35px rgba(0,0,0,.12);">
+
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:.75rem;">
+            <div class="emp-person">
+              <div class="emp-avatar">
+                {% if employee.avatar %}
+                  <img src="{{ employee.avatar.url }}" alt="">
+                {% else %}
+                  <img src="{% static 'assets/panel/dist/img/avatar.png' %}" alt="Domyślny avatar">
+                {% endif %}
+              </div>
+              <div>
+                <div class="emp-name">{{ employee.first_name }} {{ employee.last_name }}</div>
+                <div class="emp-email">{{ employee.email }}</div>
+              </div>
+            </div>
+
+            {% if employee.is_active_employee %}
+              <span class="badge-soft badge-active">
+                <i class="bi bi-check-circle-fill"></i>
+                Aktywny
+              </span>
+            {% else %}
+              <span class="badge-soft badge-inactive">
+                <i class="bi bi-pause-circle-fill"></i>
+                Nieaktywny
+              </span>
+            {% endif %}
+          </div>
+
+          <div style="margin-top:.75rem;">
+            <span class="badge-soft badge-role">
+              <i class="bi bi-person-badge"></i>
+              {{ employee.get_role_display }}
+            </span>
+          </div>
+
+          {% if employee.phone_priv or employee.phone %}
+            <div class="emp-muted" style="margin-top:.75rem;font-size:.85rem;">
+              {% if employee.phone_priv %}<i class="bi bi-telephone me-1"></i>{{ employee.phone_priv }}{% endif %}
+              {% if employee.phone %}&nbsp;&nbsp;<i class="bi bi-building me-1"></i>{{ employee.phone }}{% endif %}
+            </div>
+          {% endif %}
+          {% if employee.completion %}<div class="emp-completion" style="max-width:none;margin-top:1rem"><div class="emp-completion-head"><span>Uzupełnienie danych</span><strong>{{ employee.completion.percent }}%</strong></div><div class="emp-completion-track"><div class="emp-completion-bar" style="width:{{ employee.completion.percent }}%"></div></div></div>{% endif %}
+
+          <div style="display:flex;gap:.55rem;margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--border);">
+            {% if request.user.role == "owner" or request.user.role == "manager" or request.user.role == "biuro" %}
+              {% if employee.role != "owner" or request.user.role == "owner" %}
+                <a href="{% url 'employee_edit' employee.pk %}" class="icon-btn icon-btn-green" title="Edytuj">
+                  <i class="bi bi-pencil-square"></i>
+                </a>
+              {% endif %}
+
+              {% if employee.pk != request.user.pk and employee.role != "owner" %}
+                <form method="post" action="{% url 'employee_status_toggle' employee.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="icon-btn icon-btn-status{% if employee.is_active_employee %} off{% endif %}" title="{% if employee.is_active_employee %}Dezaktywuj{% else %}Aktywuj{% endif %}"><i class="bi {% if employee.is_active_employee %}bi-person-slash{% else %}bi-person-check{% endif %}"></i></button>
+                </form>
+              {% endif %}
+
+              {% if request.user.role == "owner" or perms.core.access_employee_delete %}
+                {% if employee.pk != request.user.pk and employee.role != "owner" %}
+                  <button type="button"
+                          class="icon-btn icon-btn-danger"
+                          title="Usuń"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteEmployeeModal"
+                          data-delete-url="{% url 'employee_delete' employee.pk %}"
+                          data-employee-name="{{ employee.get_full_name|default:employee.email }}">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                {% endif %}
+              {% endif %}
+
+              {% if request.user.role == "owner" %}
+                {% if employee.pk != request.user.pk and employee.is_active and employee.is_active_employee %}
+                  {% if employee.role == "manager" or employee.role == "biuro" %}
+                <button type="button"
+                        class="icon-btn icon-btn-owner"
+                        title="Przekaż rolę właściciela"
+                        data-bs-toggle="modal"
+                        data-bs-target="#transferOwnerModal"
+                        data-transfer-url="{% url 'employee_ownership_transfer' employee.pk %}"
+                        data-employee-name="{{ employee.get_full_name|default:employee.email }}"
+                        data-employee-email="{{ employee.email }}">
+                  <i class="bi bi-person-up"></i>
+                </button>
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="emp-empty">
+      <i class="bi bi-people"></i>
+      <h5>Brak pracowników</h5>
+      <p>Dodaj pierwszego pracownika i przypisz mu rolę w systemie.</p>
+      <a href="{% url 'employee_add' %}" class="btn-orange">
+        <i class="bi bi-person-plus-fill"></i>
+        Dodaj pracownika
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<div class="modal fade" id="transferOwnerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content transfer-owner-modal">
+      <form id="transferOwnerForm" method="post" action="">
+        {% csrf_token %}
+        <div class="delete-employee-header" style="background:radial-gradient(circle at top left,rgba(20,104,245,.2),transparent 45%),linear-gradient(180deg,rgba(255,255,255,.03),transparent);">
+          <div class="delete-employee-icon" style="background:rgba(20,104,245,.13);border-color:rgba(20,104,245,.28);color:#ff9a3c;">
+            <i class="bi bi-person-up"></i>
+          </div>
+          <div>
+            <h4>Przekazać własność firmy?</h4>
+            <p>Zmiana wymaga dwóch potwierdzeń przez e-mail.</p>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+        </div>
+        <div class="delete-employee-body">
+          <div class="transfer-owner-preview">
+            <div class="small text-muted mb-1">Nowy właściciel:</div>
+            <strong id="transferOwnerName">—</strong>
+            <div class="small text-muted mt-1" id="transferOwnerEmail">—</div>
+          </div>
+          <p class="small text-muted mt-3 mb-0">Najpierw otrzymasz link zabezpieczający na swój adres e-mail. Dopiero po jego akceptacji osobny link dostanie przyszły właściciel.</p>
+        </div>
+        <div class="delete-employee-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">Anuluj</button>
+          <button type="submit" class="btn-orange">
+            <i class="bi bi-envelope-check"></i> Wyślij potwierdzenie
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteEmployeeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-employee-modal">
+
+      <form id="deleteEmployeeForm" method="post" action="">
+        {% csrf_token %}
+
+        <div class="delete-employee-header">
+          <div class="delete-employee-icon">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć pracownika?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="delete-employee-body">
+          <div class="delete-employee-preview">
+            <div class="small text-muted mb-1">Usuwasz pracownika:</div>
+            <strong id="deleteEmployeeName">—</strong>
+          </div>
+        </div>
+
+        <div class="delete-employee-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit" class="btn-danger-modern">
+            <i class="bi bi-trash"></i>
+            Usuń pracownika
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const searchInput = document.getElementById("employeeSearch");
+  const table = document.getElementById("employeesTable");
+
+  if (searchInput && table) {
+    searchInput.addEventListener("keyup", function () {
+      const value = this.value.toLowerCase();
+      table.querySelectorAll("tbody tr").forEach(function (row) {
+        row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+      });
+    });
+  }
+
+  /* Show mobile list on small screens */
+  function checkLayout() {
+    const mobileList = document.querySelector(".emp-mobile-list");
+    const tableWrap = document.querySelector(".emp-table-wrap");
+    if (!mobileList || !tableWrap) return;
+    if (window.innerWidth <= 768) {
+      mobileList.style.display = "grid";
+      tableWrap.style.display = "none";
+    } else {
+      mobileList.style.display = "none";
+      tableWrap.style.display = "";
+    }
+  }
+  checkLayout();
+  window.addEventListener("resize", checkLayout);
+
+  const deleteModal = document.getElementById("deleteEmployeeModal");
+  if (deleteModal) {
+    deleteModal.addEventListener("show.bs.modal", function (event) {
+      const button = event.relatedTarget;
+      const form = document.getElementById("deleteEmployeeForm");
+      const nameBox = document.getElementById("deleteEmployeeName");
+
+      form.action = button.getAttribute("data-delete-url") || "";
+      nameBox.textContent = button.getAttribute("data-employee-name") || "—";
+    });
+  }
+
+  const transferModal = document.getElementById("transferOwnerModal");
+  if (transferModal) {
+    transferModal.addEventListener("show.bs.modal", function (event) {
+      const button = event.relatedTarget;
+      document.getElementById("transferOwnerForm").action = button.getAttribute("data-transfer-url") || "";
+      document.getElementById("transferOwnerName").textContent = button.getAttribute("data-employee-name") || "—";
+      document.getElementById("transferOwnerEmail").textContent = button.getAttribute("data-employee-email") || "—";
+    });
+  }
+});
+</script>
+
+{% endblock %}

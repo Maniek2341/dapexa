@@ -1,0 +1,7 @@
+Dzień dobry {{ owner.first_name|default:owner.email }},
+
+subskrypcja pakietu {{ subscription.get_package_display }} dla firmy {{ subscription.company.name }} została anulowana i wygaśnie {{ subscription.current_period_end|date:"d.m.Y o H:i" }}.
+
+Po tej dacie dostęp do konta firmowego zostanie zablokowany. Dane firmy będą przechowywane do {{ subscription.data_retention_until|date:"d.m.Y" }}, a następnie zostaną trwale usunięte.
+
+Wiadomość została wysłana automatycznie.

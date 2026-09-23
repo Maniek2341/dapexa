@@ -1,0 +1,1042 @@
+{# templates/app/obsluga/list.html #}
+{% extends "app/core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+.obsluga-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.obsluga-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.obsluga-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.obsluga-title{
+  margin:0;
+  color:var(--text);
+  font-size:1.6rem;
+  font-weight:900;
+}
+
+.obsluga-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.72rem 1rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1rem;
+  margin-bottom:1.5rem;
+}
+
+.stat-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1.2rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.12);
+  position:relative;
+  overflow:hidden;
+}
+
+.stat-card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top right, rgba(20,104,245,.13), transparent 38%);
+  pointer-events:none;
+}
+
+.stat-label{
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:700;
+}
+
+.stat-value{
+  margin-top:.35rem;
+  color:var(--text);
+  font-size:2rem;
+  line-height:1;
+  font-weight:900;
+}
+
+.obsluga-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.obsluga-card-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+  flex-wrap:wrap;
+}
+
+.obsluga-card-title{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.obsluga-card-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.obsluga-card-header h2{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.obsluga-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.search-box{
+  position:relative;
+  min-width:280px;
+}
+
+.search-box input{
+  width:100%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:15px;
+  min-height:48px;
+  padding:.75rem 1rem .75rem 2.7rem;
+  outline:none;
+}
+
+.search-box input:focus{
+  border-color:rgba(20,104,245,.5);
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13);
+}
+
+.search-box i{
+  position:absolute;
+  left:1rem;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+}
+
+.obsluga-table{
+  color:var(--text);
+  margin:0;
+}
+
+.obsluga-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+}
+
+.obsluga-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.obsluga-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.contract-main{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  min-width:300px;
+}
+
+.contract-icon{
+  width:52px;
+  height:52px;
+  border-radius:16px;
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.2rem;
+  flex-shrink:0;
+}
+
+.contract-title{
+  font-weight:900;
+  color:var(--text);
+  margin-bottom:.2rem;
+}
+
+.contract-subtitle{
+  color:var(--muted);
+  font-size:.86rem;
+}
+
+.info-stack{
+  display:flex;
+  flex-direction:column;
+  gap:.18rem;
+}
+
+.info-label{
+  color:var(--muted);
+  font-size:.76rem;
+}
+
+.info-value{
+  color:var(--text);
+  font-weight:800;
+  font-size:.92rem;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  border-radius:999px;
+  padding:.42rem .75rem;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  white-space:nowrap;
+}
+
+.badge-active{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.badge-paused{
+  color:#ffcf66;
+  background:rgba(255,193,7,.13);
+  border-color:rgba(255,193,7,.22);
+}
+
+.badge-ended{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+}
+
+.mini-count{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  padding:.55rem .8rem;
+  border-radius:12px;
+  background:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+  font-weight:800;
+  color:var(--text);
+  font-size:.82rem;
+}
+
+.table-actions{
+  display:flex;
+  justify-content:center;
+  gap:.55rem;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-blue{
+  color:#7aa7ff;
+}
+
+.icon-btn-green{
+  color:#00ff2a;
+}
+
+.icon-btn-warning{
+  color:#ffb24d;
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+}
+
+.mobile-cards{
+  display:none;
+}
+
+.mobile-contract-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.mobile-meta{
+  display:grid;
+  gap:.65rem;
+  margin-top:1rem;
+}
+
+.mobile-meta-item{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.75rem .85rem;
+  border-radius:14px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--border);
+}
+
+.mobile-meta-label{
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.mobile-meta-value{
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:800;
+  text-align:right;
+}
+
+.empty-state{
+  min-height:260px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.6rem;
+  text-align:center;
+  color:var(--muted);
+  padding:2rem;
+}
+
+.empty-icon{
+  width:90px;
+  height:90px;
+  border-radius:28px;
+  background:rgba(20,104,245,.10);
+  color:#1468f5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:2rem;
+}
+
+.empty-state h4{
+  color:var(--text);
+  font-weight:900;
+  margin:0;
+}
+
+.empty-state p{
+  max-width:520px;
+  margin:0 0 .75rem;
+}
+
+/* DELETE MODAL */
+.delete-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.13);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ff6b6b;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.delete-modal-header h4{
+  margin:0;
+  color:var(--text);
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.delete-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.delete-modal-body{
+  padding:1.5rem;
+}
+
+.delete-list{
+  display:grid;
+  gap:.75rem;
+  margin-bottom:1rem;
+}
+
+.delete-list-item{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  padding:.85rem 1rem;
+  border-radius:16px;
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  color:var(--text);
+  font-weight:700;
+}
+
+.delete-list-item i{
+  color:#ff6b6b;
+}
+
+.delete-contract-box{
+  border:1px solid rgba(220,53,69,.22);
+  background:rgba(220,53,69,.08);
+  border-radius:18px;
+  padding:1rem;
+}
+
+.delete-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:991px){
+  .stats-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .desktop-table{
+    display:none;
+  }
+
+  .mobile-cards{
+    display:grid;
+    gap:1rem;
+    padding:1rem;
+  }
+}
+
+@media(max-width:768px){
+  .obsluga-head{
+    flex-direction:column;
+  }
+
+  .obsluga-title-wrap{
+    align-items:flex-start;
+  }
+
+  .obsluga-title-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .obsluga-title{
+    font-size:1.3rem;
+  }
+
+  .obsluga-head .btn-orange{
+    width:100%;
+  }
+
+  .stats-grid{
+    grid-template-columns:1fr;
+  }
+
+  .obsluga-card-header{
+    padding:1rem;
+  }
+
+  .search-box{
+    width:100%;
+    min-width:100%;
+  }
+
+  .delete-modal-header{
+    align-items:flex-start;
+    padding:1.2rem;
+  }
+
+  .delete-modal-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    font-size:1.3rem;
+  }
+
+  .delete-modal-body{
+    padding:1rem;
+  }
+
+  .delete-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .delete-modal-footer button{
+    width:100%;
+  }
+}
+
+@media(min-width:992px){
+  .desktop-table{
+    display:block;
+  }
+}
+.obsluga-filter-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+}
+
+.obsluga-filter-card .form-control{
+  min-height:50px;
+  background:var(--body);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:14px;
+}
+
+.obsluga-filter-card .form-control:focus{
+  border-color:#1468f5;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.12);
+}
+
+.obsluga-filter-card .btn-orange{
+  height:50px;
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.72rem 1rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+</style>
+
+<div class="obsluga-head">
+  <div class="obsluga-title-wrap">
+    <div class="obsluga-title-icon">
+      <i class="bi bi-clipboard-check"></i>
+    </div>
+
+    <div>
+      <h1 class="obsluga-title">Obsługi</h1>
+      <div class="obsluga-subtitle">
+        Zarządzanie umowami, przeglądami i obsługą techniczną.
+      </div>
+    </div>
+  </div>
+
+  {% if can_add_obsluga %}
+  <a href="{% url 'service_contract_add' %}" class="btn-orange">
+    <i class="bi bi-plus-lg"></i>
+    Dodaj obsługę
+  </a>
+  {% endif %}
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Łącznie obsług</div>
+    <div class="stat-value">{{ contracts|length }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Aktywne</div>
+    <div class="stat-value">{{ active_contracts_count|default:"0" }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Wykonane przeglądy</div>
+    <div class="stat-value">{{ total_visits|default:"0" }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Elementy instalacji</div>
+    <div class="stat-value">{{ total_assets|default:"0" }}</div>
+  </div>
+</div>
+<div class="obsluga-filter-card">
+
+  <form method="get">
+    <div class="row g-3 align-items-center">
+
+      <div class="col-12 col-md">
+        <input type="text"
+               name="q"
+               class="form-control"
+               value="{{ request.GET.q }}"
+               placeholder="Szukaj obsługi...">
+      </div>
+
+      <div class="col-12 col-md-auto d-flex gap-2">
+        <button class="btn-orange w-100">
+          <i class="bi bi-search"></i>
+          Szukaj
+        </button>
+        <a href="{% url 'service_contract_list' %}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+
+    </div>
+  </form>
+
+</div>
+<div class="obsluga-card">
+  <div class="obsluga-card-header">
+    <div class="obsluga-card-title">
+      <div class="obsluga-card-icon">
+        <i class="bi bi-list-check"></i>
+      </div>
+
+      <div>
+        <h2>Lista obsług</h2>
+        <p>Umowy, lokalizacje, klienci, elementy i statusy.</p>
+      </div>
+    </div>
+  </div>
+
+  {% if contracts %}
+
+    <div class="desktop-table">
+      <div class="table-responsive">
+        <table class="table obsluga-table align-middle">
+          <thead>
+            <tr>
+              <th>Obsługa</th>
+              <th>Typ</th>
+              <th>Klient</th>
+              <th>Elementy</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for contract in contracts %}
+              <tr>
+                <td>
+                  <div class="contract-main">
+                    <div class="contract-icon">
+                      <i class="bi bi-building-gear"></i>
+                    </div>
+
+                    <div>
+                      <div class="contract-title">
+                        {{ contract.title }}
+                      </div>
+
+                      <div class="contract-subtitle">
+                        {% if contract.location %}
+                          {{ contract.location }}
+                        {% else %}
+                          Brak lokalizacji
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="info-stack">
+                    <div class="info-label">Typ obsługi</div>
+                    <div class="info-value">{{ contract.get_contract_type_display }}</div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="info-stack">
+                    <div class="info-label">Klient</div>
+                    <div class="info-value">{{ contract.client }}</div>
+                  </div>
+                </td>
+
+                <td>
+                  <span class="mini-count">
+                    <i class="bi bi-hdd-network"></i>
+                    {{ contract.assets.count }}
+                  </span>
+                </td>
+
+                <td>
+                  {% if contract.status == "active" %}
+                    <span class="badge-soft badge-active">{{ contract.get_status_display }}</span>
+                  {% elif contract.status == "paused" %}
+                    <span class="badge-soft badge-paused">{{ contract.get_status_display }}</span>
+                  {% else %}
+                    <span class="badge-soft badge-ended">{{ contract.get_status_display }}</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div class="table-actions">
+                    <a href="{% url 'service_contract_detail' contract.pk %}"
+                       class="icon-btn icon-btn-blue"
+                       title="Szczegóły">
+                      <i class="fa-solid fa-eye"></i>
+                    </a>
+
+                    {% if can_edit_obsluga or can_delete_obsluga %}
+                    {% if can_edit_obsluga %}
+                    <a href="{% url 'service_contract_update' contract.pk %}"
+                       class="icon-btn icon-btn-green"
+                       title="Edytuj">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    {% endif %}
+
+                    {% if can_delete_obsluga %}
+                    <button type="button"
+                            class="icon-btn icon-btn-danger"
+                            title="Usuń"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteContractModal{{ contract.pk }}">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                    {% endif %}
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mobile-cards">
+      {% for contract in contracts %}
+        <div class="mobile-contract-card">
+          <div class="d-flex justify-content-between align-items-start gap-3">
+            <div class="contract-main" style="min-width:0;">
+              <div class="contract-icon">
+                <i class="bi bi-building-gear"></i>
+              </div>
+
+              <div>
+                <div class="contract-title">{{ contract.title }}</div>
+                <div class="contract-subtitle">
+                  {% if contract.location %}
+                    {{ contract.location }}
+                  {% else %}
+                    Brak lokalizacji
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            {% if contract.status == "active" %}
+              <span class="badge-soft badge-active">{{ contract.get_status_display }}</span>
+            {% elif contract.status == "paused" %}
+              <span class="badge-soft badge-paused">{{ contract.get_status_display }}</span>
+            {% else %}
+              <span class="badge-soft badge-ended">{{ contract.get_status_display }}</span>
+            {% endif %}
+          </div>
+
+          <div class="mobile-meta">
+            <div class="mobile-meta-item">
+              <span class="mobile-meta-label">Typ</span>
+              <span class="mobile-meta-value">{{ contract.get_contract_type_display }}</span>
+            </div>
+
+            <div class="mobile-meta-item">
+              <span class="mobile-meta-label">Klient</span>
+              <span class="mobile-meta-value">{{ contract.client }}</span>
+            </div>
+
+            <div class="mobile-meta-item">
+              <span class="mobile-meta-label">Elementy</span>
+              <span class="mobile-meta-value">{{ contract.assets.count }}</span>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <a href="{% url 'service_contract_detail' contract.pk %}"
+               class="icon-btn icon-btn-blue">
+              <i class="fa-solid fa-eye"></i>
+            </a>
+
+            {% if can_edit_obsluga or can_delete_obsluga %}
+            {% if can_edit_obsluga %}
+            <a href="{% url 'service_contract_update' contract.pk %}"
+               class="icon-btn icon-btn-green">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            {% endif %}
+
+            {% if can_delete_obsluga %}
+            <button type="button"
+                    class="icon-btn icon-btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteContractModal{{ contract.pk }}">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+            {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% for contract in contracts %}
+      <div class="modal fade" id="deleteContractModal{{ contract.pk }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+          <div class="modal-content delete-modal">
+            <form method="post" action="{% url 'service_contract_delete' contract.pk %}">
+              {% csrf_token %}
+
+              <div class="delete-modal-header">
+                <div class="delete-modal-icon">
+                  <i class="bi bi-trash3"></i>
+                </div>
+
+                <div>
+                  <h4>Usunąć obsługę?</h4>
+                  <p>Ta operacja jest nieodwracalna.</p>
+                </div>
+
+                <button type="button"
+                        class="btn-close btn-close-white ms-auto"
+                        data-bs-dismiss="modal"
+                        aria-label="Zamknij"></button>
+              </div>
+
+              <div class="delete-modal-body">
+                <div class="delete-list">
+                  <div class="delete-list-item">
+                    <i class="bi bi-check2-circle"></i>
+                    Umowę obsługi
+                  </div>
+
+                  <div class="delete-list-item">
+                    <i class="bi bi-check2-circle"></i>
+                    Elementy instalacji
+                  </div>
+
+                  <div class="delete-list-item">
+                    <i class="bi bi-check2-circle"></i>
+                    Parametry
+                  </div>
+
+                  <div class="delete-list-item">
+                    <i class="bi bi-check2-circle"></i>
+                    Przeglądy i historię
+                  </div>
+
+                  <div class="delete-list-item">
+                    <i class="bi bi-check2-circle"></i>
+                    Pliki i zdjęcia
+                  </div>
+                </div>
+
+                <div class="delete-contract-box">
+                  <div class="small text-muted mb-1">Usuwasz:</div>
+                  <div class="fw-bold">{{ contract.title }}</div>
+
+                  {% if contract.client %}
+                    <div class="small text-muted mt-1">
+                      {{ contract.client }}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="delete-modal-footer">
+                <button type="button"
+                        class="btn-soft"
+                        data-bs-dismiss="modal">
+                  Anuluj
+                </button>
+
+                <button type="submit"
+                        class="btn-danger-modern">
+                  <i class="bi bi-trash3"></i>
+                  Usuń obsługę
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="bi bi-clipboard-x"></i>
+      </div>
+
+      <h4>Brak obsług</h4>
+
+      <p>
+        Nie dodano jeszcze żadnych obsług technicznych, umów serwisowych
+        ani harmonogramów przeglądów.
+      </p>
+
+      <a href="{% url 'service_contract_add' %}" class="btn-orange">
+        <i class="bi bi-plus-lg"></i>
+        Dodaj pierwszą obsługę
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

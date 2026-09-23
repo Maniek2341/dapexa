@@ -1,0 +1,13 @@
+from .serwis_nowe_view import SerwisNoweView
+from .serwis_detail_view import SerwisDetailView
+from .service_work_log_create_view import ServiceWorkLogCreateView
+from .serwis_add_view import SerwisAddView, client_locations_api
+from .serwis_notes_view import ServiceNoteAddView, ServiceNoteDeleteView, ServiceNotePinView
+from .serwis_edit_view import SerwisEditView
+from .serwis_delete_view import SerwisDeleteView
+from .serwis_statusupdate_view import SerwisStatusUpdateView
+from .serwis_schedule_update_view import SerwisScheduleUpdateView
+from .serwis_assigned_workers_view import SerwisAssignWorkersView
+from .serwis_media_delete_view import ServiceMediaDeleteView
+from .serwis_priority_update_view import SerwisPriorityUpdateView
+from .serwis_status_zgrania_update_view import SerwisStatusZgraniaUpdateView

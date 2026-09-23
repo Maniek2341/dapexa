@@ -1,0 +1,10 @@
+Dzień dobry {{ transfer.current_owner.get_full_name|default:transfer.current_owner.email }},
+
+Z Twojego konta rozpoczęto przekazanie roli właściciela firmy {{ transfer.company.name }} użytkownikowi {{ transfer.new_owner.get_full_name|default:transfer.new_owner.email }}.
+
+Jeżeli to Ty zleciłeś tę operację, otwórz poniższy link i potwierdź ją:
+{{ confirmation_url }}
+
+Link jest ważny do {{ expires_at|date:"d.m.Y, H:i" }} i może zostać użyty tylko raz. Dopiero po Twoim potwierdzeniu przyszły właściciel otrzyma osobną wiadomość.
+
+Jeżeli nie zlecałeś przekazania, nie otwieraj linku i niezwłocznie zmień hasło do konta.

@@ -1,0 +1,105 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+<style>
+  .support-detail{max-width:1500px;margin:0 auto;padding-bottom:2rem}
+  .support-detail-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.25rem;padding:1.35rem 1.5rem;background:linear-gradient(110deg,rgba(20,104,245,.18),rgba(17,26,42,.96) 48%);border:1px solid rgba(77,140,255,.28);border-radius:20px}
+  .support-detail-kicker{display:flex;align-items:center;gap:.65rem;color:#8fb8ff;font-size:.76rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}
+  .support-detail-kicker i{color:#08b8ee}
+  .support-detail h1{margin:0;color:var(--text);font-size:clamp(1.35rem,2.2vw,2rem);font-weight:900}
+  .support-detail-subtitle{margin:.35rem 0 0;color:var(--muted);font-size:.88rem}
+  .support-back{display:inline-flex;align-items:center;gap:.4rem;padding:.65rem .9rem;border:1px solid var(--border);border-radius:12px;color:var(--text);background:rgba(255,255,255,.04);font-weight:800;text-decoration:none;white-space:nowrap}
+  .support-back:hover{color:#fff;background:rgba(20,104,245,.18);border-color:rgba(77,140,255,.4)}
+  .support-detail-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:0 14px 35px rgba(0,0,0,.12);margin-bottom:1rem}
+  .support-detail-card-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.2rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,.025)}
+  .support-detail-card-header h2{margin:0;color:var(--text);font-size:1rem;font-weight:850}
+  .support-detail-card-body{padding:1.2rem;color:var(--text)}
+  .support-description{white-space:pre-wrap;line-height:1.7;color:#dce3f1}
+  .support-badge{display:inline-flex;align-items:center;gap:.35rem;border:1px solid rgba(77,140,255,.3);border-radius:999px;padding:.35rem .65rem;background:rgba(20,104,245,.13);color:#9bc0ff;font-size:.75rem;font-weight:800;white-space:nowrap}
+  .support-reply{padding:1rem 0;border-bottom:1px solid var(--border)}
+  .support-reply:first-child{padding-top:0}
+  .support-reply:last-child{padding-bottom:0;border-bottom:0}
+  .support-reply-meta{display:flex;justify-content:space-between;gap:1rem;margin-bottom:.45rem;color:var(--muted);font-size:.76rem}
+  .support-reply-author{color:#a8c8ff;font-weight:800}
+  .support-reply-content{white-space:pre-wrap;line-height:1.6;color:#dce3f1}
+  .support-detail .form-label{color:var(--muted);font-size:.78rem;font-weight:800}
+  .support-detail .form-select,.support-detail textarea,.support-detail input{background:#0b1220!important;border:1px solid var(--border)!important;color:var(--text)!important;border-radius:12px;padding:.72rem .85rem}
+  .support-detail .form-select:focus,.support-detail textarea:focus,.support-detail input:focus{border-color:rgba(77,140,255,.7)!important;box-shadow:0 0 0 .2rem rgba(20,104,245,.14)!important}
+  .support-primary{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;width:100%;border:0;border-radius:12px;padding:.7rem 1rem;background:var(--brand-gradient);color:#fff;font-weight:850;box-shadow:0 10px 24px rgba(20,104,245,.2)}
+  .support-primary:hover{color:#fff;filter:brightness(1.08);transform:translateY(-1px)}
+  @media(max-width:767px){.support-detail-hero{flex-direction:column}.support-back{width:100%;justify-content:center}.support-detail-card-header{align-items:flex-start;flex-direction:column}}
+</style>
+
+<div class="support-detail">
+  <header class="support-detail-hero">
+    <div>
+      <div class="support-detail-kicker"><i class="bi bi-headset"></i> Wsparcie techniczne</div>
+      <h1>{{ ticket.title }}</h1>
+      <p class="support-detail-subtitle">{{ ticket.get_priority_display }} · zgłoszenie z {{ ticket.created_at|date:"d.m.Y H:i" }}</p>
+    </div>
+    <a class="support-back" href="{% url 'support_list' %}"><i class="bi bi-arrow-left"></i> Lista zgłoszeń</a>
+  </header>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <section class="support-detail-card">
+        <div class="support-detail-card-header">
+          <h2><i class="bi bi-chat-left-text me-2"></i>Opis zgłoszenia</h2>
+          <span class="support-badge"><i class="bi bi-circle-fill" style="font-size:.45rem"></i>{{ ticket.get_status_display }}</span>
+        </div>
+        <div class="support-detail-card-body support-description">{{ ticket.description }}</div>
+      </section>
+
+      <section class="support-detail-card">
+        <div class="support-detail-card-header">
+          <h2><i class="bi bi-clock-history me-2"></i>Historia odpowiedzi</h2>
+        </div>
+        <div class="support-detail-card-body">
+          {% for reply in ticket.replies.all %}
+            <article class="support-reply">
+              <div class="support-reply-meta">
+                <span class="support-reply-author"><i class="bi bi-person me-1"></i>{{ reply.author|default:"Wsparcie" }}</span>
+                <span>{{ reply.created_at|date:"d.m.Y H:i" }}</span>
+              </div>
+              <div class="support-reply-content">{{ reply.content }}</div>
+            </article>
+          {% empty %}
+            <div class="text-muted">Brak odpowiedzi do tego zgłoszenia.</div>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+
+    <div class="col-lg-4">
+      {% if request.user.is_superuser %}
+        <section class="support-detail-card">
+          <div class="support-detail-card-header"><h2><i class="bi bi-sliders me-2"></i>Status zgłoszenia</h2></div>
+          <div class="support-detail-card-body">
+            <form method="post" action="{% url 'support_status_update' ticket.pk %}">
+              {% csrf_token %}
+              <label class="form-label" for="support-status">Wybierz status</label>
+              <select id="support-status" class="form-select mb-3" name="status">
+                {% for value,label in status_choices %}
+                  <option value="{{ value }}" {% if ticket.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <button class="support-primary" type="submit"><i class="bi bi-check2"></i>Zapisz status</button>
+            </form>
+          </div>
+        </section>
+      {% endif %}
+
+      <section class="support-detail-card">
+        <div class="support-detail-card-header"><h2><i class="bi bi-reply me-2"></i>Dodaj odpowiedź</h2></div>
+        <div class="support-detail-card-body">
+          <form method="post">
+            {% csrf_token %}
+            <label class="form-label" for="{{ reply_form.content.id_for_label }}">Treść odpowiedzi</label>
+            {{ reply_form.content }}
+            <button class="support-primary mt-3" type="submit"><i class="bi bi-send"></i>Dodaj odpowiedź</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}

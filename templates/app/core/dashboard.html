@@ -1,0 +1,1284 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+:root{
+  --dashboard-cyan:#08b8ee;
+  --dashboard-blue:#1468f5;
+  --dashboard-purple:#9b4dff;
+  --dashboard-accent:#4d8cff;
+  --dashboard-accent-soft:rgba(20,104,245,.14);
+}
+
+.dashboard-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.dashboard-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.dashboard-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--dashboard-accent);
+  font-size:1.6rem;
+  background:linear-gradient(135deg,rgba(8,184,238,.20),rgba(155,77,255,.12));
+  border:1px solid rgba(77,140,255,.30);
+}
+
+.dashboard-title{
+  margin:0;
+  color:var(--text);
+  font-size:1.6rem;
+  font-weight:900;
+}
+
+.dashboard-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.dashboard-actions{
+  display:flex;
+  gap:.65rem;
+  flex-wrap:wrap;
+}
+
+.btn-orange,
+.btn-brand{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  /* Kolory logo: błękit, niebieski i fiolet. */
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.26);
+  text-decoration:none;
+  transition:transform .2s ease,filter .2s ease,box-shadow .2s ease;
+}
+
+.btn-orange:hover,
+.btn-brand:hover{
+  color:#fff;
+  filter:brightness(1.08);
+  transform:translateY(-1px);
+  box-shadow:0 16px 34px rgba(20,104,245,.34);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.dashboard-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.dashboard-card-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding:1.25rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.14), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.dashboard-card-title{
+  display:flex;
+  align-items:center;
+  gap:.85rem;
+}
+
+.dashboard-card-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,rgba(8,184,238,.16),rgba(155,77,255,.12));
+  border:1px solid rgba(77,140,255,.25);
+  color:var(--dashboard-accent);
+  font-size:1.2rem;
+}
+
+.dashboard-card-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.dashboard-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.dashboard-card-body{
+  padding:1.5rem;
+}
+
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1rem;
+  margin-bottom:1.5rem;
+}
+
+.kpi-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1.2rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.12);
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+}
+
+.kpi-label{
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:700;
+}
+
+.kpi-value{
+  margin-top:.35rem;
+  color:var(--text);
+  font-size:2rem;
+  font-weight:900;
+}
+
+.kpi-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,rgba(8,184,238,.16),rgba(155,77,255,.12));
+  border:1px solid rgba(77,140,255,.25);
+  color:var(--dashboard-accent);
+  font-size:1.25rem;
+}
+
+.alert-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1rem;
+  margin-bottom:1.5rem;
+}
+
+.alert-box{
+  display:flex;
+  gap:.85rem;
+  align-items:flex-start;
+  padding:1rem;
+  border-radius:20px;
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+}
+
+.alert-box-danger{
+  border-color:rgba(220,53,69,.25);
+  background:rgba(220,53,69,.08);
+}
+
+.alert-box-warning{
+  border-color:rgba(255,193,7,.22);
+  background:rgba(255,193,7,.07);
+}
+
+.alert-box-orange{
+  border-color:rgba(77,140,255,.30);
+  background:rgba(20,104,245,.09);
+}
+
+.alert-icon{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--dashboard-accent);
+  background:linear-gradient(135deg,rgba(8,184,238,.16),rgba(155,77,255,.12));
+  flex-shrink:0;
+}
+
+.alert-title{
+  color:var(--text);
+  font-weight:900;
+  font-size:.95rem;
+}
+
+.alert-text{
+  color:var(--muted);
+  font-size:.84rem;
+  margin-top:.15rem;
+}
+
+.task-tabs .nav-link{
+  border-radius:999px;
+  color:var(--muted);
+  font-weight:800;
+  padding:.45rem .9rem;
+}
+
+.task-tabs .nav-link.active{
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  color:#fff;
+}
+
+.task-item,
+.service-item,
+.protocol-item,
+.deadline-item,
+.activity-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  padding:1rem 0;
+  border-bottom:1px solid var(--border);
+}
+
+/* Listy dashboardu pokazują maksymalnie pięć pozycji. Kolejne można
+   przewijać bez rozciągania całej strony. */
+.dashboard-scroll-list{
+  max-height: 390px;
+  overflow-y: auto;
+  padding-right: .45rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--dashboard-accent) rgba(255,255,255,.06);
+}
+
+.dashboard-scroll-list::-webkit-scrollbar{ width:7px; }
+.dashboard-scroll-list::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.05);
+  border-radius:999px;
+}
+.dashboard-scroll-list::-webkit-scrollbar-thumb{
+  background:linear-gradient(180deg,var(--dashboard-cyan),var(--dashboard-purple));
+  border-radius:999px;
+}
+
+.task-item-overdue{
+  margin:.35rem 0;
+  padding:1rem;
+  border:1px solid rgba(220,53,69,.28);
+  border-left:4px solid #dc3545;
+  border-radius:18px;
+  background:rgba(220,53,69,.075);
+}
+
+.task-item:last-child,
+.service-item:last-child,
+.protocol-item:last-child,
+.deadline-item:last-child,
+.activity-item:last-child{
+  border-bottom:0;
+}
+
+.item-title{
+  color:var(--text);
+  font-weight:900;
+  text-decoration:none;
+}
+
+.item-title:hover{
+  color:var(--dashboard-accent);
+}
+
+.item-muted{
+  color:var(--muted);
+  font-size:.84rem;
+  margin-top:.2rem;
+}
+
+.item-actions{
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  flex-shrink:0;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+  color:var(--dashboard-accent);
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+}
+
+.badge-danger-soft{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.12);
+  border-color:rgba(220,53,69,.24);
+}
+
+.badge-warning-soft{
+  color:#ffcf66;
+  background:rgba(255,193,7,.10);
+  border-color:rgba(255,193,7,.22);
+}
+
+.badge-success-soft{
+  color:#47d18c;
+  background:rgba(25,135,84,.14);
+  border-color:rgba(25,135,84,.24);
+}
+
+.task-complete-form{
+  margin:0;
+}
+
+.task-complete-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.35rem;
+  min-height:38px;
+  padding:.45rem .7rem;
+  color:#47d18c;
+  background:rgba(25,135,84,.10);
+  border:1px solid rgba(25,135,84,.24);
+  border-radius:12px;
+  font-size:.78rem;
+  font-weight:850;
+  white-space:nowrap;
+}
+
+.task-complete-btn:hover{
+  color:#fff;
+  background:rgba(25,135,84,.85);
+}
+
+.dashboard-table{
+  color:var(--text);
+  margin:0;
+}
+
+.dashboard-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+}
+
+.dashboard-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.calendar-mini-item{
+  display:flex;
+  gap:.8rem;
+  align-items:flex-start;
+  padding:.8rem 0;
+  border-bottom:1px solid var(--border);
+}
+
+.calendar-mini-item:last-child{
+  border-bottom:0;
+}
+
+.calendar-time{
+  min-width:58px;
+  color:var(--dashboard-accent);
+  font-weight:900;
+  font-size:.9rem;
+}
+
+.calendar-kind-badge{
+  display:inline-flex;
+  align-items:center;
+  margin-bottom:.2rem;
+  padding:.22rem .5rem;
+  border-radius:999px;
+  color:#ffb36b;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(77,140,255,.26);
+  font-size:.68rem;
+  font-weight:850;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.empty-box{
+  min-height:120px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  color:var(--muted);
+  border:1px dashed var(--border);
+  border-radius:18px;
+  background:rgba(255,255,255,.02);
+  text-align:center;
+}
+
+.empty-box i{
+  color:var(--dashboard-accent);
+  font-size:1.8rem;
+}
+
+.chart-wrap{
+  min-height:260px;
+}
+
+@media(max-width:1199px){
+  .kpi-grid,
+  .alert-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:768px){
+  .dashboard-head{
+    flex-direction:column;
+  }
+
+  .dashboard-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .dashboard-actions a{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+
+  .kpi-grid,
+  .alert-grid{
+    grid-template-columns:1fr;
+  }
+
+  .dashboard-card-body{
+    padding:1rem;
+  }
+
+  .dashboard-card-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .task-item,
+  .service-item,
+  .protocol-item,
+  .deadline-item,
+  .activity-item{
+    flex-direction:column;
+  }
+
+  .item-actions{
+    width:100%;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
+}
+</style>
+
+<div class="dashboard-head">
+  <div class="dashboard-title-wrap">
+    <div class="dashboard-title-icon">
+      <i class="bi bi-house-door"></i>
+    </div>
+
+    <div>
+      <h1 class="dashboard-title">Strona Główna</h1>
+      <div class="dashboard-subtitle">
+        Szybki podgląd najważniejszych danych Twojej firmy.
+      </div>
+    </div>
+  </div>
+
+  <div class="dashboard-actions">
+    {% if request.user.role != request.user.Role.EMPLOYEE and request.user.role != request.user.Role.PODWYKONAWCA %}
+      <a class="btn-orange" href="{% url 'serwis_add' %}">
+        <i class="bi bi-plus-lg me-2"></i>
+        Nowy serwis
+      </a>
+    {% endif %}
+
+    <a class="btn-soft" href="{% url 'protokol_add' %}">
+      <i class="bi bi-file-earmark-plus me-2"></i>
+      Nowy protokół
+    </a>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-label">Serwisy do wykonania</div>
+      <div class="kpi-value">{{ kpi_services_to_do|default:0 }}</div>
+    </div>
+    <div class="kpi-icon"><i class="bi bi-wrench-adjustable"></i></div>
+  </div>
+
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-label">Protokoły do faktury</div>
+      <div class="kpi-value">{{ kpi_protocols_to_invoice|default:0 }}</div>
+    </div>
+    <div class="kpi-icon"><i class="bi bi-receipt"></i></div>
+  </div>
+
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-label">Zadania otwarte</div>
+      <div class="kpi-value">{{ kpi_open_tasks|default:0 }}</div>
+    </div>
+    <div class="kpi-icon"><i class="bi bi-check2-square"></i></div>
+  </div>
+
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-label">Klienci</div>
+      <div class="kpi-value">{{ kpi_clients_count|default:0 }}</div>
+    </div>
+    <div class="kpi-icon"><i class="bi bi-people"></i></div>
+  </div>
+</div>
+
+{% if show_management_dashboard_sections %}
+  <div class="alert-grid">
+    <div class="alert-box alert-box-danger">
+      <div class="alert-icon">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+      <div>
+        <div class="alert-title">{{ overdue_tasks_count|default:0 }} zadań po terminie</div>
+        <div class="alert-text">Sprawdź zadania wymagające reakcji.</div>
+      </div>
+    </div>
+
+    <div class="alert-box alert-box-orange">
+      <div class="alert-icon">
+        <i class="bi bi-file-earmark-text"></i>
+      </div>
+      <div>
+        <div class="alert-title">{{ protocols_to_invoice_count|default:0 }} protokołów do faktury</div>
+        <div class="alert-text">Gotowe do przekazania do rozliczenia.</div>
+      </div>
+    </div>
+
+    <div class="alert-box alert-box-warning">
+      <div class="alert-icon">
+        <i class="bi bi-car-front"></i>
+      </div>
+      <div>
+        <div class="alert-title">{{ vehicle_deadlines_count|default:0 }} terminów pojazdów</div>
+        <div class="alert-text">OC, przeglądy lub serwis w najbliższych dniach.</div>
+      </div>
+    </div>
+
+    <div class="alert-box">
+      <div class="alert-icon">
+        <i class="bi bi-shield-check"></i>
+      </div>
+      <div>
+        <div class="alert-title">{{ warranty_alerts_count|default:0 }} gwarancji</div>
+        <div class="alert-text">Zgłoszenia gwarancyjne do obserwacji.</div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<div class="row g-4">
+
+  <div class="col-12 col-xl-6">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-check2-square"></i>
+          </div>
+          <div>
+            <h3>Zadania</h3>
+            <p>Twoje, grupowe i firmowe zadania.</p>
+          </div>
+        </div>
+
+        {% if request.user.role != request.user.Role.EMPLOYEE and request.user.role != request.user.Role.PODWYKONAWCA %}
+          <a href="{% url 'task_create' %}" class="btn-orange btn-sm">
+            <i class="bi bi-plus-lg me-1"></i>
+            Dodaj
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="dashboard-card-body">
+        <ul class="nav nav-pills task-tabs mb-3" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#dash-my-tasks" type="button">
+              Moje <span class="badge text-bg-secondary ms-1">{{ my_tasks.count|default:0 }}</span>
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#dash-role-tasks" type="button">
+              Grupowe <span class="badge text-bg-secondary ms-1">{{ role_tasks.count|default:0 }}</span>
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#dash-all-tasks" type="button">
+              Wszystkich <span class="badge text-bg-secondary ms-1">{{ all_company_tasks.count|default:0 }}</span>
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <div class="tab-pane fade show active" id="dash-my-tasks">
+            <div class="dashboard-scroll-list">
+            {% for task in my_tasks %}
+              <div class="task-item{% if task.is_overdue %} task-item-overdue{% endif %}">
+                <div>
+                  <div class="item-title">{{ task.title|default:task.description|truncatechars:80 }}</div>
+                  <div class="item-muted">
+                    Termin:
+                    {% if task.due_date %}
+                      {{ task.due_date|date:"d.m.Y" }}
+                    {% else %}
+                      brak
+                    {% endif %}
+                  </div>
+                </div>
+
+                <div class="item-actions">
+                  {% if task.is_overdue %}
+                    <span class="badge-soft badge-danger-soft">
+                      <i class="bi bi-exclamation-triangle"></i>
+                      Po terminie
+                    </span>
+                  {% endif %}
+                  <span class="badge-soft{% if task.is_overdue %} badge-danger-soft{% else %} badge-warning-soft{% endif %}">
+                    {{ task.get_status_display }}
+                  </span>
+                  <form method="post" action="{% url 'task_complete' task.pk %}" class="task-complete-form">
+                    {% csrf_token %}
+                    <button type="submit" class="task-complete-btn">
+                      <i class="bi bi-check2-circle"></i>
+                      Wykonano
+                    </button>
+                  </form>
+                </div>
+              </div>
+            {% empty %}
+              <div class="empty-box">
+                <i class="bi bi-check2-circle"></i>
+                Brak Twoich zadań.
+              </div>
+            {% endfor %}
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="dash-role-tasks">
+            <div class="dashboard-scroll-list">
+            {% for task in role_tasks %}
+              <div class="task-item">
+                <div>
+                  <div class="item-title">{{ task.title|default:task.description|truncatechars:80 }}</div>
+                  <div class="item-muted">
+                    Rola: {{ task.get_assigned_role_display }}
+                    · Termin:
+                    {% if task.due_date %}
+                      {{ task.due_date|date:"d.m.Y" }}
+                    {% else %}
+                      brak
+                    {% endif %}
+                  </div>
+                </div>
+
+                <span class="badge-soft">{{ task.get_status_display }}</span>
+              </div>
+            {% empty %}
+              <div class="empty-box">
+                <i class="bi bi-people"></i>
+                Brak zadań grupowych.
+              </div>
+            {% endfor %}
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="dash-all-tasks">
+            <div class="dashboard-scroll-list">
+            {% for task in all_company_tasks %}
+              <div class="task-item">
+                <div>
+                  <div class="item-title">{{ task.title|default:task.description|truncatechars:80 }}</div>
+                  <div class="item-muted">
+                    Termin:
+                    {% if task.due_date %}
+                      {{ task.due_date|date:"d.m.Y" }}
+                    {% else %}
+                      brak
+                    {% endif %}
+                  </div>
+                </div>
+
+                <span class="badge-soft">{{ task.get_status_display }}</span>
+              </div>
+            {% empty %}
+              <div class="empty-box">
+                <i class="bi bi-building"></i>
+                Brak zadań dla wszystkich.
+              </div>
+            {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-calendar-event"></i>
+          </div>
+          <div>
+            <h3>Dzisiaj</h3>
+            <p>Dzisiejsze serwisy, wizyty i ważne terminy.</p>
+          </div>
+        </div>
+
+        <a href="{% url 'user_calendar' %}" class="btn-soft btn-sm">
+          Kalendarz
+        </a>
+      </div>
+
+      <div class="dashboard-card-body">
+        <div class="dashboard-scroll-list">
+        {% for event in today_events %}
+          <div class="calendar-mini-item">
+            <div class="calendar-time">
+              {% if event.start %}
+                {{ event.start|date:"H:i" }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+
+            <div>
+              <span class="calendar-kind-badge">
+                {% if event.kind == "praca" %}<i class="bi bi-hammer me-1"></i>Praca{% else %}<i class="bi bi-wrench-adjustable me-1"></i>Serwis{% endif %}
+              </span>
+              <div class="item-title">{{ event.title }}</div>
+              <div class="item-muted">
+                {{ event.client|default:"" }}
+                {% if event.location %} · {{ event.location }}{% endif %}
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-box">
+            <i class="bi bi-calendar-check"></i>
+            Brak wpisów na dziś.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row g-4 mt-1">
+
+  <div class="col-12 col-xl-6">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-person-check"></i>
+          </div>
+          <div>
+            <h3>Moje serwisy</h3>
+            <p>Zgłoszenia serwisowe przypisane do Ciebie.</p>
+          </div>
+        </div>
+
+        <a href="{% url 'serwis_nowe' %}" class="btn-soft btn-sm">
+          Wszystkie
+        </a>
+      </div>
+
+      <div class="dashboard-card-body">
+        <div class="dashboard-scroll-list">
+        {% for service in assigned_services %}
+          <div class="service-item{% if service.is_overdue %} task-item-overdue{% endif %}">
+            <div>
+              <a href="{% url 'serwis_detail' service.pk %}" class="item-title">
+                {{ service.title|default:service.number }}
+              </a>
+              <div class="item-muted">
+                {{ service.client }}
+                ·
+                {% if service.planned_start %}
+                  {{ service.planned_start|date:"d.m.Y H:i" }}
+                {% else %}
+                  bez terminu
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="item-actions">
+              {% if service.is_overdue %}
+                <span class="badge-soft badge-danger-soft">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  Po terminie
+                </span>
+              {% endif %}
+              <span class="badge-soft{% if service.priority == 'critical' %} badge-danger-soft{% elif service.priority == 'high' %} badge-warning-soft{% endif %}">
+                {{ service.get_priority_display }}
+              </span>
+              <span class="badge-soft">
+                {% if service.status == "zgrania" %}
+                  {{ service.get_status_display }} · {{ service.get_status_zgrania_display }}
+                {% else %}
+                  {{ service.get_status_display }}
+                {% endif %}
+              </span>
+              <a href="{% url 'serwis_detail' service.pk %}" class="icon-btn" aria-label="Otwórz serwis">
+                <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-box">
+            <i class="bi bi-wrench-adjustable"></i>
+            Brak przypisanych serwisów.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-hammer"></i>
+          </div>
+          <div>
+            <h3>Moje prace</h3>
+            <p>Prace przypisane do Ciebie.</p>
+          </div>
+        </div>
+
+        <a href="{% url 'workorder_list' %}" class="btn-soft btn-sm">
+          Wszystkie
+        </a>
+      </div>
+
+      <div class="dashboard-card-body">
+        <div class="dashboard-scroll-list">
+        {% for work in assigned_works %}
+          <div class="service-item{% if work.is_overdue %} task-item-overdue{% endif %}">
+            <div>
+              <a href="{% url 'work_detail' work.pk %}" class="item-title">
+                {{ work.title|default:work.number }}
+              </a>
+              <div class="item-muted">
+                {{ work.client }}
+                ·
+                {% if work.planned_start %}
+                  {{ work.planned_start|date:"d.m.Y H:i" }}
+                {% else %}
+                  bez terminu
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="item-actions">
+              {% if work.is_overdue %}
+                <span class="badge-soft badge-danger-soft">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  Po terminie
+                </span>
+              {% endif %}
+              <span class="badge-soft">
+                {{ work.get_status_display }}
+              </span>
+              {% if work.is_ordered %}
+                <span class="badge-soft badge-success-soft">Zamówione</span>
+              {% endif %}
+              <a href="{% url 'work_detail' work.pk %}" class="icon-btn" aria-label="Otwórz pracę">
+                <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-box">
+            <i class="bi bi-hammer"></i>
+            Brak przypisanych prac.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% if show_management_dashboard_sections %}
+<div class="row g-4 mt-1">
+
+  <div class="col-12 col-xl-6">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-wrench-adjustable"></i>
+          </div>
+          <div>
+            <h3>Najbliższe serwisy</h3>
+            <p>Zgłoszenia wymagające realizacji.</p>
+          </div>
+        </div>
+
+        <a href="{% url 'serwis_nowe' %}" class="btn-soft btn-sm">
+          Wszystkie
+        </a>
+      </div>
+
+      <div class="dashboard-card-body">
+        <div class="dashboard-scroll-list">
+        {% for service in upcoming_services %}
+          <div class="service-item">
+            <div>
+              <a href="{% url 'serwis_detail' service.pk %}" class="item-title">
+                {{ service.title|default:service.number }}
+              </a>
+              <div class="item-muted">
+                {{ service.client }}
+                ·
+                {% if service.planned_start %}
+                  {{ service.planned_start|date:"d.m.Y H:i" }}
+                {% else %}
+                  bez terminu
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="item-actions">
+              {% if service.priority == "critical" %}
+                <span class="badge-soft badge-danger-soft">Krytyczny</span>
+              {% elif service.priority == "high" %}
+                <span class="badge-soft badge-warning-soft">Wysoki</span>
+              {% else %}
+                <span class="badge-soft">{{ service.get_priority_display }}</span>
+              {% endif %}
+
+              <a href="{% url 'serwis_detail' service.pk %}" class="icon-btn">
+                <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-box">
+            <i class="bi bi-wrench-adjustable"></i>
+            Brak najbliższych serwisów.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-file-earmark-text"></i>
+          </div>
+          <div>
+            <h3>Protokoły do obsługi</h3>
+            <p>Ostatnie i oczekujące protokoły.</p>
+          </div>
+        </div>
+
+        <a href="{% url 'protokol_nowe' %}" class="btn-soft btn-sm">
+          Wszystkie
+        </a>
+      </div>
+
+      <div class="dashboard-card-body">
+        <div class="dashboard-scroll-list">
+        {% for protocol in recent_protocols %}
+          <div class="protocol-item">
+            <div>
+              <a href="{% url 'protokol_detail' protocol.pk %}" class="item-title">
+                {{ protocol.number }}
+              </a>
+              <div class="item-muted">
+                {{ protocol.client }}
+                ·
+                {{ protocol.end_time|date:"d.m.Y"|default:"brak daty" }}
+              </div>
+            </div>
+
+            <div class="item-actions">
+              {% if protocol.status == "do_zafakturowania" %}
+                <span class="badge-soft badge-warning-soft">Do faktury</span>
+              {% elif protocol.status == "sent" %}
+                <span class="badge-soft badge-success-soft">Wysłany</span>
+              {% else %}
+                <span class="badge-soft">{{ protocol.get_status_display }}</span>
+              {% endif %}
+
+              <a href="{% url 'protokol_detail' protocol.pk %}" class="icon-btn">
+                <i class="bi bi-box-arrow-up-right"></i>
+              </a>
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-box">
+            <i class="bi bi-file-earmark-text"></i>
+            Brak protokołów.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row g-4 mt-1">
+
+  <div class="col-12 col-xl-6">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-bell"></i>
+          </div>
+          <div>
+            <h3>Najbliższe terminy</h3>
+            <p>OC, przeglądy, gwarancje i ważne daty.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card-body">
+        <div class="dashboard-scroll-list">
+        {% for deadline in deadlines %}
+          <div class="deadline-item">
+            <div>
+              <div class="item-title">{{ deadline.title }}</div>
+              <div class="item-muted">
+                {{ deadline.description }}
+                {% if deadline.date %}
+                  · {{ deadline.date|date:"d.m.Y" }}
+                {% endif %}
+              </div>
+            </div>
+
+            {% if deadline.days_left <= 3 %}
+              <span class="badge-soft badge-danger-soft">za {{ deadline.days_left }} dni</span>
+            {% elif deadline.days_left <= 7 %}
+              <span class="badge-soft badge-warning-soft">za {{ deadline.days_left }} dni</span>
+            {% else %}
+              <span class="badge-soft">za {{ deadline.days_left }} dni</span>
+            {% endif %}
+          </div>
+        {% empty %}
+          <div class="empty-box">
+            <i class="bi bi-bell-slash"></i>
+            Brak ważnych terminów.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-6">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-graph-up-arrow"></i>
+          </div>
+          <div>
+            <h3>Zyski / straty</h3>
+            <p>Przychody, koszty i wynik finansowy.</p>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button class="btn btn-sm btn-soft active" data-range="mtd">MTD</button>
+          <button class="btn btn-sm btn-soft" data-range="qtd">QTD</button>
+          <button class="btn btn-sm btn-soft" data-range="ytd">YTD</button>
+        </div>
+      </div>
+
+      <div class="dashboard-card-body">
+        <div class="chart-wrap">
+          <canvas id="plChart" height="140"></canvas>
+        </div>
+
+        <div class="mt-3 d-flex flex-wrap gap-2">
+          <span class="badge-soft">Przychody: <strong id="rev">0</strong> zł</span>
+          <span class="badge-soft">Koszty: <strong id="cost">0</strong> zł</span>
+          <span class="badge-soft">Zysk: <strong id="profit">0</strong> zł</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row g-4 mt-1">
+  <div class="col-12">
+    <div class="dashboard-card h-100">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon"><i class="bi bi-headset"></i></div>
+          <div><h3>Wsparcie techniczne</h3><p>Ostatnie odpowiedzi na zgłoszenia.</p></div>
+        </div>
+        <a href="{% url 'support_list' %}" class="btn-soft btn-sm">Wszystkie</a>
+      </div>
+      <div class="dashboard-card-body">
+        <div class="dashboard-scroll-list">
+          {% for ticket in support_updates %}
+            {% with reply=ticket.dashboard_replies.0 %}
+            <div class="activity-item">
+              <div>
+                <a href="{% url 'support_detail' ticket.pk %}" class="item-title">{{ ticket.title }}</a>
+                <div class="item-muted"><i class="bi bi-reply me-1"></i>Odpowiedział: {{ reply.author|default:"Wsparcie techniczne" }}</div>
+              </div>
+              <div class="item-muted text-end">{{ reply.created_at|date:"d.m.Y H:i" }}<br><span class="badge-soft">{{ ticket.get_status_display }}</span></div>
+            </div>
+            {% endwith %}
+          {% empty %}
+            <div class="empty-box"><i class="bi bi-headset"></i>Brak odpowiedzi na zgłoszenia.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="row g-4 mt-1">
+  <div class="col-12">
+    <div class="dashboard-card">
+      <div class="dashboard-card-header">
+        <div class="dashboard-card-title">
+          <div class="dashboard-card-icon">
+            <i class="bi bi-activity"></i>
+          </div>
+          <div>
+            <h3>Ostatnia aktywność</h3>
+            <p>Co ostatnio wydarzyło się w firmie.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-card-body">
+        <div class="dashboard-scroll-list">
+        {% for activity in recent_activities %}
+          <div class="activity-item">
+            <div>
+              <div class="item-title">{{ activity.title }}</div>
+              <div class="item-muted">
+                {{ activity.description|default:"" }}
+              </div>
+            </div>
+
+            <div class="item-muted text-end">
+              {{ activity.created_at|date:"d.m.Y H:i" }}
+              <br>
+              {% if activity.created_by %}
+                {{ activity.created_by.first_name }} {{ activity.created_by.last_name }}
+              {% else %}
+                System
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="empty-box">
+            <i class="bi bi-activity"></i>
+            Brak aktywności.
+          </div>
+        {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,617 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+
+<style>
+.leave-request-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.leave-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.leave-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.leave-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.leave-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.leave-limits-card,
+.leave-form-card,
+.leave-summary-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.leave-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.leave-card-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.leave-card-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.leave-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.leave-card-body{
+  padding:1.5rem;
+}
+
+.limits-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1rem;
+}
+
+.limit-box{
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+}
+
+.limit-name{
+  color:var(--text);
+  font-weight:900;
+  margin-bottom:.85rem;
+}
+
+.limit-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding:.25rem 0;
+  font-size:.86rem;
+}
+
+.limit-row span{
+  color:var(--muted);
+}
+
+.limit-row strong{
+  color:var(--text);
+}
+
+.limit-row .success{
+  color:#47d18c;
+}
+
+.limit-row .danger{
+  color:#ff6b6b;
+}
+
+.leave-label{
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:900;
+  margin-bottom:.45rem;
+}
+
+.leave-form-card .form-control,
+.leave-form-card .form-select,
+.leave-form-card textarea,
+.leave-form-card select,
+.leave-form-card input:not([type="checkbox"]){
+  background:rgba(255,255,255,.04)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+
+.leave-form-card textarea{
+  min-height:130px;
+}
+
+.leave-form-card .form-control:focus,
+.leave-form-card .form-select:focus,
+.leave-form-card textarea:focus,
+.leave-form-card select:focus,
+.leave-form-card input:not([type="checkbox"]):focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.leave-switch-card{
+  display:flex;
+  align-items:flex-start;
+  gap:.85rem;
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  cursor:pointer;
+}
+
+.leave-switch-card input[type="checkbox"]{
+  width:20px!important;
+  height:20px!important;
+  min-height:20px!important;
+  margin:0!important;
+  margin-top:.15rem!important;
+  flex-shrink:0;
+  cursor:pointer;
+  accent-color:#1468f5;
+}
+
+.switch-title{
+  color:var(--text);
+  font-weight:900;
+  line-height:1.2;
+}
+
+.switch-desc{
+  color:var(--muted);
+  font-size:.82rem;
+  margin-top:.25rem;
+}
+
+.leave-form-actions{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.summary-item{
+  padding:1rem;
+  border-radius:20px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  margin-bottom:1rem;
+}
+
+.summary-label{
+  color:var(--muted);
+  font-size:.76rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:.3rem;
+}
+
+.summary-value{
+  color:var(--text);
+  font-weight:950;
+  font-size:1.35rem;
+}
+
+.summary-value.success{
+  color:#47d18c;
+}
+
+.summary-note{
+  color:var(--muted);
+  font-size:.82rem;
+  line-height:1.45;
+}
+
+.empty-limits{
+  color:var(--muted);
+  padding:1rem;
+  border:1px dashed var(--border);
+  border-radius:18px;
+  text-align:center;
+}
+
+@media(max-width:1200px){
+  .limits-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+
+@media(max-width:768px){
+  .leave-request-head{
+    flex-direction:column;
+  }
+
+  .leave-request-head .btn-soft{
+    width:100%;
+    display:flex;
+    justify-content:center;
+  }
+
+  .leave-title{
+    font-size:1.35rem;
+  }
+
+  .leave-title-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+  }
+
+  .leave-card-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .leave-card-body{
+    padding:1rem;
+  }
+
+  .limits-grid{
+    grid-template-columns:1fr;
+  }
+
+  .leave-form-actions{
+    padding:0 1rem 1rem;
+    flex-direction:column-reverse;
+  }
+
+  .leave-form-actions .btn-soft,
+  .leave-form-actions .btn-orange{
+    width:100%;
+    display:flex;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="leave-request-head">
+  <div class="leave-title-wrap">
+    <div class="leave-title-icon">
+      <i class="bi bi-calendar-plus"></i>
+    </div>
+
+    <div>
+      <h1 class="leave-title">Nowy wniosek urlopowy</h1>
+      <div class="leave-subtitle">
+        Złóż wniosek o urlop i sprawdź dostępne limity.
+      </div>
+    </div>
+  </div>
+
+  <a href="" class="btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+    Wróć
+  </a>
+</div>
+
+<div class="leave-limits-card mb-4">
+  <div class="leave-card-header">
+    <div class="leave-card-icon">
+      <i class="bi bi-calendar-range"></i>
+    </div>
+
+    <div>
+      <h3>Limity urlopowe</h3>
+      <p>Aktualny limit, wykorzystanie i pozostała liczba dni.</p>
+    </div>
+  </div>
+
+  <div class="leave-card-body">
+    {% if leave_limits %}
+      <div class="limits-grid">
+        {% for item in leave_limits %}
+          <div class="limit-box">
+            <div class="limit-name">
+              {{ item.leave_type.name }}
+            </div>
+
+            <div class="limit-row">
+              <span>Limit</span>
+              <strong>{{ item.limit }} dni</strong>
+            </div>
+
+            <div class="limit-row">
+              <span>Wykorzystane</span>
+              <strong class="danger">{{ item.used }} dni</strong>
+            </div>
+
+            <div class="limit-row">
+              <span>Pozostało</span>
+              <strong class="success">{{ item.remaining }} dni</strong>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-limits">
+        Brak zdefiniowanych limitów urlopowych.
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="leave-form-card">
+
+        <div class="leave-card-header">
+          <div class="leave-card-icon">
+            <i class="bi bi-pencil-square"></i>
+          </div>
+
+          <div>
+            <h3>Dane wniosku</h3>
+            <p>Rodzaj urlopu, okres nieobecności i powód zgłoszenia.</p>
+          </div>
+        </div>
+
+        <div class="leave-card-body">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label leave-label">
+                Rodzaj urlopu
+              </label>
+              {{ form.leave_type }}
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label leave-label">
+                Data od
+              </label>
+              {{ form.date_from }}
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label leave-label">
+                Data do
+              </label>
+              {{ form.date_to }}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label leave-label">
+                Powód
+              </label>
+              {{ form.reason }}
+            </div>
+
+            <div class="col-12">
+              <label class="leave-switch-card" for="{{ form.is_carryover.id_for_label }}">
+                {{ form.is_carryover }}
+
+                <div>
+                  <div class="switch-title">
+                    Urlop zaległy
+                  </div>
+
+                  <div class="switch-desc">
+                    Zaznacz, jeśli urlop pochodzi z poprzedniego roku.
+                  </div>
+                </div>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="leave-form-actions">
+          <a href="" class="btn-soft">
+            Anuluj
+          </a>
+
+          <button type="submit" class="btn-orange">
+            <i class="bi bi-send me-1"></i>
+            Wyślij wniosek
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="leave-summary-card">
+
+        <div class="leave-card-header">
+          <div class="leave-card-icon">
+            <i class="bi bi-clipboard-check"></i>
+          </div>
+
+          <div>
+            <h3>Podsumowanie</h3>
+            <p>Automatyczne przeliczenie dni i limitu.</p>
+          </div>
+        </div>
+
+        <div class="leave-card-body">
+
+          <div class="summary-item">
+            <div class="summary-label">Liczba dni</div>
+            <div class="summary-value" id="days-preview">—</div>
+          </div>
+
+          <div class="summary-item">
+            <div class="summary-label">Pozostały limit</div>
+            <div class="summary-value success" id="remaining-preview">—</div>
+          </div>
+
+          <div class="summary-item">
+            <div class="summary-label">Limit całkowity</div>
+            <div class="summary-value" id="limit-preview">—</div>
+          </div>
+
+          <div class="summary-item">
+            <div class="summary-label">Wykorzystane</div>
+            <div class="summary-value" id="used-preview">—</div>
+          </div>
+
+          <div class="summary-note">
+            <i class="bi bi-info-circle me-1" style="color:#1468f5;"></i>
+            Liczone bez weekendów i dni ustawowo wolnych.
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{{ leave_limits_map|json_script:"leave-limits-data" }}
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const leaveTypeInput = document.getElementById("id_leave_type");
+  const fromInput = document.getElementById("id_date_from");
+  const toInput = document.getElementById("id_date_to");
+
+  const daysPreview = document.getElementById("days-preview");
+  const remainingPreview = document.getElementById("remaining-preview");
+  const limitPreview = document.getElementById("limit-preview");
+  const usedPreview = document.getElementById("used-preview");
+
+  const leaveLimits = JSON.parse(
+    document.getElementById("leave-limits-data").textContent
+  );
+
+  function calculateWorkingDays(start, end) {
+    let count = 0;
+    let current = new Date(start);
+
+    while (current <= end) {
+      const day = current.getDay();
+
+      if (day !== 0 && day !== 6) {
+        count++;
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return count;
+  }
+
+  function updateDaysPreview() {
+    if (!fromInput.value || !toInput.value) {
+      daysPreview.innerText = "—";
+      return;
+    }
+
+    const start = new Date(fromInput.value);
+    const end = new Date(toInput.value);
+
+    if (end >= start) {
+      const days = calculateWorkingDays(start, end);
+      daysPreview.innerText = days + " dni";
+    } else {
+      daysPreview.innerText = "—";
+    }
+  }
+
+  function updateLeaveLimitPreview() {
+    const selectedId = leaveTypeInput.value;
+
+    if (!selectedId || !leaveLimits[selectedId]) {
+      remainingPreview.innerText = "—";
+      limitPreview.innerText = "—";
+      usedPreview.innerText = "—";
+      return;
+    }
+
+    const item = leaveLimits[selectedId];
+
+    remainingPreview.innerText = item.remaining + " dni";
+    limitPreview.innerText = item.limit + " dni";
+    usedPreview.innerText = item.used + " dni";
+  }
+
+  if (fromInput) fromInput.addEventListener("change", updateDaysPreview);
+  if (toInput) toInput.addEventListener("change", updateDaysPreview);
+  if (leaveTypeInput) leaveTypeInput.addEventListener("change", updateLeaveLimitPreview);
+
+  updateDaysPreview();
+  updateLeaveLimitPreview();
+});
+</script>
+
+{% endblock %}

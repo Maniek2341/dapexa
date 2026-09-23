@@ -1,0 +1,364 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  .warranty-page{max-width:1500px;margin:0 auto;padding-bottom:1rem}
+  .warranty-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+  .warranty-title-wrap{display:flex;align-items:center;gap:1rem}
+  .warranty-title-icon{width:62px;height:62px;display:grid;place-items:center;border-radius:20px;color:#1468f5;background:linear-gradient(135deg,rgba(20,104,245,.2),rgba(20,104,245,.06));border:1px solid rgba(20,104,245,.3);font-size:1.5rem}
+  .warranty-title{margin:0;color:var(--text);font-size:1.55rem;font-weight:900}
+  .warranty-subtitle{margin:.25rem 0 0;color:var(--muted);font-size:.9rem}
+  .warranty-layout{align-items:start}
+  .warranty-card{overflow:hidden;background:var(--card);border:1px solid var(--border);border-radius:24px;box-shadow:0 16px 45px rgba(0,0,0,.12)}
+  .warranty-card-head{display:flex;align-items:center;gap:.8rem;padding:1.15rem 1.3rem;border-bottom:1px solid var(--border);background:linear-gradient(100deg,rgba(20,104,245,.12),rgba(255,255,255,.015) 45%)}
+  .warranty-card-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 auto;border-radius:14px;color:#1468f5;background:rgba(20,104,245,.13);border:1px solid rgba(20,104,245,.2)}
+  .warranty-card-title{margin:0;color:var(--text);font-size:1rem;font-weight:900}
+  .warranty-card-desc{margin:.15rem 0 0;color:var(--muted);font-size:.78rem}
+  .warranty-card-body{padding:1.3rem}
+  .warranty-section{padding:1rem;margin-bottom:1rem;background:rgba(255,255,255,.018);border:1px solid var(--border);border-radius:18px}
+  .warranty-section:last-child{margin-bottom:0}
+  .warranty-section-title{display:flex;align-items:center;gap:.55rem;margin-bottom:.85rem;color:var(--text);font-size:.9rem;font-weight:900}
+  .warranty-section-title i{color:#1468f5}
+  .warranty-card .form-label{color:var(--text);font-size:.8rem;font-weight:800;margin-bottom:.4rem}
+  .warranty-card .form-control,.warranty-card .form-select,.warranty-card select,.warranty-card textarea{min-height:50px;color:var(--text)!important;background:rgba(255,255,255,.035)!important;border:1px solid var(--border)!important;border-radius:15px!important;box-shadow:none!important}
+  .warranty-card textarea{min-height:130px}
+  .warranty-card .form-control:focus,.warranty-card .form-select:focus,.warranty-card select:focus,.warranty-card textarea:focus{color:var(--text)!important;background:rgba(255,255,255,.035)!important;border-color:rgba(20,104,245,.5)!important;box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important}
+  .warranty-card .form-control::placeholder{color:var(--muted);opacity:.75}
+  .warranty-actions{display:flex;justify-content:flex-end;gap:.7rem;padding-top:1rem;border-top:1px solid var(--border)}
+  .preview-card{position:sticky;top:86px}
+  .preview-list{display:grid;gap:.6rem}
+  .preview-row{display:flex;justify-content:space-between;gap:1rem;padding:.75rem .85rem;color:var(--muted);background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:13px;font-size:.8rem}
+  .preview-row strong{color:var(--text);text-align:right;font-weight:800}
+  .preview-description{margin-top:.6rem;padding:.8rem .85rem;color:var(--muted);background:rgba(255,255,255,.035);border:1px solid var(--border);border-radius:13px;font-size:.8rem;line-height:1.45}
+  .preview-description strong{display:block;margin-bottom:.25rem;color:var(--text)}
+  .btn-brand{box-shadow:0 10px 24px rgba(20,104,245,.18)}
+  @media(max-width:991px){.preview-card{position:static}.warranty-card-body{padding:1rem}}
+  .btn-brand{
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%) !important;
+    border:0 !important;
+    color:#fff !important;
+    border-radius:14px !important;
+    font-weight:800;
+    padding:.65rem 1rem;
+  }
+  .btn-outline-secondary{
+    background:rgba(255,255,255,.04) !important;
+    border:1px solid var(--border) !important;
+    color:var(--text) !important;
+    border-radius:14px !important;
+    font-weight:800;
+    padding:.65rem 1rem;
+  }
+</style>
+
+<div class="warranty-page">
+<div class="warranty-head">
+  <div class="warranty-title-wrap">
+    <div class="warranty-title-icon"><i class="bi bi-shield-check"></i></div>
+    <div>
+    <h1 class="warranty-title">
+        {% if object %}
+          Edytuj zgłoszenie gwarancyjne
+        {% else %}
+          Dodaj zgłoszenie gwarancyjne
+        {% endif %}
+      </h1>
+    <p class="warranty-subtitle">Uzupełnij dane zgłoszenia, klienta i urządzenia.</p>
+    </div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{% url 'warranty_claim_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Wróć
+    </a>
+
+    <button form="warrantyForm" class="btn btn-brand">
+      <i class="bi bi-save me-1"></i>Zapisz
+    </button>
+  </div>
+</div>
+
+<div class="row g-4 warranty-layout">
+
+  <div class="col-xl-8">
+    <div class="warranty-card">
+      <div class="warranty-card-head">
+        <div class="warranty-card-icon"><i class="bi bi-clipboard2-check"></i></div>
+        <div><h2 class="warranty-card-title">Dane zgłoszenia</h2><p class="warranty-card-desc">Podstawowe informacje o usterce i urządzeniu.</p></div>
+      </div>
+      <div class="warranty-card-body">
+
+        <form id="warrantyForm" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <div class="warranty-section">
+            <div class="warranty-section-title"><i class="bi bi-info-circle"></i>Podstawowe informacje</div>
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label" for="{{ form.provider.id_for_label }}">
+                Hurtownia
+              </label>
+              {{ form.provider }}
+              {% if form.provider.errors %}
+                <div class="invalid-feedback d-block">{{ form.provider.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label required" for="{{ form.client.id_for_label }}">
+                Klient
+              </label>
+              {{ form.client }}
+              {% if form.client.errors %}
+                <div class="invalid-feedback d-block">{{ form.client.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-12 d-none" id="locationWrapper">
+              <label class="form-label" for="{{ form.location.id_for_label }}">
+                Lokalizacja
+              </label>
+              {{ form.location }}
+              {% if form.location.errors %}
+                <div class="invalid-feedback d-block">{{ form.location.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-12">
+              <label class="form-label" for="{{ form.product.id_for_label }}">
+                Urządzenie
+              </label>
+              {{ form.product }}
+              {% if form.product.errors %}
+                <div class="invalid-feedback d-block">{{ form.product.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" for="{{ form.fault_description.id_for_label }}">
+                Opis usterki
+              </label>
+              {{ form.fault_description }}
+              {% if form.fault_description.errors %}
+                <div class="invalid-feedback d-block">{{ form.fault_description.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label" for="{{ form.notes.id_for_label }}">
+                Notatki
+              </label>
+              {{ form.notes }}
+              {% if form.notes.errors %}
+                <div class="invalid-feedback d-block">{{ form.notes.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-12">
+                <label class="form-label" for="{{ form.files.id_for_label }}">
+                    Zdjęcia
+                </label>
+
+                {{ form.files }}
+
+                {% if form.files.errors %}
+                    <div class="invalid-feedback d-block">
+                    {{ form.files.errors|striptags }}
+                    </div>
+                {% endif %}
+
+                <div id="imgPreview" class="d-flex flex-wrap gap-2 mt-2"></div>
+            </div>
+
+            <div class="col-12 warranty-actions">
+              <a href="{% url 'warranty_claim_list' %}" class="btn btn-outline-secondary">
+                Anuluj
+              </a>
+
+              <button type="submit" class="btn btn-brand">
+                <i class="bi bi-save me-1"></i>
+                {% if object %}Zapisz zmiany{% else %}Zapisz zgłoszenie{% endif %}
+              </button>
+            </div>
+
+          </div>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="warranty-card preview-card">
+      <div class="warranty-card-head">
+        <div class="warranty-card-icon"><i class="bi bi-eye"></i></div>
+        <div><h2 class="warranty-card-title">Podgląd</h2><p class="warranty-card-desc">Szybkie podsumowanie zgłoszenia.</p></div>
+      </div>
+      <div class="warranty-card-body">
+        <div class="preview-list">
+        <div class="preview-row"><span>Numer</span><strong id="pvNumber">—</strong></div>
+        <div class="preview-row"><span>Firma</span><strong id="pvProvider">—</strong></div>
+        <div class="preview-row"><span>Klient</span><strong id="pvClient">—</strong></div>
+        <div class="preview-row"><span>Lokalizacja</span><strong id="pvLocation">—</strong></div>
+        <div class="preview-row"><span>Urządzenie</span><strong id="pvDevice">—</strong></div>
+        <div class="preview-row"><span>Status</span><strong id="pvStatus">—</strong></div>
+        </div>
+        <div class="preview-description"><strong>Opis usterki</strong><span id="pvDescription">—</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+  (function(){
+    const form = document.getElementById('warrantyForm');
+    if (!form) return;
+
+    const byName = (n) => form.querySelector(`[name="${n}"]`);
+
+    const pv = {
+      number: document.getElementById('pvNumber'),
+      provider: document.getElementById('pvProvider'),
+      client: document.getElementById('pvClient'),
+      location: document.getElementById('pvLocation'),
+      device: document.getElementById('pvDevice'),
+      status: document.getElementById('pvStatus'),
+      description: document.getElementById('pvDescription'),
+    };
+
+    function selectedText(name){
+      const el = byName(name);
+      if (!el) return '—';
+
+      if (el.tagName === 'SELECT') {
+        return el.selectedOptions?.[0]?.text || '—';
+      }
+
+      return el.value || '—';
+    }
+
+    function updatePreview(){
+      pv.number.textContent = byName('external_number')?.value || '—';
+      pv.provider.textContent = byName('provider')?.value || '—';
+      pv.client.textContent = selectedText('client');
+      pv.location.textContent = selectedText('location');
+      pv.device.textContent = selectedText('device');
+      pv.status.textContent = selectedText('status');
+      pv.description.textContent = byName('fault_description')?.value || '—';
+    }
+
+    form.addEventListener('input', updatePreview);
+    form.addEventListener('change', updatePreview);
+    updatePreview();
+
+    form.addEventListener('submit', (e) => {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      form.classList.add('was-validated');
+    });
+  })();
+</script>
+
+<script>
+  (function(){
+    const form = document.getElementById('warrantyForm');
+    if (!form) return;
+
+    const clientInput = form.querySelector('[name="client"]');
+    const locationSelect = form.querySelector('[name="location"]');
+    const locationWrapper = document.getElementById('locationWrapper');
+
+    if (!clientInput || !locationSelect || !locationWrapper) return;
+
+    function resetLocation(){
+      locationSelect.innerHTML = '<option value="">---------</option>';
+      locationWrapper.classList.add('d-none');
+    }
+
+    function loadLocations(clientId){
+      if (!clientId){
+        resetLocation();
+        return;
+      }
+
+      fetch(`/serwis/api/client-locations/?client=${clientId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (!data.length){
+            resetLocation();
+            return;
+          }
+
+          locationSelect.innerHTML = '<option value="">Wybierz lokalizację</option>';
+
+          data.forEach(loc => {
+            locationSelect.innerHTML += `
+              <option value="${loc.id}">
+                ${loc.name}
+              </option>
+            `;
+          });
+
+          locationWrapper.classList.remove('d-none');
+
+          locationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        })
+        .catch(() => resetLocation());
+    }
+
+    if (clientInput.tagName === "SELECT") {
+      clientInput.addEventListener('change', function(){
+        loadLocations(this.value);
+      });
+    }
+
+    if (clientInput.value) {
+      loadLocations(clientInput.value);
+    }
+  })();
+</script>
+
+<script>
+(function(){
+  const form = document.getElementById('warrantyForm');
+  if (!form) return;
+
+  const imgInput = form.querySelector('input[name="files"]');
+  const imgPreview = document.getElementById('imgPreview');
+
+  imgInput?.addEventListener('change', () => {
+    if (!imgPreview) return;
+
+    imgPreview.innerHTML = '';
+
+    [...imgInput.files].forEach(file => {
+      const url = URL.createObjectURL(file);
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'rounded border';
+      img.style.width = '86px';
+      img.style.height = '86px';
+      img.style.objectFit = 'cover';
+
+      imgPreview.appendChild(img);
+    });
+  });
+})();
+</script>
+
+{% endblock %}

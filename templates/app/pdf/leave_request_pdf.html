@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+body {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    color: #333;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.logo {
+    height: 60px;
+}
+.title {
+    font-size: 18px;
+    font-weight: bold;
+}
+.section {
+    margin-bottom: 20px;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table td {
+    padding: 6px;
+    border-bottom: 1px solid #ddd;
+}
+.footer {
+    margin-top: 40px;
+    font-size: 11px;
+    color: #777;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <img src="{{ company_logo_url }}" class="logo" alt="Logo firmy">
+    </div>
+    <div>
+        <strong>{{ company.name }}</strong><br>
+        {{ company.main_address.street }}<br>
+        {{ company.main_address.postal_code }} {{ company.main_address.city }}
+    </div>
+</div>
+
+<div class="title">
+    Wniosek urlopowy
+</div>
+
+<div class="section">
+    <table class="table">
+        <tr>
+            <td><strong>Pracownik</strong></td>
+            <td>{{ leave.user.first_name }} {{ leave.user.last_name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Rodzaj urlopu</strong></td>
+            <td>{{ leave.leave_type.name }}</td>
+        </tr>
+        <tr>
+            <td><strong>Okres</strong></td>
+            <td>{{ leave.date_from }} – {{ leave.date_to }}</td>
+        </tr>
+        <tr>
+            <td><strong>Liczba dni</strong></td>
+            <td>{{ leave.days_count }}</td>
+        </tr>
+        <tr>
+            <td><strong>Status</strong></td>
+            <td>{{ leave.get_status_display }}</td>
+        </tr>
+    </table>
+</div>
+
+<div class="section">
+    <strong>Powód:</strong><br>
+    {{ leave.reason|default:"—" }}
+</div>
+
+<div class="section">
+    <table class="table">
+        <tr>
+            <td><strong>Data złożenia</strong></td>
+            <td>{{ leave.created_at|date:"d.m.Y H:i" }}</td>
+        </tr>
+        <tr>
+            <td><strong>Zatwierdzający</strong></td>
+            <td>
+                {% if leave.approver %}
+                    {{ leave.approver.first_name }} {{ leave.approver.last_name }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="footer">
+    Dokument wygenerowany elektronicznie przez system HR.
+</div>
+
+</body>
+</html>

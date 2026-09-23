@@ -1,0 +1,457 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  input[type="checkbox"][name$="-DELETE"] {
+      display: none;
+  }
+  </style>
+<div class="d-flex justify-content-between mb-3 align-items-center">
+  <div>
+    <h1 class="h4 fw-bold mb-0">Edytuj protokół</h1>
+    <p class="text-muted mb-0">Uzupełnij dane w protokole</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'protokol_nowe' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Wróć
+    </a>
+    <button form="serviceForm" class="btn btn-brand">
+      <i class="bi bi-save me-1"></i>Zapisz
+    </button>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    <div class="card">
+      <div class="card-body p-4">
+        <form id="serviceForm" class="needs-validation" method="post" enctype="multipart/form-data" novalidate>
+          {% csrf_token %}
+          <div class="row g-3">
+            <!-- Klient + tytuł + data -->
+            <div class="col-md-6">
+              <label class="form-label required">{{ form.title.label }}</label>
+              {{ form.title }}
+              <div class="invalid-feedback">Podaj tytuł.</div>
+            </div>   
+
+            <div class="col-md-6">
+              <label class="form-label required">{{ form.client.label }}</label>
+              <input type="text"
+                     class="form-control"
+                     style="background-color: var(--bg)"
+                     value="{{ protocol.client }}"
+                     disabled>
+              <div class="invalid-feedback">Wybierz klienta.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label required">{{ form.end_time.label }}</label>
+              {{ form.end_time }}
+              <div class="invalid-feedback">Podaj datę zakończenia.</div>
+            </div>
+
+            <div class="col-md-6 d-none" id="locationWrapper">
+              <label class="form-label">{{ form.location.label }}</label>
+              {{ form.location }}
+            </div>
+
+            <!-- wykonane prace -->
+            <div class="col-12">
+              <label class="form-label required">{{ form.wykonane_prace.label }}</label>
+              {{ form.wykonane_prace }}
+              <div class="invalid-feedback">Opisz wykonane prace.</div>
+            </div>            
+
+            <div class="col-md-3">
+              <label class="form-label required">{{ form.robocizna.label }}</label>
+              {{ form.robocizna }}
+              <div class="invalid-feedback">Podaj czas pracy.</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label required">{{ form.pracownicy_szt.label }}</label>
+              {{ form.pracownicy_szt }}
+              <div class="invalid-feedback">Podaj ilość pracowników.</div>
+            </div>            
+
+            <div class="col-md-3">
+              <label class="form-label required">{{ form.dojazdy_szt.label }}</label>
+              {{ form.dojazdy_szt }}
+              <div class="invalid-feedback">Podaj ilość dojazdów.</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label required">{{ form.rodzaj_prac.label }}</label>
+              {{ form.rodzaj_prac }}
+              <div class="invalid-feedback">Wybierz rodzaj prac.</div>
+            </div>            
+
+            <!-- urządzenia / materiały -->
+            <div class="col-12">
+              <hr class="my-2">
+            
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Użyte urządzenia / materiały</h6>
+                <button type="button" id="addDevice" class="btn btn-outline-secondary btn-sm">
+                  <i class="bi bi-plus-lg"></i> Dodaj
+                </button>
+              </div>
+            
+              {{ formset.management_form }}
+            
+              <div class="table-responsive">
+                <table class="table align-middle" id="devicesTable">
+                  <thead>
+                    <tr>
+                      <th style="width:60%">Produkt</th>
+                      <th style="width:20%">Ilość</th>
+                      <th style="width:10%"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="formset-body">
+            
+                    {% for form in formset %}
+                    <tr class="formset-row">
+                      <td>
+                        {{ form.id }}   
+                        {{ form.urzadzenia }}
+                        {% if form.urzadzenia.errors %}
+                          <div class="text-danger small">
+                            {{ form.urzadzenia.errors }}
+                          </div>
+                        {% endif %}
+                      </td>
+            
+                      <td>
+                        {{ form.sztuki }}
+                        {% if form.sztuki.errors %}
+                          <div class="text-danger small">
+                            {{ form.sztuki.errors }}
+                          </div>
+                        {% endif %}
+                      </td>
+            
+                      <td class="text-end">
+                        {{ form.DELETE }} 
+                        <button type="button"
+                                class="btn btn-outline-secondary btn-sm remove-row">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                    {% endfor %}
+            
+                  </tbody>
+                </table>
+                <script type="text/template" id="empty-form-template">
+                  <tr class="formset-row">
+                    <td>__URZADZENIA__</td>
+                    <td>__SZTUKI__</td>
+                    <td class="text-end">
+                      <button type="button"
+                              class="btn btn-outline-secondary btn-sm remove-row">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  </script>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">{{ form.dodatkowe_materialy.label }}</label>
+              {{ form.dodatkowe_materialy }}
+              <div class="form-text">
+                Opcjonalnie – wpisz materiały, które nie zostały dodane z listy produktów.
+              </div>
+            </div>
+
+            <!-- załączniki -->
+            <div class="col-12">
+              <label class="form-label">{{ form.attachments.label }}</label>
+              {{ form.attachments }}
+              <div id="attachmentsPreview" class="small text-muted mt-1"></div>
+              <div class="text-muted">
+                Możesz dodać zdjęcia wykonanych prac lub dokumenty (pdf).
+              </div>
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2 pt-2">
+              <a href="{% url 'protokol_nowe' %}" class="btn btn-outline-secondary">Anuluj</a>
+              <button type="submit" class="btn btn-brand">
+                <i class="bi bi-save me-1"></i>Zapisz protokół
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panel podglądu -->
+  <div class="col-xl-4">
+    <div class="card mb-3">
+      <div class="card-body p-3">
+        <h6 class="fw-bold mb-2">Podgląd</h6>
+        <div class="small text-muted">Klient: <span id="pvClient">—</span></div>
+        <div class="small text-muted">Tytuł: <span id="pvTitle">—</span></div>
+        <div class="small text-muted">Data zakończenia: <span id="pvEndDate">—</span></div>
+        <div class="small text-muted">Wykonane prace: <span id="pvPerformed">—</span></div>
+        <div class="small text-muted">Czas pracy: <span id="pvWorkHours">—</span></div>
+        <div class="small text-muted">Ilość pracowników: <span id="pvWorkersCount">—</span></div>
+        <div class="small text-muted">Ilość dojazdów: <span id="pvTripsCount">—</span></div>
+        <div class="small text-muted">Dodatkowe materiały:<span id="pvExtraMaterials">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Przełącznik motywu (zapisywany w localStorage)
+  (function () {
+    const root = document.documentElement;
+    const key = 'dashboard-theme';
+    const saved = localStorage.getItem(key) || 'dark';
+    root.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+
+    const setIcon = () => {
+      if (!btn) return;
+      btn.innerHTML = root.getAttribute('data-theme') === 'light'
+        ? '<i class="bi bi-sun"></i>'
+        : '<i class="bi bi-moon-stars"></i>';
+    };
+
+    setIcon();
+
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem(key, next);
+        setIcon();
+      });
+    }
+  })();
+</script>
+
+  <script>
+    (function () {
+      const f = document.getElementById('serviceForm');
+      if (!f) return;
+
+      const getField = (name) => f.querySelector(`[name="${name}"]`);
+
+      // Elementy podglądu
+      const pv = {
+        client: document.getElementById('pvClient'),
+        title: document.getElementById('pvTitle'),
+        end_date: document.getElementById('pvEndDate'),
+        performed: document.getElementById('pvPerformed'),
+        work_hours: document.getElementById('pvWorkHours'),
+        workers_count: document.getElementById('pvWorkersCount'),
+        trips_count: document.getElementById('pvTripsCount'),
+        extra_materials: document.getElementById('pvExtraMaterials'),
+      };
+
+      const attachmentsInput = getField('attachments');
+      const attachmentsPreview = document.getElementById('attachmentsPreview');
+
+      function updateAttachmentsPreview() {
+        if (!attachmentsInput || !attachmentsPreview) return;
+        const files = attachmentsInput.files;
+        if (!files || files.length === 0) {
+          attachmentsPreview.textContent = '';
+          return;
+        }
+        const items = [];
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          // file.name zawiera już nazwę i rozszerzenie
+          items.push(file.name);
+        }
+        attachmentsPreview.textContent = 'Wybrane pliki: ' + items.join(', ');
+      }
+
+    function formatDateTimeLocal(val) {
+      if (!val) return '—';
+      try {
+        const d = new Date(val);
+        if (isNaN(d.getTime())) return val;
+        return d.toLocaleString('pl-PL');
+      } catch (e) {
+        return val;
+      }
+    }
+
+    function updatePreview() {
+      const clientField = getField('client');
+      const clientText = clientField && clientField.selectedOptions[0]
+        ? clientField.selectedOptions[0].text
+        : '—';
+    
+      pv.client.textContent = clientText || '—';
+      pv.title.textContent = (getField('title')?.value || '—');
+      pv.end_date.textContent = formatDateTimeLocal(getField('end_time')?.value);
+      pv.performed.textContent = (getField('wykonane_prace')?.value || '—');
+      const extraMaterials = getField('dodatkowe_materialy')?.value;
+      pv.extra_materials.textContent = extraMaterials || '—';
+    
+      const workHours = getField('robocizna')?.value;
+      pv.work_hours.textContent = workHours ? workHours + ' h' : '—';
+    
+      const workersCount = getField('pracownicy_szt')?.value;
+      pv.workers_count.textContent = workersCount || '—';
+    
+      const tripsCount = getField('dojazdy_szt')?.value;
+      pv.trips_count.textContent = tripsCount || '—';
+    
+      updateAttachmentsPreview();
+    }
+    
+
+      // Aktualizuj podgląd na input
+      f.addEventListener('input', updatePreview);
+      if (attachmentsInput) {
+        attachmentsInput.addEventListener('change', updateAttachmentsPreview);
+      }
+      updatePreview();
+
+    // Walidacja bootstrapowa
+    f.addEventListener('submit', function (e) {
+      if (!f.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      f.classList.add('was-validated');
+    });
+
+ 
+  })();
+</script>
+<script>
+  (function () {
+    const addBtn = document.getElementById("addDevice");
+    const tableBody = document.getElementById("formset-body");
+    const totalForms = document.getElementById("id_protokolurz-TOTAL_FORMS"); // <- sprawdź czy to na pewno ta nazwa!
+  
+    const emptyFormHtml = `
+      <tr class="formset-row">
+        <td>
+          {{ formset.empty_form.id|escapejs }}
+          {{ formset.empty_form.DELETE|escapejs }}
+          {{ formset.empty_form.protokolurz|escapejs }}
+        </td>
+        <td>
+          {{ formset.empty_form.sztuki|escapejs }}
+        </td>
+        <td class="text-end">
+          <button type="button" class="btn btn-outline-secondary btn-sm remove-row">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  
+    // -----------------------------
+    // DODAWANIE WIERSZA
+    // -----------------------------
+    if (addBtn) {
+      addBtn.addEventListener("click", function () {
+        const formCount = parseInt(totalForms.value, 10);
+        const newRow = emptyFormHtml.replace(/__prefix__/g, formCount);
+        tableBody.insertAdjacentHTML("beforeend", newRow);
+        totalForms.value = formCount + 1;
+      });
+    }
+  
+    // -----------------------------
+    // USUWANIE (PRO): DELETE + disable + hide
+    // -----------------------------
+    tableBody.addEventListener("click", function (e) {
+      const btn = e.target.closest(".remove-row");
+      if (!btn) return;
+  
+      const row = btn.closest("tr");
+      const deleteInput = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+  
+      if (deleteInput) deleteInput.checked = true;
+  
+      // 🔥 wyłącz pola, żeby przestały walidować (bootstrap/HTML5)
+      row.querySelectorAll("input, select, textarea").forEach(el => {
+        if (
+          !el.name.endsWith("-DELETE") &&
+          !el.name.endsWith("-id")
+        ) {
+          el.disabled = true;
+        }
+      });
+  
+      row.style.display = "none";
+    });
+  })();
+  </script>
+  
+  <script>
+    (function(){
+    
+      const form = document.getElementById('serviceForm');
+      if (!form) return;
+    
+      const clientSelect = form.querySelector('[name="client"]');
+      const locationSelect = form.querySelector('[name="location"]');
+      const locationWrapper = document.getElementById('locationWrapper');
+    
+      if (!clientSelect || !locationSelect || !locationWrapper) return;
+    
+      function resetLocation(){
+        locationSelect.innerHTML = '<option value="">---------</option>';
+        locationWrapper.classList.add('d-none');
+        locationSelect.value = "";
+      }
+    
+      function loadLocations(clientId, selectedLocationId=null){
+    
+        fetch(`/serwis/api/client-locations/?client=${clientId}`)
+          .then(res => res.json())
+          .then(data => {
+    
+            if (!data.length){
+              resetLocation();
+              return;
+            }
+    
+            locationSelect.innerHTML = '<option value="">Wybierz lokalizację</option>';
+    
+            data.forEach(loc => {
+              const selected = selectedLocationId == loc.id ? 'selected' : '';
+              locationSelect.innerHTML += 
+                `<option value="${loc.id}" ${selected}>${loc.name}</option>`;
+            });
+    
+            locationWrapper.classList.remove('d-none');
+          })
+          .catch(() => resetLocation());
+      }
+    
+      // 🔁 ZMIANA KLIENTA
+      clientSelect.addEventListener('change', function(){
+        const clientId = this.value;
+    
+        if (!clientId){
+          resetLocation();
+          return;
+        }
+    
+        loadLocations(clientId);
+      });
+    
+      // 🔥 AUTO-LOAD PRZY EDYCJI / RELOAD
+      if (clientSelect.value){
+        const currentLocation = locationSelect.value || null;
+        loadLocations(clientSelect.value, currentLocation);
+      }
+    
+    })();
+    </script>
+{% endblock %}

@@ -1,0 +1,4 @@
+from .document_create_view import DocumentCreateView
+from .document_list_view import DocumentListView
+from .document_delete_view import DocumentDeleteView
+from .document_update_view import DocumentUpdateView

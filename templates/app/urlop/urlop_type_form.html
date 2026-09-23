@@ -1,0 +1,471 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+
+<style>
+.leave-form-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.leave-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.leave-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.leave-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.leave-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.leave-form-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.leave-form-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.leave-form-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.leave-form-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.leave-form-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.leave-form-body{
+  padding:1.5rem;
+}
+
+.leave-label{
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:900;
+  margin-bottom:.45rem;
+}
+
+.leave-form-card .form-control,
+.leave-form-card .form-select,
+.leave-form-card input:not([type="checkbox"]),
+.leave-form-card select{
+  background:rgba(255,255,255,.04)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+.leave-check-card{
+  cursor:pointer;
+}
+
+.leave-check-card .form-check-input{
+  width:20px!important;
+  height:20px!important;
+  min-height:20px!important;
+  margin:0!important;
+  margin-top:.15rem!important;
+  flex-shrink:0;
+  cursor:pointer;
+  accent-color:#1468f5;
+}
+.leave-form-card .form-control:focus,
+.leave-form-card .form-select:focus,
+.leave-form-card input:not([type="checkbox"]):focus,
+.leave-form-card select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+.leave-form-card input[type="checkbox"]{
+  min-height:auto!important;
+  width:18px!important;
+  height:18px!important;
+  border-radius:5px!important;
+  cursor:pointer;
+  flex-shrink:0;
+}
+
+.leave-check-card{
+  cursor:pointer;
+}
+
+.leave-check-card label,
+.leave-check-card *{
+  cursor:pointer;
+}
+.leave-check-card{
+  display:flex;
+  align-items:flex-start;
+  gap:.85rem;
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  height:100%;
+}
+
+.leave-check-card input{
+  width:1.15rem;
+  height:1.15rem;
+  margin-top:.15rem;
+  accent-color:#1468f5;
+}
+
+.leave-check-title{
+  color:var(--text);
+  font-weight:900;
+  line-height:1.2;
+}
+
+.leave-check-desc{
+  color:var(--muted);
+  font-size:.82rem;
+  margin-top:.25rem;
+}
+
+.leave-form-actions{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.leave-help-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:1.25rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.leave-help-title{
+  color:var(--text);
+  font-weight:900;
+  margin-bottom:.75rem;
+}
+
+.leave-help-item{
+  padding:.8rem 0;
+  border-bottom:1px solid var(--border);
+}
+
+.leave-help-item:last-child{
+  border-bottom:0;
+}
+
+.leave-help-label{
+  color:var(--muted);
+  font-size:.76rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.leave-help-value{
+  color:var(--text);
+  font-weight:700;
+  margin-top:.2rem;
+}
+
+.error-box{
+  margin-top:1rem;
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(220,53,69,.10);
+  border:1px solid rgba(220,53,69,.22);
+  color:#ff6b6b;
+}
+
+@media(max-width:768px){
+  .leave-form-head{
+    flex-direction:column;
+  }
+
+  .leave-form-head .btn-soft{
+    width:100%;
+    display:flex;
+    justify-content:center;
+  }
+
+  .leave-title{
+    font-size:1.35rem;
+  }
+
+  .leave-title-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+  }
+
+  .leave-form-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .leave-form-body{
+    padding:1rem;
+  }
+
+  .leave-form-actions{
+    padding:0 1rem 1rem;
+    flex-direction:column-reverse;
+  }
+
+  .leave-form-actions .btn-soft,
+  .leave-form-actions .btn-orange{
+    width:100%;
+    display:flex;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="leave-form-head">
+  <div class="leave-title-wrap">
+    <div class="leave-title-icon">
+      <i class="bi bi-calendar2-check"></i>
+    </div>
+
+    <div>
+      <h1 class="leave-title">
+        {% if object %}Edytuj{% else %}Nowy{% endif %} rodzaj urlopu
+      </h1>
+      <div class="leave-subtitle">
+        Skonfiguruj zasady naliczania limitu i typ urlopu.
+      </div>
+    </div>
+  </div>
+
+  <a href="{% url 'leave_type_list' %}" class="btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+    Wróć
+  </a>
+</div>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="leave-form-card">
+
+        <div class="leave-form-header">
+          <div class="leave-form-icon">
+            <i class="bi bi-pencil-square"></i>
+          </div>
+
+          <div>
+            <h3>Dane rodzaju urlopu</h3>
+            <p>Nazwa, kod, limit roczny oraz sposób naliczania.</p>
+          </div>
+        </div>
+
+        <div class="leave-form-body">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label leave-label">
+                Nazwa
+              </label>
+              {{ form.name }}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label leave-label">
+                Kod
+              </label>
+              {{ form.code }}
+            </div>
+
+            <div class="col-md-6">
+  <label class="leave-check-card" for="{{ form.counts_against_limit.id_for_label }}">
+    {{ form.counts_against_limit }}
+
+    <div>
+      <div class="leave-check-title">
+        Liczy się do limitu rocznego
+      </div>
+
+      <div class="leave-check-desc">
+        Ten typ urlopu będzie odejmowany z rocznej puli dni.
+      </div>
+    </div>
+  </label>
+</div>
+
+            <div class="col-md-6">
+              <label class="form-label leave-label">
+                Limit roczny (dni)
+              </label>
+              {{ form.annual_limit_days }}
+            </div>
+
+            <div class="col-md-6">
+  <label class="leave-check-card" for="{{ form.is_special.id_for_label }}">
+    {{ form.is_special }}
+
+    <div>
+      <div class="leave-check-title">
+        Typ specjalny
+      </div>
+
+      <div class="leave-check-desc">
+        Typ urlopu, w którym ilość dni nie wpływa na zwykły limit.
+      </div>
+    </div>
+  </label>
+</div>
+
+          </div>
+
+          {% if form.errors %}
+            <div class="error-box">
+              {{ form.errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="leave-form-actions">
+          <a href="{% url 'leave_type_list' %}" class="btn-soft">
+            Anuluj
+          </a>
+
+          <button type="submit" class="btn-orange">
+            <i class="bi bi-check2-circle me-1"></i>
+            Zapisz
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="leave-help-card">
+        <div class="leave-help-title">
+          <i class="bi bi-info-circle me-1" style="color:#1468f5;"></i>
+          Podpowiedź
+        </div>
+
+        <div class="leave-help-item">
+          <div class="leave-help-label">Nazwa</div>
+          <div class="leave-help-value">
+            Np. Wypoczynkowy, Opiekuńczy, Rodzicielski.
+          </div>
+        </div>
+
+        <div class="leave-help-item">
+          <div class="leave-help-label">Kod</div>
+          <div class="leave-help-value">
+            Krótki identyfikator, np. VACATION, CARE, OTHER.
+          </div>
+        </div>
+
+        <div class="leave-help-item">
+          <div class="leave-help-label">Limit</div>
+          <div class="leave-help-value">
+            Używaj tylko wtedy, gdy urlop ma własny roczny limit.
+          </div>
+        </div>
+
+        <div class="leave-help-item">
+          <div class="leave-help-label">Typ specjalny</div>
+          <div class="leave-help-value">
+            Przydatne dla urlopów, które mają osobne zasady naliczania.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

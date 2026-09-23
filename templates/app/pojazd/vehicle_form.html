@@ -1,0 +1,455 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .page-head {
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:1rem;
+    margin-bottom:1.5rem;
+  }
+
+  .page-title {
+    font-size:1.35rem;
+    font-weight:800;
+    margin:0;
+    color:var(--text);
+  }
+
+  .page-subtitle {
+    color:var(--muted);
+    font-size:.9rem;
+    margin-top:.25rem;
+  }
+
+  .fleet-card {
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    box-shadow:0 18px 45px rgba(0,0,0,.18);
+  }
+
+  .section-icon {
+    width:44px;
+    height:44px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#1468f5;
+    background:linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.06));
+    border:1px solid rgba(20,104,245,.25);
+  }
+
+  .fleet-label {
+    color:var(--text);
+    font-weight:700;
+    font-size:.86rem;
+    margin-bottom:.45rem;
+  }
+
+  .fleet-help {
+    color:var(--muted);
+    font-size:.78rem;
+    margin-top:.35rem;
+  }
+
+  .fleet-card .form-control,
+  .fleet-card .form-select {
+    background:var(--body);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:12px;
+    min-height:44px;
+  }
+
+  .fleet-card .form-control:focus,
+  .fleet-card .form-select:focus {
+    border-color:#1468f5;
+    box-shadow:0 0 0 .2rem rgba(20,104,245,.16);
+  }
+
+  .fleet-card .form-control::placeholder {
+    color:var(--muted);
+  }
+
+  .vehicle-preview {
+    position:sticky;
+    top:90px;
+  }
+
+  .preview-photo {
+    height:180px;
+    border-radius:18px;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(20,104,245,.20), transparent 35%),
+      linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+    border:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#1468f5;
+  }
+
+  .preview-photo img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  .preview-reg {
+    font-size:1.4rem;
+    font-weight:900;
+    letter-spacing:.06em;
+    color:var(--text);
+  }
+
+  .preview-meta {
+    color:var(--muted);
+    font-size:.88rem;
+  }
+
+  .info-pill {
+    display:flex;
+    justify-content:space-between;
+    gap:.75rem;
+    padding:.8rem .9rem;
+    border-radius:14px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--border);
+    font-size:.86rem;
+  }
+
+  .info-pill span:first-child {
+    color:var(--muted);
+  }
+
+  .info-pill span:last-child {
+    color:var(--text);
+    font-weight:700;
+  }
+
+  .btn-orange {
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+    border:0;
+    color:#fff;
+    font-weight:700;
+    border-radius:12px;
+    box-shadow:0 12px 28px rgba(20,104,245,.25);
+  }
+
+  .btn-orange:hover {
+    color:#fff;
+    filter:brightness(1.05);
+  }
+
+  .btn-soft {
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:12px;
+  }
+
+  .btn-soft:hover {
+    background:rgba(255,255,255,.07);
+    color:var(--text);
+  }
+
+  .form-check-input:checked {
+    background-color:#1468f5;
+    border-color:#1468f5;
+  }
+
+  @media (max-width: 991px) {
+    .vehicle-preview {
+      position:static;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .page-head {
+      flex-direction:column;
+    }
+
+    .page-head .btn {
+      width:100%;
+    }
+  }
+</style>
+
+<div class="page-head">
+  <div>
+    <h1 class="page-title">
+      {% if object %}Edytuj pojazd{% else %}Nowy pojazd{% endif %}
+    </h1>
+    <div class="page-subtitle">
+      Zarządzaj pojazdami firmowymi, przeglądami i ubezpieczeniem
+    </div>
+  </div>
+
+  <a href="{% url 'vehicle_list' %}" class="btn btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+    Wróć
+  </a>
+</div>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+
+  <div class="row g-4">
+
+    <div class="col-lg-8">
+
+      <div class="fleet-card p-4 mb-4">
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="section-icon">
+            <i class="bi bi-car-front fs-5"></i>
+          </div>
+
+          <div>
+            <h2 class="h6 fw-bold mb-1">Dane podstawowe</h2>
+            <div class="text-muted small">
+              Numer rejestracyjny, marka, model i VIN
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="fleet-label">Numer rejestracyjny</label>
+            {{ form.registration_number }}
+            {% if form.registration_number.errors %}
+              <div class="text-danger small mt-1">{{ form.registration_number.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="fleet-label">VIN</label>
+            {{ form.vin }}
+            {% if form.vin.errors %}
+              <div class="text-danger small mt-1">{{ form.vin.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-md-6">
+            <label class="fleet-label">Marka</label>
+            {{ form.brand }}
+          </div>
+
+          <div class="col-md-6">
+            <label class="fleet-label">Model</label>
+            {{ form.model }}
+          </div>
+
+          <div class="col-md-6">
+            <label class="fleet-label">Aktualny przebieg</label>
+            {{ form.current_mileage }}
+            <div class="fleet-help">Podaj aktualny przebieg w kilometrach.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="fleet-label">Zdjęcie pojazdu</label>
+            {{ form.photo }}
+            <div class="fleet-help">Zdjęcie będzie widoczne na liście i w szczegółach.</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="fleet-card p-4">
+
+        <div class="d-flex align-items-center gap-3 mb-4">
+          <div class="section-icon">
+            <i class="bi bi-shield-check fs-5"></i>
+          </div>
+
+          <div>
+            <h2 class="h6 fw-bold mb-1">Terminy i status</h2>
+            <div class="text-muted small">
+              Kontrola ważności ubezpieczenia i przeglądu
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+
+          <div class="col-md-6">
+            <label class="fleet-label">Ubezpieczenie ważne do</label>
+            {{ form.insurance_valid_until }}
+          </div>
+
+          <div class="col-md-6">
+            <label class="fleet-label">Przegląd ważny do</label>
+            {{ form.inspection_valid_until }}
+          </div>
+
+          <div class="col-12">
+            <div class="form-check mt-2">
+              {{ form.is_active }}
+              <label class="form-check-label fw-semibold">
+                Pojazd aktywny
+              </label>
+              <div class="fleet-help">
+                Nieaktywne pojazdy możesz zostawić w historii, ale ukrywać je w bieżącej pracy.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="col-lg-4">
+
+      <div class="vehicle-preview">
+
+        <div class="fleet-card p-3 mb-3">
+
+          <div class="preview-photo mb-3" id="vehiclePhotoPreview">
+            {% if object.photo %}
+              <img src="{{ object.photo.url }}" alt="Zdjęcie pojazdu">
+            {% else %}
+              <i class="bi bi-car-front fs-1"></i>
+            {% endif %}
+          </div>
+
+          <div class="preview-reg" id="previewRegistration">
+            {% if object %}{{ object.registration_number }}{% else %}—{% endif %}
+          </div>
+
+          <div class="preview-meta mb-3" id="previewCarName">
+            {% if object %}
+              {{ object.brand }} {{ object.model }}
+            {% else %}
+              Marka i model pojazdu
+            {% endif %}
+          </div>
+
+          <div class="d-grid gap-2">
+
+            <div class="info-pill">
+              <span>Przebieg</span>
+              <span id="previewMileage">
+                {% if object %}{{ object.current_mileage }} km{% else %}0 km{% endif %}
+              </span>
+            </div>
+
+            <div class="info-pill">
+              <span>Ubezpieczenie</span>
+              <span id="previewInsurance">
+                {% if object.insurance_valid_until %}
+                  {{ object.insurance_valid_until|date:"d.m.Y" }}
+                {% else %}
+                  —
+                {% endif %}
+              </span>
+            </div>
+
+            <div class="info-pill">
+              <span>Przegląd</span>
+              <span id="previewInspection">
+                {% if object.inspection_valid_until %}
+                  {{ object.inspection_valid_until|date:"d.m.Y" }}
+                {% else %}
+                  —
+                {% endif %}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="fleet-card p-3">
+
+          <button type="submit" class="btn btn-orange w-100 mb-2">
+            <i class="bi bi-check2-circle me-1"></i>
+            {% if object %}Zapisz zmiany{% else %}Zapisz pojazd{% endif %}
+          </button>
+
+          <a href="{% url 'vehicle_list' %}" class="btn btn-soft w-100">
+            Anuluj
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</form>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const regInput = document.getElementById("id_registration_number");
+    const brandInput = document.getElementById("id_brand");
+    const modelInput = document.getElementById("id_model");
+    const mileageInput = document.getElementById("id_current_mileage");
+    const insuranceInput = document.getElementById("id_insurance_valid_until");
+    const inspectionInput = document.getElementById("id_inspection_valid_until");
+    const photoInput = document.getElementById("id_photo");
+
+    const previewRegistration = document.getElementById("previewRegistration");
+    const previewCarName = document.getElementById("previewCarName");
+    const previewMileage = document.getElementById("previewMileage");
+    const previewInsurance = document.getElementById("previewInsurance");
+    const previewInspection = document.getElementById("previewInspection");
+    const vehiclePhotoPreview = document.getElementById("vehiclePhotoPreview");
+
+    function formatDate(value) {
+      if (!value) return "—";
+      const parts = value.split("-");
+      if (parts.length !== 3) return value;
+      return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    }
+
+    function updatePreview() {
+      const reg = regInput?.value?.trim();
+      const brand = brandInput?.value?.trim();
+      const model = modelInput?.value?.trim();
+      const mileage = mileageInput?.value?.trim();
+
+      previewRegistration.textContent = reg ? reg.toUpperCase() : "—";
+      previewCarName.textContent = `${brand || ""} ${model || ""}`.trim() || "Marka i model pojazdu";
+      previewMileage.textContent = `${mileage || "0"} km`;
+      previewInsurance.textContent = formatDate(insuranceInput?.value);
+      previewInspection.textContent = formatDate(inspectionInput?.value);
+    }
+
+    [regInput, brandInput, modelInput, mileageInput, insuranceInput, inspectionInput].forEach(function (input) {
+      if (input) {
+        input.addEventListener("input", updatePreview);
+        input.addEventListener("change", updatePreview);
+      }
+    });
+
+    if (photoInput) {
+      photoInput.addEventListener("change", function () {
+        const file = this.files && this.files[0];
+
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+          vehiclePhotoPreview.innerHTML = `<img src="${e.target.result}" alt="Zdjęcie pojazdu">`;
+        };
+
+        reader.readAsDataURL(file);
+      });
+    }
+
+    updatePreview();
+  });
+</script>
+
+{% endblock %}

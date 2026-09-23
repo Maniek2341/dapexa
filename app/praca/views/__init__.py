@@ -1,0 +1,6 @@
+from .work_order_list_view import WorkOrderListView
+from .work_detail_view import WorkDetailView
+from .work_assign_workers_view import WorkAssignWorkersView
+from .work_schedule_update_view import WorkScheduleUpdateView
+from .work_mark_ordered_view import WorkMarkOrderedView
+from .work_status_update_view import WorkStatusUpdateView

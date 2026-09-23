@@ -1,0 +1,16 @@
+[Unit]
+Description=Dapexa Django application
+After=network.target
+
+[Service]
+User=%APP_USER%
+Group=www-data
+WorkingDirectory=%APP_DIR%
+EnvironmentFile=%APP_DIR%/.env
+ExecStart=%APP_DIR%/.venv/bin/gunicorn BusinessManager.wsgi:application --bind unix:/run/dapexa.sock --workers 3 --timeout 120
+Restart=always
+RestartSec=5
+UMask=0007
+
+[Install]
+WantedBy=multi-user.target

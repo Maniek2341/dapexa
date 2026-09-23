@@ -1,0 +1,334 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+{% block content %}
+<style>
+/* ====== FULLCALENDAR – DYNAMIC LIGHT / DARK ====== */
+
+/* Usuń twarde ramki */
+.fc .fc-scrollgrid,
+.fc-theme-standard td,
+.fc-theme-standard th {
+    border: none !important;
+}
+
+/* ===== DARK MODE FIX FOR DATE GRID ===== */
+
+[data-theme="dark"] .fc-theme-standard td,
+[data-theme="dark"] .fc-theme-standard th,
+[data-theme="dark"] .fc-daygrid-day,
+[data-theme="dark"] .fc-timegrid-slot,
+[data-theme="dark"] .fc-timegrid-col {
+    background-color: var(--card) !important;
+    border-color: rgba(255,255,255,0.06) !important;
+}
+
+/* Nagłówki dni (Pn, Wt...) */
+[data-theme="dark"] .fc-col-header-cell {
+    background-color: var(--bg) !important;
+}
+
+/* Pasek godzin po lewej */
+[data-theme="dark"] .fc-timegrid-axis {
+    background-color: var(--bg) !important;
+}
+
+/* Obszar all-day */
+[data-theme="dark"] .fc-timegrid-allday {
+    background-color: var(--card) !important;
+}
+
+/* Dzisiaj w dark */
+[data-theme="dark"] .fc-day-today {
+    background-color: rgba(37, 99, 235, 0.15) !important;
+}
+
+/* Tło kalendarza */
+.fc {
+
+    color: var(--text);
+}
+
+/* Delikatne linie siatki (dynamiczne) */
+.fc-timegrid-slot,
+.fc-daygrid-day {
+    border-color: var(--border, #e5e7eb) !important;
+}
+
+/* Header */
+.fc-toolbar-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+/* Przyciski */
+.fc-button {
+    background: rgba(255,255,255,.04) !important;
+    border: 1px solid var(--border, #d1d5db) !important;
+    color: var(--text) !important;
+    border-radius: 12px !important;
+    font-weight: 800 !important;
+    padding: .55rem .8rem !important;
+    box-shadow: none !important;
+    transition: all .2s ease;
+}
+
+.fc-button:hover {
+    background: var(--card) !important;
+}
+
+/* Aktywny przycisk */
+.fc-button-active {
+    background: linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%) !important;
+    border-color: #1468f5 !important;
+    color: #fff !important;
+    box-shadow: 0 8px 18px rgba(20,104,245,.18) !important;
+}
+
+.fc .fc-button-primary:focus,
+.fc .fc-button-primary:not(:disabled):active:focus,
+.fc .fc-button-primary:not(:disabled).fc-button-active:focus{
+    box-shadow: 0 0 0 .2rem rgba(20,104,245,.14) !important;
+}
+
+/* Event */
+.fc-event {
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--brand, #2563eb) !important;
+}
+
+/* Hover event */
+.fc-event:hover {
+    filter: brightness(1.05);
+    cursor: pointer;
+}
+
+/* Dzisiaj */
+.fc-day-today {
+    background: rgba(37, 99, 235, 0.08) !important;
+}
+
+/* All-day label */
+.fc .fc-timegrid-axis-cushion {
+    color: var(--muted);
+}
+
+/* Godziny */
+.fc-timegrid-slot-label {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* Nazwy dni */
+.fc-col-header-cell-cushion {
+    color: var(--muted);
+    font-weight: 500;
+}
+
+/* Popraw spacing */
+.fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 1.5rem;
+}
+
+.calendar-actions{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap}
+.calendar-add-button,.calendar-modal-save{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;border:0;border-radius:12px;padding:.72rem 1rem;background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);color:#fff;font-weight:850;text-decoration:none;box-shadow:0 10px 24px rgba(20,104,245,.2)}
+.calendar-add-button:hover,.calendar-modal-save:hover{color:#fff;filter:brightness(1.06)}
+.calendar-modal{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+.calendar-modal .modal-header,.calendar-modal .modal-footer{border-color:var(--border);padding:1.15rem 1.35rem}
+.calendar-modal .modal-body{padding:1.35rem}
+.calendar-modal .modal-title{font-size:1.05rem;font-weight:900}
+.calendar-modal .form-label{color:var(--muted);font-size:.8rem;font-weight:800}
+.calendar-modal .form-control{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:.7rem .8rem}
+.calendar-modal .form-control:focus{border-color:#1468f5;box-shadow:0 0 0 .2rem rgba(20,104,245,.14);background:rgba(255,255,255,.06);color:var(--text)}
+.calendar-modal-cancel{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:12px;padding:.72rem 1rem;background:rgba(255,255,255,.04);color:var(--text);font-weight:800}
+.personal-events-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}.personal-events-head{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);background:rgba(20,104,245,.06)}.personal-events-head h2{margin:0;color:var(--text);font-size:1rem;font-weight:900}.personal-events-head p{margin:.2rem 0 0;color:var(--muted);font-size:.82rem}.personal-events-list{display:grid}.personal-event-row{display:flex;align-items:center;gap:1rem;padding:.85rem 1.1rem;border-bottom:1px solid var(--border)}.personal-event-row:last-child{border-bottom:0}.personal-event-date{min-width:70px;display:flex;flex-direction:column;color:#7d4cff}.personal-event-date strong{font-size:1rem}.personal-event-date small,.personal-event-info small{color:var(--muted);font-size:.78rem}.personal-event-info{display:flex;flex-direction:column;flex:1;min-width:0}.personal-event-info strong{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.personal-event-delete{width:36px;height:36px;border-radius:10px;border:1px solid rgba(220,53,69,.3);background:rgba(220,53,69,.1);color:#ff6b6b}.personal-event-delete:hover{filter:brightness(1.1)}
+.calendar-shell{min-width:0;overflow:hidden}
+.calendar-page-header{min-width:0}
+
+/* ===== MOBILE GOOGLE STYLE ===== */
+@media (max-width: 768px) {
+
+    .calendar-page-header{
+        align-items:stretch !important;
+        flex-direction:column;
+        gap:.85rem;
+        margin-bottom:1rem !important;
+    }
+
+    .calendar-page-header h1{font-size:1.35rem}
+    .calendar-actions{width:100%}
+    .calendar-add-button{width:100%}
+
+    .calendar-shell .card-body{padding:.55rem !important}
+    #calendar{width:100%;min-width:0;overflow:hidden}
+
+    .fc .fc-toolbar.fc-header-toolbar{
+        display:grid;
+        grid-template-columns:1fr auto;
+        gap:.45rem;
+        align-items:center;
+    }
+
+    .fc .fc-toolbar-chunk{min-width:0;display:flex;align-items:center;gap:.25rem}
+    .fc .fc-toolbar-chunk:nth-child(2){grid-column:1 / -1;grid-row:1;justify-content:center;min-height:32px}
+    .fc .fc-toolbar-chunk:nth-child(1){grid-column:1;grid-row:2}
+    .fc .fc-toolbar-chunk:nth-child(3){grid-column:1 / -1;grid-row:3;justify-content:center;flex-wrap:wrap}
+
+    .fc-toolbar-title {
+        max-width:100%;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .fc-button {
+        padding: 5px 7px !important;
+        font-size: 12px !important;
+        white-space:nowrap;
+    }
+
+    .fc-event {
+        font-size: 11px !important;
+        padding: 2px 6px !important;
+    }
+
+    .fc-timegrid-slot-label {
+        font-size: 10px !important;
+    }
+
+    .fc-col-header-cell-cushion {
+        font-size: 12px !important;
+    }
+
+    /* mniej odstępów */
+    .fc .fc-toolbar.fc-header-toolbar {
+        margin-bottom: 0.8rem;
+    }
+
+    /* usuń scroll poziomy */
+    .fc-scroller {
+        overflow-x: hidden !important;
+    }
+
+    .fc .fc-timegrid-axis{width:42px}
+    .fc .fc-timegrid-slot-label{padding:0 2px}
+    .personal-event-row{gap:.65rem;padding:.75rem}
+    .personal-event-date{min-width:58px}
+    .calendar-modal .modal-dialog{margin:.5rem}
+    .calendar-modal .modal-header,.calendar-modal .modal-footer{padding:.9rem}
+    .calendar-modal .modal-body{padding:.9rem}
+}
+</style>
+<div class="calendar-page-header d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 fw-bold mb-0">Kalendarz</h1>
+    <div class="text-muted">Twoje protokoły i urlopy</div>
+  </div>
+  <div class="calendar-actions"><button type="button" class="calendar-add-button" data-bs-toggle="modal" data-bs-target="#personalEventModal"><i class="bi bi-plus-lg"></i>Dodaj wydarzenie</button></div>
+</div>
+
+<div class="calendar-shell card border-0">
+  <div class="card-body p-4">
+    <div id="calendar"></div>
+  </div>
+</div>
+
+{% if personal_events %}
+<div class="personal-events-card mt-4">
+  <div class="personal-events-head"><h2><i class="bi bi-person-workspace me-2"></i>Moje wydarzenia</h2><p>Wydarzenia dodane przez Ciebie.</p></div>
+  <div class="personal-events-list">
+    {% for event in personal_events %}
+      <div class="personal-event-row"><div class="personal-event-date"><strong>{{ event.start|date:"d.m" }}</strong><small>{{ event.start|date:"H:i" }}–{{ event.end|date:"H:i" }}</small></div><div class="personal-event-info"><strong>{{ event.title }}</strong>{% if event.description %}<small>{{ event.description }}</small>{% endif %}</div><form method="post" action="{% url 'calendar_personal_event_delete' event.pk %}">{% csrf_token %}<button type="submit" class="personal-event-delete" title="Usuń wydarzenie" onclick="return confirm('Czy na pewno usunąć to wydarzenie?');"><i class="bi bi-trash"></i></button></form></div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="modal fade" id="personalEventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content calendar-modal">
+      <form method="post" action="{% url 'calendar_personal_event_add' %}">
+        {% csrf_token %}
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-calendar-plus me-2" style="color:#1468f5"></i>Dodaj własne wydarzenie</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><div class="mb-3"><label class="form-label">Nazwa wydarzenia</label><input class="form-control" name="title" required></div><div class="row g-3"><div class="col-12 col-md-6"><label class="form-label">Początek</label><input class="form-control" type="datetime-local" name="start" required></div><div class="col-12 col-md-6"><label class="form-label">Koniec</label><input class="form-control" type="datetime-local" name="end" required></div></div><div class="mt-3"><label class="form-label">Opis <span class="text-muted">(opcjonalnie)</span></label><textarea class="form-control" name="description" rows="3"></textarea></div></div>
+        <div class="modal-footer"><button type="button" class="calendar-modal-cancel" data-bs-dismiss="modal">Anuluj</button><button type="submit" class="calendar-modal-save"><i class="bi bi-check2"></i>Zapisz wydarzenie</button></div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales-all.global.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+    
+        const isMobile = window.innerWidth < 768;
+    
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: isMobile ? 'timeGridDay' : 'timeGridWeek',
+            locale: 'pl',
+            allDayText: 'Cały dzień',
+            firstDay: 1,
+            weekends: false,
+            height: 'auto',
+            nowIndicator: true,
+            dayMaxEvents: true,   // 🔥 zwija nadmiar eventów
+            expandRows: true,
+            slotMinTime: "{{ calendar_start_time }}",
+            slotMaxTime: "{{ calendar_end_time }}",
+    
+            headerToolbar: isMobile
+                ? {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: 'today,timeGridDay'
+                  }
+                : {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'timeGridDay,timeGridWeek,dayGridMonth'
+                  },
+    
+            buttonText: {
+                today: 'Dzisiaj',
+                month: 'Miesiąc',
+                week: 'Tydzień',
+                day: 'Dzień'
+            },
+    
+            events: "{% url 'user_calendar_events' %}"
+        });
+    
+        calendar.render();
+    });
+    </script>
+    <script>
+        // Przełącznik motywu (zapisywany w localStorage)
+        (function(){
+          const root = document.documentElement;
+          const key = 'dashboard-theme';
+          const saved = localStorage.getItem(key) || 'dark';
+          root.setAttribute('data-theme', saved);
+          const btn = document.getElementById('themeToggle');
+          const setIcon = () => { btn.innerHTML = root.getAttribute('data-theme') === 'light' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>'; };
+          setIcon();
+          btn.addEventListener('click', ()=>{
+            const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            root.setAttribute('data-theme', next);
+            localStorage.setItem(key, next);
+            setIcon();
+            // odśwież kolory wykresu bez przeładowania
+            renderPL(document.querySelector('[data-range].active')?.getAttribute('data-range') || 'mtd');
+          });
+        })();
+        </script>
+{% endblock %}

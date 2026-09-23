@@ -1,0 +1,1083 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+
+<style>
+  .product-detail-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:1rem;
+    margin-bottom:1.5rem;
+    flex-wrap:wrap;
+  }
+
+  .product-detail-title{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .product-detail-icon{
+    width:64px;
+    height:64px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+      linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+    border:1px solid rgba(20,104,245,.18);
+    color:#1468f5;
+    font-size:1.7rem;
+    flex-shrink:0;
+  }
+
+  .product-detail-title h1{
+    margin:0;
+    font-size:1.75rem;
+    font-weight:900;
+    color:var(--text);
+  }
+
+  .product-detail-sub{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem;
+    margin-top:.5rem;
+  }
+
+  .detail-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    padding:.45rem .75rem;
+    border-radius:999px;
+    font-size:.78rem;
+    font-weight:800;
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--border);
+    color:var(--muted);
+  }
+
+  .detail-badge-orange{
+    background:rgba(20,104,245,.12);
+    color:#1468f5;
+    border-color:rgba(20,104,245,.18);
+  }
+
+  .detail-badge-active{
+    background:rgba(25,135,84,.15);
+    color:#47d18c;
+    border-color:rgba(25,135,84,.18);
+  }
+
+  .detail-badge-disabled{
+    background:rgba(220,53,69,.15);
+    color:#ff6b81;
+    border-color:rgba(220,53,69,.18);
+  }
+
+  .detail-actions{
+    display:flex;
+    gap:.75rem;
+    flex-wrap:wrap;
+  }
+
+  .btn-orange{
+    border:0;
+    color:#fff;
+    font-weight:800;
+    border-radius:14px;
+    padding:.75rem 1.1rem;
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+    text-decoration:none;
+  }
+
+  .btn-orange:hover{
+    color:#fff;
+    filter:brightness(1.05);
+  }
+
+  .btn-soft{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    border-radius:14px;
+    font-weight:800;
+    padding:.75rem 1.1rem;
+    text-decoration:none;
+  }
+
+  .btn-soft:hover{
+    color:var(--text);
+    background:rgba(255,255,255,.07);
+  }
+
+  .detail-grid{
+    display:grid;
+    grid-template-columns:1.35fr .65fr;
+    gap:1.25rem;
+  }
+
+  .detail-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:0 18px 55px rgba(0,0,0,.14);
+  }
+
+  .detail-card-header{
+    padding:1.2rem 1.35rem;
+    border-bottom:1px solid var(--border);
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 38%),
+      rgba(255,255,255,.02);
+  }
+
+  .detail-card-header h2{
+    margin:0;
+    color:var(--text);
+    font-size:1.05rem;
+    font-weight:900;
+  }
+
+  .detail-card-header span{
+    display:block;
+    margin-top:.2rem;
+    color:var(--muted);
+    font-size:.85rem;
+  }
+
+  .detail-card-body{
+    padding:1.35rem;
+  }
+
+  .info-list{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:1rem;
+  }
+
+  .info-item{
+    padding:1rem;
+    border-radius:18px;
+    background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.06);
+  }
+
+  .info-label{
+    color:var(--muted);
+    font-size:.78rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-bottom:.35rem;
+  }
+
+  .info-value{
+    color:var(--text);
+    font-size:.98rem;
+    font-weight:800;
+    word-break:break-word;
+  }
+
+  .price-box{
+    display:grid;
+    gap:1rem;
+  }
+
+  .price-main{
+    padding:1.25rem;
+    border-radius:20px;
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.22), transparent 45%),
+      rgba(20,104,245,.08);
+    border:1px solid rgba(20,104,245,.18);
+  }
+
+  .price-label{
+    color:var(--muted);
+    font-size:.78rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+
+  .price-value{
+    color:var(--text);
+    font-size:2rem;
+    font-weight:950;
+    margin-top:.2rem;
+  }
+
+  .price-muted{
+    color:var(--muted);
+    font-size:.9rem;
+    margin-top:.2rem;
+  }
+
+  .mini-stats{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:.85rem;
+  }
+
+  .mini-stat{
+    padding:1rem;
+    border-radius:18px;
+    background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.06);
+  }
+
+  .mini-stat strong{
+    display:block;
+    color:var(--text);
+    font-size:1.15rem;
+    font-weight:900;
+  }
+
+  .mini-stat span{
+    color:var(--muted);
+    font-size:.8rem;
+    font-weight:700;
+  }
+
+  .placeholder-box{
+    padding:1.25rem;
+    border-radius:20px;
+    background:rgba(255,255,255,.03);
+    border:1px dashed rgba(255,255,255,.14);
+    color:var(--muted);
+    text-align:center;
+  }
+
+  .placeholder-box i{
+    display:block;
+    font-size:1.8rem;
+    color:#1468f5;
+    margin-bottom:.5rem;
+  }
+
+  .detail-tabs{
+    margin-top:1.25rem;
+  }
+
+  .detail-tabs .nav-link{
+    color:var(--muted);
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.03);
+    border-radius:999px;
+    font-weight:800;
+    margin-right:.5rem;
+    margin-bottom:.5rem;
+  }
+
+  .detail-tabs .nav-link.active{
+    color:#fff;
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+    border-color:transparent;
+  }
+
+  .tab-panel{
+    margin-top:1rem;
+  }
+
+  @media(max-width: 992px){
+    .detail-grid{
+      grid-template-columns:1fr;
+    }
+  }
+
+  @media(max-width: 576px){
+    .product-detail-title{
+      align-items:flex-start;
+    }
+
+    .product-detail-icon{
+      width:54px;
+      height:54px;
+      border-radius:17px;
+    }
+
+    .info-list,
+    .mini-stats{
+      grid-template-columns:1fr;
+    }
+
+    .detail-actions,
+    .detail-actions a{
+      width:100%;
+    }
+
+    .detail-actions a{
+      text-align:center;
+    }
+  }
+
+  .scroll-table{
+  max-height:320px;
+  overflow:auto;
+  border-radius:18px;
+}
+
+.scroll-table::-webkit-scrollbar{
+  width:10px;
+  height:10px;
+}
+
+.scroll-table::-webkit-scrollbar-track{
+  background:rgba(255,255,255,.04);
+  border-radius:999px;
+}
+
+.scroll-table::-webkit-scrollbar-thumb{
+  background:rgba(20,104,245,.35);
+  border-radius:999px;
+}
+
+.scroll-table::-webkit-scrollbar-thumb:hover{
+  background:rgba(20,104,245,.55);
+}
+</style>
+
+<div class="product-detail-header">
+  <div class="product-detail-title">
+    <div class="product-detail-icon">
+      <i class="bi bi-box-seam"></i>
+    </div>
+
+    <div>
+      <h1>{{ product.name }}</h1>
+
+      <div class="product-detail-sub">
+        <span class="detail-badge detail-badge-orange">
+          <i class="bi bi-tag"></i>
+          {{ product.get_type_display }}
+        </span>
+
+        <span class="detail-badge">
+          <i class="bi bi-upc-scan"></i>
+          {% if product.sku %}{{ product.sku }}{% else %}Brak SKU{% endif %}
+        </span>
+
+        {% if product.category %}
+          <span class="detail-badge">
+            <i class="bi bi-folder"></i>
+            {{ product.category.name }}
+          </span>
+        {% endif %}
+
+        {% if product.is_active %}
+          <span class="detail-badge detail-badge-active">
+            <i class="bi bi-check-circle"></i>
+            Aktywny
+          </span>
+        {% else %}
+          <span class="detail-badge detail-badge-disabled">
+            <i class="bi bi-x-circle"></i>
+            Nieaktywny
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-actions">
+    <a href="{% url 'product_list' %}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>
+      Lista
+    </a>
+
+    {# później podmienisz na product_edit #}
+    <a href="{% url 'product_update' product.pk %}" class="btn-soft">
+      <i class="bi bi-pencil-square me-1"></i>
+      Edytuj
+    </a>
+
+    <a href="{% url 'product_create' %}" class="btn-orange">
+      <i class="bi bi-plus-circle me-1"></i>
+      Dodaj kolejną
+    </a>
+  </div>
+</div>
+
+<div class="detail-grid">
+  <div>
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <h2>Podstawowe informacje</h2>
+        <span>Dane katalogowe pozycji.</span>
+      </div>
+
+      <div class="detail-card-body">
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-label">Nazwa</div>
+            <div class="info-value">{{ product.name }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">SKU / Kod</div>
+            <div class="info-value">
+              {% if product.sku %}{{ product.sku }}{% else %}—{% endif %}
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Typ pozycji</div>
+            <div class="info-value">{{ product.get_type_display }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Kategoria</div>
+            <div class="info-value">
+              {% if product.category %}{{ product.category.name }}{% else %}—{% endif %}
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Jednostka</div>
+            <div class="info-value">{{ product.unit }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Status</div>
+            <div class="info-value">
+              {% if product.is_active %}Aktywny{% else %}Nieaktywny{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-tabs">
+      
+      <ul class="nav nav-pills" id="productTabs" role="tablist">
+        {% if product.type != "service" and product.type != "labor" %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active"
+                  id="usage-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#usage"
+                  type="button"
+                  role="tab">
+            Użycie
+          </button>
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <button class="nav-link"
+                  id="warehouse-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#warehouse"
+                  type="button"
+                  role="tab">
+            Magazyn
+          </button>
+        </li>
+{% endif %}
+        <li class="nav-item" role="presentation" >
+          <button class="nav-link {% if product.type == 'service' or product.type == 'labor' %}active{% endif %}"
+                  id="files-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#files"
+                  type="button"
+                  role="tab">
+            Dokumenty
+          </button>
+        </li>
+
+        <li class="nav-item" role="presentation">
+          <button class="nav-link"
+                  id="history-tab"
+                  data-bs-toggle="pill"
+                  data-bs-target="#history"
+                  type="button"
+                  role="tab">
+            Historia
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content tab-panel">
+        {% if product.type != "service" and product.type != "labor" %}
+        <div class="tab-pane fade show active" id="usage" role="tabpanel">
+
+  <div class="detail-card mb-3">
+    <div class="detail-card-header">
+      <h2>Użycie w ofertach</h2>
+      <span>Warianty ofert, w których użyto tego produktu.</span>
+    </div>
+
+    <div class="detail-card-body">
+      {% if offer_items %}
+        <div class="table-responsive scroll-table">
+          <table class="table align-middle mb-0" style="color:var(--text);">
+            <thead>
+              <tr>
+                <th>Oferta</th>
+                <th>Wariant</th>
+                <th>Klient</th>
+                <th>Ilość</th>
+                <th>Wartość netto</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for item in offer_items %}
+                <tr>
+                  <td>
+                    <a href="{% url 'offer_detail' item.variant.offer.pk %}"
+                       class="fw-bold text-decoration-none"
+                       style="color:var(--text);">
+                      {{ item.variant.offer.number }}
+                    </a>
+
+                    <div class="text-muted small">
+                      {{ item.variant.offer.title }}
+                    </div>
+                  </td>
+
+                  <td>
+                    {{ item.variant.name }}
+
+                    {% if item.variant.is_selected %}
+                      <span class="detail-badge detail-badge-active ms-1">
+                        Wybrany
+                      </span>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {{ item.variant.offer.client }}
+                  </td>
+
+                  <td>
+                    <strong>{{ item.quantity|floatformat:2 }}</strong>
+                    <span class="text-muted small">{{ item.unit }}</span>
+                  </td>
+
+                  <td>
+                    {{ item.total_netto|floatformat:2 }} zł
+                  </td>
+
+                  <td>
+                    {{ item.variant.offer.issue_date|date:"d.m.Y" }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          
+        </div>
+        {% if offer_items_count > 10 %}
+          <div class="text-muted small mt-3">
+            Pokazano ostatnie 10 z {{ offer_items_count }} użyć w ofertach.
+            <a href="{% url 'product_offer_usage' product.pk %}" class="fw-bold" style="color:#1468f5;">
+              Zobacz wszystkie
+            </a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="placeholder-box">
+          <i class="bi bi-file-earmark-text"></i>
+          Produkt nie został jeszcze użyty w żadnej ofercie.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="detail-card">
+    <div class="detail-card-header">
+      <h2>Użycie w protokołach</h2>
+      <span>Protokoły, w których użyto tego produktu.</span>
+    </div>
+
+    <div class="detail-card-body">
+      {% if protocol_items %}
+        <div class="table-responsive scroll-table">
+          <table class="table align-middle mb-0" style="color:var(--text);">
+            <thead>
+              <tr>
+                <th>Protokół</th>
+                <th>Klient</th>
+                <th>Ilość</th>
+                <th>Wartość</th>
+                <th>Status</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for item in protocol_items %}
+                <tr>
+                  <td>
+                    <a href="{% url 'protokol_detail' item.protokol.pk %}"
+                       class="fw-bold text-decoration-none"
+                       style="color:var(--text);">
+                      {{ item.protokol.number }}
+                    </a>
+
+                    {% if item.protokol.title %}
+                      <div class="text-muted small">
+                        {{ item.protokol.title }}
+                      </div>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {{ item.protokol.client }}
+                  </td>
+
+                  <td>
+                    <strong>{{ item.sztuki|default:0 }}</strong>
+                    <span class="text-muted small">{{ product.unit }}</span>
+                  </td>
+
+                  <td>
+                    {% if item.cenarazem %}
+                      {{ item.cenarazem|floatformat:2 }} zł
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    <span class="detail-badge">
+                      {{ item.protokol.get_status_display }}
+                    </span>
+                  </td>
+
+                  <td>
+                    {{ item.protokol.created_at|date:"d.m.Y" }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if protocol_items_count > 10 %}
+          <div class="text-muted small mt-3">
+            Pokazano ostatnie 10 z {{ protocol_items_count }} użyć w protokołach.
+            <a href="{% url 'product_protocol_usage' product.pk %}" class="fw-bold" style="color:#1468f5;">
+              Zobacz wszystkie
+            </a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="placeholder-box">
+          <i class="bi bi-tools"></i>
+          Produkt nie został jeszcze użyty w żadnym protokole.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+        <div class="tab-pane fade" id="warehouse" role="tabpanel">
+  <div class="detail-card">
+    <div class="detail-card-header">
+      <h2>Magazyn</h2>
+      <span>Stany magazynowe produktu w poszczególnych magazynach.</span>
+    </div>
+
+    <div class="detail-card-body">
+      <div class="mini-stats mb-3">
+        <div class="mini-stat">
+          <strong>{{ total_quantity|floatformat:2 }} {{ product.unit }}</strong>
+          <span>Łączny stan</span>
+        </div>
+
+        <div class="mini-stat">
+          <strong>{{ total_min_quantity|floatformat:2 }} {{ product.unit }}</strong>
+          <span>Łączne minimum</span>
+        </div>
+
+        <div class="mini-stat">
+          <strong>{{ warehouse_count }}</strong>
+          <span>Liczba magazynów</span>
+        </div>
+
+        <div class="mini-stat">
+          <strong>
+            {% if total_quantity <= 0 %}
+              Brak
+            {% elif total_quantity < total_min_quantity %}
+              Niski
+            {% else %}
+              OK
+            {% endif %}
+          </strong>
+          <span>Status globalny</span>
+        </div>
+      </div>
+
+      {% if stock_items %}
+        <div class="table-responsive scroll-table">
+          <table class="table align-middle mb-0" style="color:var(--text);">
+            <thead>
+              <tr>
+                <th>Magazyn</th>
+                <th>Ilość</th>
+                <th>Minimum</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for stock in stock_items %}
+                <tr>
+                  <td>
+                    <div class="fw-bold">
+                      <i class="bi bi-building me-1 text-muted"></i>
+                      {{ stock.warehouse.name }}
+                    </div>
+
+                    {% if stock.warehouse.description %}
+                      <div class="text-muted small">
+                        {{ stock.warehouse.description }}
+                      </div>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    <strong>{{ stock.quantity|floatformat:2 }}</strong>
+                    <span class="text-muted small">{{ product.unit }}</span>
+                  </td>
+
+                  <td>
+                    <strong>{{ stock.min_quantity|floatformat:2 }}</strong>
+                    <span class="text-muted small">{{ product.unit }}</span>
+                  </td>
+
+                  <td>
+                    {% if stock.quantity <= 0 %}
+                      <span class="detail-badge detail-badge-disabled">
+                        <i class="bi bi-x-circle"></i>
+                        Brak
+                      </span>
+                    {% elif stock.quantity < stock.min_quantity %}
+                      <span class="detail-badge" style="background:rgba(255,193,7,.16);color:#ffc857;border-color:rgba(255,193,7,.22);">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Niski stan
+                      </span>
+                    {% else %}
+                      <span class="detail-badge detail-badge-active">
+                        <i class="bi bi-check-circle"></i>
+                        OK
+                      </span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="placeholder-box">
+          <i class="bi bi-boxes"></i>
+          Ten produkt nie jest jeszcze dodany do żadnego magazynu.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="detail-card mt-3">
+    <div class="detail-card-header">
+      <h2>Ostatnie ruchy magazynowe</h2>
+      <span>Przyjęcia i wydania tego produktu.</span>
+    </div>
+
+    <div class="detail-card-body">
+      {% if stock_movements %}
+        <div class="table-responsive scroll-table">
+          <table class="table align-middle mb-0" style="color:var(--text);">
+            <thead>
+              <tr>
+                <th>Typ</th>
+                <th>Magazyn</th>
+                <th>Ilość</th>
+                <th>Dokument</th>
+                <th>Notatka</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for movement in stock_movements %}
+                <tr>
+                  <td>
+                    {% if movement.type == "in" %}
+                      <span class="detail-badge detail-badge-active">
+                        <i class="bi bi-plus-circle"></i>
+                        Przyjęcie
+                      </span>
+                    {% elif movement.type == "out" %}
+                      <span class="detail-badge detail-badge-disabled">
+                        <i class="bi bi-dash-circle"></i>
+                        Wydanie
+                      </span>
+                    {% else %}
+                      <span class="detail-badge">
+                        {{ movement.get_type_display }}
+                      </span>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {% if movement.warehouse %}
+                      {{ movement.warehouse.name }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    <strong>{{ movement.quantity|floatformat:2 }}</strong>
+                    <span class="text-muted small">{{ product.unit }}</span>
+                  </td>
+
+                  <td>
+                    {% if movement.document_number %}
+                      {{ movement.document_number }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {% if movement.note %}
+                      {{ movement.note|truncatechars:60 }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if stock_movements_count > 10 %}
+          <div class="text-muted small mt-3">
+            Pokazano ostatnie 10 z {{ stock_movements_count }} ruchów magazynowych.
+            <a href="{% url 'product_stock_history' product.pk %}" class="fw-bold" style="color:#1468f5;">
+              Zobacz wszystkie
+            </a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="placeholder-box">
+          <i class="bi bi-clock-history"></i>
+          Brak ruchów magazynowych dla tego produktu.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+        <div class="tab-pane fade {% if product.type == 'service' or product.type == 'labor' %}show active{% endif %}" id="files" role="tabpanel">
+          <div class="detail-card">
+            <div class="detail-card-header">
+              <h2>Dokumenty i załączniki</h2>
+              <span>Karty katalogowe, instrukcje, gwarancje i zdjęcia.</span>
+            </div>
+
+            <div class="detail-card-body">
+              <div class="placeholder-box">
+                <i class="bi bi-paperclip"></i>
+                Tutaj później dodasz zdjęcia, PDF-y, instrukcje i karty produktu.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="history" role="tabpanel">
+  <div class="detail-card">
+    <div class="detail-card-header">
+      <h2>Historia zmian</h2>
+      <span>Zmiany ceny, statusu, danych produktu i notatki.</span>
+    </div>
+
+    <div class="detail-card-body">
+      {% if product_activities %}
+        <div class="table-responsive scroll-table">
+          <table class="table align-middle mb-0" style="color:var(--text);">
+            <thead>
+              <tr>
+                <th>Typ</th>
+                <th>Zdarzenie</th>
+                <th>Użytkownik</th>
+                <th>Data</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for activity in product_activities %}
+                <tr>
+                  <td>
+                    <span class="detail-badge">
+                      {% if activity.type == "created" %}
+                        <i class="bi bi-plus-circle"></i>
+                      {% elif activity.type == "updated" %}
+                        <i class="bi bi-pencil-square"></i>
+                      {% elif activity.type == "price" %}
+                        <i class="bi bi-cash-coin"></i>
+                      {% elif activity.type == "status" %}
+                        <i class="bi bi-toggle-on"></i>
+                      {% elif activity.type == "stock" %}
+                        <i class="bi bi-boxes"></i>
+                      {% else %}
+                        <i class="bi bi-clock-history"></i>
+                      {% endif %}
+
+                      {{ activity.get_type_display }}
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="fw-bold">
+                      {{ activity.title }}
+                    </div>
+
+                    {% if activity.description %}
+                      <div class="text-muted small">
+                        {{ activity.description }}
+                      </div>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {% if activity.created_by %}
+                      {{ activity.created_by.get_full_name|default:activity.created_by.email }}
+                    {% else %}
+                      System
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {{ activity.created_at|date:"d.m.Y H:i" }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        {% if product_activities_count > 10 %}
+          <div class="text-muted small mt-3">
+            Pokazano ostatnie 10 z {{ product_activities_count }} wpisów historii.
+            <a href="#" class="fw-bold" style="color:#1468f5;">
+              Zobacz wszystkie
+            </a>
+          </div>
+        {% endif %}
+      {% else %}
+        <div class="placeholder-box">
+          <i class="bi bi-clock-history"></i>
+          Brak historii dla tego produktu.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+
+  <aside>
+    <div class="detail-card mb-3">
+      <div class="detail-card-header">
+        <h2>Cena</h2>
+        <span>Podsumowanie ceny netto i brutto.</span>
+      </div>
+
+      <div class="detail-card-body">
+        <div class="price-box">
+          <div class="price-main">
+            <div class="price-label">Cena brutto</div>
+            <div class="price-value">
+              {{ gross_price|floatformat:2 }} zł
+            </div>
+            <div class="price-muted">
+              Netto: {{ product.net_price }} zł · VAT {{ product.vat_rate }}%
+            </div>
+          </div>
+
+          <div class="mini-stats">
+            <div class="mini-stat">
+              <strong>{{ product.net_price }} zł</strong>
+              <span>Cena netto</span>
+            </div>
+
+            <div class="mini-stat">
+              <strong>{{ product.vat_rate }}%</strong>
+              <span>Stawka VAT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <h2>Szybkie informacje</h2>
+        <span>Najważniejsze dane w skrócie.</span>
+      </div>
+
+      <div class="detail-card-body">
+        <div class="info-list" style="grid-template-columns:1fr;">
+          <div class="info-item">
+            <div class="info-label">Typ</div>
+            <div class="info-value">{{ product.get_type_display }}</div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Kategoria</div>
+            <div class="info-value">
+              {% if product.category %}{{ product.category.name }}{% else %}—{% endif %}
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-label">Jednostka</div>
+            <div class="info-value">{{ product.unit }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const tabButtons = document.querySelectorAll('[data-bs-toggle="pill"]');
+    const tabPanes = document.querySelectorAll(".tab-pane");
+
+    tabButtons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        const targetSelector = button.getAttribute("data-bs-target");
+        const targetPane = document.querySelector(targetSelector);
+
+        tabButtons.forEach(function (btn) {
+          btn.classList.remove("active");
+          btn.setAttribute("aria-selected", "false");
+        });
+
+        tabPanes.forEach(function (pane) {
+          pane.classList.remove("show", "active");
+        });
+
+        button.classList.add("active");
+        button.setAttribute("aria-selected", "true");
+
+        if (targetPane) {
+          targetPane.classList.add("show", "active");
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,11 @@
+from .dashboard_view import DashboardView
+from .views_stripe import checkout_cancel, checkout_success, create_checkout_session, stripe_webhook
+from .select_plan_view import select_plan
+from .views_calendar import user_calendar_events, UserCalendarView
+from .calendar_personal_event_view import PersonalCalendarEventCreateView
+from .calendar_personal_event_delete_view import PersonalCalendarEventDeleteView
+from .company_settings_view import CompanySettingsView
+from .purchase_extra_users_view import PurchaseExtraUsersView
+from .change_package_view import ChangePackageView
+from .cancel_subscription_view import CancelSubscriptionView
+from .documentation_view import ClientDocumentationView, DocumentationIndexView, DocumentationModuleView

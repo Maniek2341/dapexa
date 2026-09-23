@@ -1,0 +1,629 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1 fw-bold">Edytuj klienta</h1>
+    <div class="text-muted" style="color:var(--muted)!important">
+      Uzupełnij dane klienta i adresy serwisowe / rozliczeniowe
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- FORMULARZ -->
+  <div class="col-12 col-xl-8">
+    <div class="card">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Dane podstawowe</h5>
+
+    <form id="clientForm" class="needs-validation" novalidate method="post" action="{% url 'klient_edit' client.pk %}"> {# client.pk to id klienta #}
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          <div class="row g-3">
+            <div class="col-md-3 order-md-2">
+              <label class="form-label">Typ klienta</label>
+              <select
+                name="client_type"
+                id="{{ form.client_type.id_for_label }}"
+                class="form-select{% if form.client_type.errors %} is-invalid{% endif %}">
+                {% for value, label in form.client_type.field.choices %}
+                  <option value="{{ value }}" {% if form.client_type.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              {% for error in form.client_type.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- TOŻSAMOŚĆ + TYP KLIENTA + EMAIL/TEL -->
+          <div class="row g-3">
+            <!-- OSOBA PRYWATNA: imię + nazwisko -->
+            <div class="col-md-12" id="personIdentityRow">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Imię</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    id="{{ form.first_name.id_for_label }}"
+                    value="{{ form.first_name.value|default_if_none:'' }}"
+                    class="form-control{% if form.first_name.errors %} is-invalid{% endif %}"
+                    placeholder="np. Jan">
+                  {% for error in form.first_name.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Nazwisko</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    id="{{ form.last_name.id_for_label }}"
+                    value="{{ form.last_name.value|default_if_none:'' }}"
+                    class="form-control{% if form.last_name.errors %} is-invalid{% endif %}"
+                    placeholder="np. Kowalski">
+                  {% for error in form.last_name.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- FIRMA: nazwa + NIP -->
+            <div class="col-md-12 d-none" id="companyIdentityRow">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Nazwa firmy</label>
+                  <input
+                    type="text"
+                    name="name"
+                    id="{{ form.name.id_for_label }}"
+                    value="{{ form.name.value|default_if_none:'' }}"
+                    class="form-control{% if form.name.errors %} is-invalid{% endif %}"
+                    placeholder="np. ACME Sp. z o.o.">
+                  {% for error in form.name.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">NIP</label>
+                  <input
+                    type="text"
+                    name="nip"
+                    id="{{ form.nip.id_for_label }}"
+                    value="{{ form.nip.value|default_if_none:'' }}"
+                    class="form-control{% if form.nip.errors %} is-invalid{% endif %}"
+                    placeholder="np. 5250000000">
+                  {% for error in form.nip.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <!-- E-mail -->
+            <div class="col-md-6 mt-3">
+              <label class="form-label required">E-mail</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input
+                  type="email"
+                  name="email"
+                  id="{{ form.email.id_for_label }}"
+                  value="{{ form.email.value|default_if_none:'' }}"
+                  class="form-control{% if form.email.errors %} is-invalid{% endif %}"
+                  placeholder="np. kontakt@firma.pl"
+                  required>
+                {% for error in form.email.errors %}
+                  <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Telefon -->
+            <div class="col-md-6 mt-3">
+              <label class="form-label required">Telefon</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input
+                  type="tel"
+                  name="phone"
+                  id="{{ form.phone.id_for_label }}"
+                  value="{{ form.phone.value|default_if_none:'' }}"
+                  class="form-control{% if form.phone.errors %} is-invalid{% endif %}"
+                  placeholder="np. +48 600 000 000"
+                  required>
+                {% for error in form.phone.errors %}
+                  <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- ADRES SERWISOWY (SHIPPING) -->
+          <div class="row g-3 mt-3">
+            <div class="col-12">
+              <h5 class="fw-bold mt-2 mb-3">Adres serwisowy</h5>
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label required">Ulica</label>
+              <input
+                type="text"
+                name="shipping_street"
+                value="{{ form.shipping_street.value|default_if_none:'' }}"
+                class="form-control{% if form.shipping_street.errors %} is-invalid{% endif %}"
+                placeholder="np. Prosta">
+              {% for error in form.shipping_street.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label required">Nr domu / lokalu</label>
+              <input
+                type="text"
+                name="shipping_street_no"
+                value="{{ form.shipping_street_no.value|default_if_none:'' }}"
+                class="form-control{% if form.shipping_street_no.errors %} is-invalid{% endif %}"
+                placeholder="np. 12/4">
+              {% for error in form.shipping_street_no.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label required">Kod pocztowy</label>
+              <input
+                type="text"
+                name="shipping_zip"
+                value="{{ form.shipping_zip.value|default_if_none:'' }}"
+                class="form-control{% if form.shipping_zip.errors %} is-invalid{% endif %}"
+                placeholder="np. 00-000">
+              {% for error in form.shipping_zip.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-5">
+              <label class="form-label required">Miejscowość</label>
+              <input
+                type="text"
+                name="shipping_city"
+                value="{{ form.shipping_city.value|default_if_none:'' }}"
+                class="form-control{% if form.shipping_city.errors %} is-invalid{% endif %}"
+                placeholder="np. Warszawa">
+              {% for error in form.shipping_city.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label required">Kraj</label>
+              <input
+                type="text"
+                name="shipping_country"
+                value="{{ form.shipping_country.value|default_if_none:'Polska' }}"
+                class="form-control{% if form.shipping_country.errors %} is-invalid{% endif %}"
+                placeholder="np. Polska">
+              {% for error in form.shipping_country.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- CHECKBOX + ADRES ROZLICZENIOWY (BILLING) -->
+          <div class="row g-3 mt-3">
+            <div class="col-12">
+              <div class="form-check">
+                <input
+                  class="form-check-input form-control"
+                  type="checkbox"
+                  id="id_billing_other"
+                  name="billing_other"
+                  {% if form.billing_other.value %}checked{% endif %}>
+                <label class="form-check-label ms-2" for="id_billing_other">
+                  Inny adres rozliczeniowy
+                </label>
+              </div>
+            </div>
+
+            <div class="col-12">
+              <div id="billingAddressSection" class="row g-3 mt-2 d-none">
+                <div class="col-12">
+                </div>
+
+                <div class="col-md-8">
+                  <label class="form-label">Ulica</label>
+                  <input
+                    type="text"
+                    name="billing_street"
+                    value="{{ form.billing_street.value|default_if_none:'' }}"
+                    class="form-control{% if form.billing_street.errors %} is-invalid{% endif %}"
+                    placeholder="np. Prosta">
+                  {% for error in form.billing_street.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Nr domu / lokalu</label>
+                  <input
+                    type="text"
+                    name="billing_street_no"
+                    value="{{ form.billing_street_no.value|default_if_none:'' }}"
+                    class="form-control{% if form.billing_street_no.errors %} is-invalid{% endif %}"
+                    placeholder="np. 12/4">
+                  {% for error in form.billing_street_no.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="col-md-4">
+                  <label class="form-label">Kod pocztowy</label>
+                  <input
+                    type="text"
+                    name="billing_zip"
+                    value="{{ form.billing_zip.value|default_if_none:'' }}"
+                    class="form-control{% if form.billing_zip.errors %} is-invalid{% endif %}"
+                    placeholder="np. 00-000">
+                  {% for error in form.billing_zip.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="col-md-5">
+                  <label class="form-label">Miejscowość</label>
+                  <input
+                    type="text"
+                    name="billing_city"
+                    value="{{ form.billing_city.value|default_if_none:'' }}"
+                    class="form-control{% if form.billing_city.errors %} is-invalid{% endif %}"
+                    placeholder="np. Warszawa">
+                  {% for error in form.billing_city.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+
+                <div class="col-md-3">
+                  <label class="form-label">Kraj</label>
+                  <input
+                    type="text"
+                    name="billing_country"
+                    value="{{ form.billing_country.value|default_if_none:'Polska' }}"
+                    class="form-control{% if form.billing_country.errors %} is-invalid{% endif %}"
+                    placeholder="np. Polska">
+                  {% for error in form.billing_country.errors %}
+                    <div class="invalid-feedback">{{ error }}</div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DANE OSOBY KONTAKTOWEJ (tylko dla firmy) -->
+          <div class="row g-3 mt-3 d-none" id="contactPersonSection">
+            <div class="col-12">
+              <hr class="my-1">
+              <h5 class="fw-bold mt-2 mb-3">Dane osoby kontaktowej</h5>
+              <div class="text-muted" style="color:var(--muted)!important">
+                Osoba, z którą Twoi pracownicy będą się kontaktować w sprawach serwisowych.
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Imię osoby kontaktowej</label>
+              <input
+                type="text"
+                name="contact_first_name"
+                class="form-control"
+                placeholder="np. Anna">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Nazwisko osoby kontaktowej</label>
+              <input
+                type="text"
+                name="contact_last_name"
+                class="form-control"
+                placeholder="np. Nowak">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">E-mail osoby kontaktowej</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input
+                  type="email"
+                  name="contact_email"
+                  class="form-control"
+                  placeholder="np. anna.nowak@firma.pl">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Telefon osoby kontaktowej</label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input
+                  type="tel"
+                  name="contact_phone"
+                  class="form-control"
+                  placeholder="np. +48 700 000 000">
+              </div>
+            </div>
+          </div>
+
+          <!-- DANE DLA PRACOWNIKÓW -->
+          <div class="row g-3 mt-3">
+            <div class="col-12">
+              <hr class="my-1">
+              <h5 class="fw-bold mt-2 mb-3">Dane dla pracowników</h5>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Notatki</label>
+              <textarea
+                name="notes"
+                id="{{ form.notes.id_for_label }}"
+                rows="3"
+                class="form-control"
+                placeholder="Wewnętrzne informacje o kliencie...">{{ form.notes.value|default_if_none:'' }}</textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Opiekun</label>
+              <select
+                name="caretaker"
+                id="{{ form.caretaker.id_for_label }}"
+                class="form-select">
+                <option value="">— wybierz —</option>
+                {% for u in form.caretaker.field.queryset %}
+                  <option value="{{ u.pk }}" {% if form.caretaker.value == u.pk|stringformat:"s" %}selected{% endif %}>
+                    {{ u.first_name }} {{ u.last_name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <!-- PRZYCISKI -->
+          <div class="d-flex justify-content-end gap-2 pt-3">
+            <a href="{% url 'klient' %}" class="btn btn-outline-secondary">Anuluj</a>
+            <button class="btn btn-primary" type="submit">Zapisz zmiany</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL PODSUMOWANIA -->
+  <div class="col-12 col-xl-4">
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Podsumowanie</h5>
+        <div class="small text-muted mb-2">
+          Dane aktualizują się na żywo przy wypełnianiu formularza.
+        </div>
+
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            Imię: <span class="text-white" id="pvFirst_name">—</span>
+          </li>
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            Nazwisko: <span class="text-white" id="pvLast_name">—</span>
+          </li>
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            Typ klienta: <span class="text-white" id="pvType">—</span>
+          </li>
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            E-mail: <span class="text-white" id="pvEmail">—</span>
+          </li>
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            Telefon: <span class="text-white" id="pvPhone">—</span>
+          </li>
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            Adres serwisowy: <span class="text-white" id="pvAddress">—</span>
+          </li>
+        </ul>
+
+        <section class="mt-3">
+          <h5 class="fw-bold">Dane firmy / rozliczeniowe</h5>
+          <div class="small text-muted mb-2">
+            Dla firmy – nazwa, NIP i adres rozliczeniowy (jeśli inny niż serwisowy).
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item bg-transparent text-white-50 border-0">
+              Nazwa firmy: <span class="text-white" id="pvCompany">—</span>
+            </li>
+            <li class="list-group-item bg-transparent text-white-50 border-0">
+              NIP: <span class="text-white" id="pvNIP">—</span>
+            </li>
+            <li class="list-group-item bg-transparent text-white-50 border-0">
+              Adres rozliczeniowy: <span class="text-white" id="pvAddressf">—</span>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Przełącznik motywu (zapisywany w localStorage)
+  (function(){
+    const root = document.documentElement;
+    const key = 'dashboard-theme';
+    const saved = localStorage.getItem(key) || 'dark';
+    root.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    const setIcon = () => { btn.innerHTML = root.getAttribute('data-theme') === 'light' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>'; };
+    setIcon();
+    btn.addEventListener('click', ()=>{
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem(key, next);
+      setIcon();
+      // odśwież kolory wykresu bez przeładowania
+      renderPL(document.querySelector('[data-range].active')?.getAttribute('data-range') || 'mtd');
+    });
+  })();
+  </script>
+
+<!-- JS: billing toggle -->
+<script>
+  (function() {
+    const checkbox = document.getElementById('id_billing_other');
+    const section = document.getElementById('billingAddressSection');
+    const billingFieldNames = [
+      'billing_street',
+      'billing_street_no',
+      'billing_zip',
+      'billing_city',
+      'billing_country',
+    ];
+    const billingFields = billingFieldNames.map(
+      name => document.querySelector('[name="' + name + '"]')
+    );
+
+    function toggleBilling() {
+      const show = checkbox.checked;
+      section.classList.toggle('d-none', !show);
+      billingFields.forEach(function(field) {
+        if (!field) return;
+        if (show) {
+          field.removeAttribute('disabled');
+        } else {
+          field.setAttribute('disabled', 'disabled');
+        }
+      });
+    }
+
+    if (checkbox && section) {
+      checkbox.addEventListener('change', toggleBilling);
+      toggleBilling();  // stan startowy
+    }
+  })();
+</script>
+
+<!-- JS: live preview -->
+<script>
+  function updatePreview() {
+    const get = function(name) {
+      return document.querySelector('[name="' + name + '"]');
+    };
+    const setText = function(id, value) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      value = value || '';
+      el.textContent = value.trim() ? value : '—';
+    };
+
+    // Adres serwisowy (shipping)
+    const shipStreet = get('shipping_street')?.value || '';
+    const shipNo = get('shipping_street_no')?.value || '';
+    const shipZip = get('shipping_zip')?.value || '';
+    const shipCity = get('shipping_city')?.value || '';
+    const shipCountry = get('shipping_country')?.value || '';
+
+    const shipAddressLine = [shipStreet, shipNo].filter(Boolean).join(' ');
+    const shipCityLine = [shipZip, shipCity].filter(Boolean).join(' ');
+    const shipFull = [shipAddressLine, shipCityLine, shipCountry].filter(Boolean).join(', ');
+
+    // Adres billing – jeśli brak, pokaż shipping
+    const billStreet = get('billing_street')?.value || '';
+    const billNo = get('billing_street_no')?.value || '';
+    const billZip = get('billing_zip')?.value || '';
+    const billCity = get('billing_city')?.value || '';
+    const billCountry = get('billing_country')?.value || '';
+
+    const billAddressLine = [billStreet, billNo].filter(Boolean).join(' ');
+    const billCityLine = [billZip, billCity].filter(Boolean).join(' ');
+    let billFull = [billAddressLine, billCityLine, billCountry].filter(Boolean).join(', ');
+    if (!billFull) {
+      billFull = shipFull;  // domyślnie taki sam
+    }
+
+    setText('pvFirst_name', get('first_name')?.value);
+    setText('pvLast_name', get('last_name')?.value);
+    const typeSelect = get('client_type');
+    setText('pvType', typeSelect && typeSelect.selectedOptions[0] ? typeSelect.selectedOptions[0].text : '—');
+    setText('pvEmail', get('email')?.value);
+    setText('pvPhone', get('phone')?.value);
+    setText('pvAddress', shipFull);
+
+    setText('pvCompany', get('name')?.value);
+    setText('pvNIP', get('nip')?.value);
+    setText('pvAddressf', billFull);
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('clientForm');
+    if (form) {
+      form.addEventListener('input', updatePreview);
+      form.addEventListener('change', updatePreview);
+    }
+    updatePreview();
+  });
+</script>
+
+<!-- JS: przełączanie typ klienta (osoba/firma) + dane osoby kontaktowej -->
+<script>
+  (function() {
+    const typeSelect = document.querySelector('[name="client_type"]');
+    const personRow = document.getElementById('personIdentityRow');
+    const companyRow = document.getElementById('companyIdentityRow');
+    const contactSection = document.getElementById('contactPersonSection');
+
+    const nameField = document.querySelector('[name="name"]');
+    const nipField = document.querySelector('[name="nip"]');
+    const firstNameField = document.querySelector('[name="first_name"]');
+    const lastNameField = document.querySelector('[name="last_name"]');
+
+    if (!typeSelect || !personRow || !companyRow) return;
+
+    function updateTypeUI() {
+      const isCompany = typeSelect.value === 'company';
+
+      // widoczność sekcji
+      personRow.classList.toggle('d-none', isCompany);
+      companyRow.classList.toggle('d-none', !isCompany);
+      if (contactSection) {
+        contactSection.classList.toggle('d-none', !isCompany);
+      }
+
+      // wymagania HTML
+      if (nameField && nipField) {
+        if (isCompany) {
+          nameField.setAttribute('required', 'required');
+          nipField.setAttribute('required', 'required');
+        } else {
+          nameField.removeAttribute('required');
+          nipField.removeAttribute('required');
+        }
+      }
+
+      // imię / nazwisko – wymagane zawsze (osoba prywatna lub kontaktowa)
+      if (firstNameField) {
+        firstNameField.setAttribute('required', 'required');
+      }
+      if (lastNameField) {
+        lastNameField.setAttribute('required', 'required');
+      }
+
+      // odśwież podgląd
+      if (typeof updatePreview === 'function') {
+        updatePreview();
+      }
+    }
+
+    typeSelect.addEventListener('change', updateTypeUI);
+    updateTypeUI();  // stan startowy
+  })();
+</script>
+{% endblock %}

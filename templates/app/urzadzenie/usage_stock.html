@@ -1,0 +1,101 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+
+{% include "app/urzadzenie/partials/usage_style.html" %}
+
+<div class="usage-header">
+  <div class="usage-title">
+    <div class="usage-icon">
+      <i class="bi bi-clock-history"></i>
+    </div>
+    <div>
+      <h1>Historia magazynu</h1>
+      <p>{{ product.name }}</p>
+    </div>
+  </div>
+
+  <a href="{% url 'product_detail' product.pk %}" class="btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+    Wróć do produktu
+  </a>
+</div>
+
+<div class="usage-card">
+  <div class="table-responsive">
+    <table class="table usage-table align-middle">
+      <thead>
+        <tr>
+          <th>Typ</th>
+          <th>Magazyn</th>
+          <th>Ilość</th>
+          <th>Dokument</th>
+          <th>Notatka</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for movement in items %}
+          <tr>
+            <td>
+              {% if movement.type == "in" %}
+                <span class="detail-badge detail-badge-active">
+                  <i class="bi bi-plus-circle"></i>
+                  Przyjęcie
+                </span>
+              {% elif movement.type == "out" %}
+                <span class="detail-badge detail-badge-disabled">
+                  <i class="bi bi-dash-circle"></i>
+                  Wydanie
+                </span>
+              {% else %}
+                <span class="detail-badge">
+                  {{ movement.get_type_display }}
+                </span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if movement.warehouse %}
+                {{ movement.warehouse.name }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>
+              <strong>{{ movement.quantity|floatformat:2 }}</strong>
+              <span class="text-muted small">{{ product.unit }}</span>
+            </td>
+
+            <td>
+              {% if movement.document_number %}
+                {{ movement.document_number }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+
+            <td>
+              {% if movement.note %}
+                {{ movement.note }}
+              {% else %}
+                —
+              {% endif %}
+            </td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center text-muted py-5">
+              Brak ruchów magazynowych dla tego produktu.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "app/urzadzenie/partials/pagination.html" %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,1142 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.work-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.work-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.work-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.work-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.work-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.work-filter-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.status-filters{
+  display:flex;
+  gap:.65rem;
+  flex-wrap:wrap;
+}
+
+.filter-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  padding:.65rem .95rem;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  font-weight:800;
+  font-size:.82rem;
+  text-decoration:none;
+}
+
+.filter-pill:hover{
+  color:#1468f5;
+  border-color:rgba(20,104,245,.35);
+  background:rgba(20,104,245,.08);
+}
+
+.filter-pill.active{
+  color:#fff;
+  border-color:rgba(20,104,245,.45);
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 10px 24px rgba(20,104,245,.18);
+}
+
+.work-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.work-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.work-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.work-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.work-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.work-table{
+  color:var(--text);
+  margin:0;
+}
+
+.work-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+  white-space:nowrap;
+}
+
+.work-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.work-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.work-main{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+}
+
+.work-avatar{
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.2rem;
+  flex-shrink:0;
+}
+
+.work-link{
+  color:var(--text);
+  font-weight:900;
+  text-decoration:none;
+}
+
+.work-link:hover{
+  color:#1468f5;
+}
+
+.work-muted{
+  color:var(--muted);
+  font-size:.84rem;
+  margin-top:.15rem;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  white-space:nowrap;
+}
+
+.badge-new{
+  color:#adb5bd;
+  background:rgba(108,117,125,.14);
+  border-color:rgba(108,117,125,.24);
+}
+
+.badge-progress{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.15);
+  border-color:rgba(13,110,253,.25);
+}
+
+.badge-done{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.badge-cancelled{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+}
+
+.badge-ordered{
+  color:#20c997;
+  background:rgba(32,201,151,.14);
+  border-color:rgba(32,201,151,.24);
+}
+
+.badge-not-ordered{
+  color:var(--muted);
+  background:rgba(108,117,125,.12);
+  border-color:rgba(108,117,125,.22);
+}
+
+.work-actions{
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-blue{
+  color:#7aa7ff;
+  border-color:rgba(13,110,253,.25);
+}
+
+.icon-btn-orange{
+  color:#ffb24d;
+  border-color:rgba(255,178,77,.25);
+}
+
+.icon-btn-green{
+  color:#20c997;
+  border-color:rgba(32,201,151,.25);
+}
+
+.placeholder-box{
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.6rem;
+  text-align:center;
+  color:var(--muted);
+  border:1px dashed var(--border);
+  border-radius:22px;
+  background:rgba(255,255,255,.02);
+  margin:1.5rem;
+}
+
+.placeholder-box i{
+  font-size:2rem;
+  color:#1468f5;
+}
+
+.work-mobile-list{
+  display:none;
+}
+
+.work-mobile-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.work-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:.85rem;
+  padding:1.25rem;
+  border-top:1px solid var(--border);
+}
+.work-summary-card{
+  display:flex;
+  flex-direction:column;
+  gap:.35rem;
+  padding:1rem 1.1rem;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+}
+.work-summary-card span{color:var(--muted);font-size:.78rem;font-weight:800}
+.work-summary-card strong{color:var(--text);font-size:1.15rem;font-weight:950}
+.work-summary-profit{background:rgba(25,135,84,.1);border-color:rgba(25,135,84,.25)}
+.work-summary-profit strong{color:#47d18c}
+
+.work-mobile-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+}
+
+.work-mobile-actions{
+  display:flex;
+  gap:.55rem;
+  margin-top:1rem;
+  padding-top:.85rem;
+  border-top:1px solid var(--border);
+}
+
+/* MODALS */
+.work-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.work-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.work-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.work-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.work-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.work-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.work-modal-body{
+  padding:1.5rem;
+}
+
+.work-label{
+  display:block;
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:800;
+  margin-bottom:.45rem;
+}
+
+.work-modal .form-control,
+.work-modal .form-select,
+.work-modal select{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+
+.work-modal .form-control:focus,
+.work-modal .form-select:focus,
+.work-modal select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.work-modal-preview{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  margin-bottom:1rem;
+}
+
+.work-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.assigned-chip{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:999px;
+  padding:.45rem .75rem;
+  font-weight:700;
+  font-size:.8rem;
+}
+
+@media(max-width:768px){
+  .work-page-head{
+    flex-direction:column;
+  }
+
+  .status-filters{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:.25rem;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .filter-pill{
+    white-space:nowrap;
+    font-size:.76rem;
+    padding:.55rem .8rem;
+  }
+
+  .work-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .work-table-wrap{
+    display:none;
+  }
+
+  .work-mobile-list{
+    display:grid;
+    gap:1rem;
+    padding:1rem;
+  }
+
+  .work-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:1rem}
+
+  .work-modal-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .work-modal-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .work-modal-body{
+    padding:1rem;
+  }
+
+  .work-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .work-modal-footer .btn-soft,
+  .work-modal-footer .btn-orange{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+}
+
+.work-filter-card .form-control,
+.work-filter-card .form-select{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.work-filter-card .form-control:focus,
+.work-filter-card .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+</style>
+
+<div class="work-page-head">
+  <div class="work-title-wrap">
+    <div class="work-title-icon">
+      <i class="bi bi-briefcase"></i>
+    </div>
+
+    <div>
+      <h1 class="work-title">Lista prac</h1>
+      <div class="work-subtitle">Podgląd realizacji z ofert.</div>
+    </div>
+  </div>
+</div>
+
+<div class="work-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+
+      <div class="col-12 col-md">
+        <input type="text"
+               name="q"
+               class="form-control"
+               placeholder="Szukaj pracy, klienta lub numeru..."
+               value="{{ q }}">
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="status" class="form-select">
+          <option value="all" {% if active_status == "all" %}selected{% endif %}>Wszystkie</option>
+          <option value="new" {% if active_status == "new" %}selected{% endif %}>Nowe</option>
+          <option value="in_progress" {% if active_status == "in_progress" %}selected{% endif %}>W realizacji</option>
+          <option value="done" {% if active_status == "done" %}selected{% endif %}>Zakończone</option>
+          <option value="cancelled" {% if active_status == "cancelled" %}selected{% endif %}>Anulowane</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-auto d-flex gap-2">
+        <button class="btn-orange">
+          <i class="bi bi-search me-1"></i>
+          Szukaj
+        </button>
+
+        <a href="{% url 'workorder_list' %}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<div class="work-list-card">
+  <div class="work-list-header">
+    <div class="work-list-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista prac</h3>
+      <p>Klient, termin, pracownicy, zamówienie i szybkie akcje.</p>
+    </div>
+  </div>
+
+  {% if works %}
+    <div class="table-responsive work-table-wrap">
+      <table class="table work-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Praca</th>
+            <th>Termin</th>
+            <th>Pracownicy</th>
+            <th>Status</th>
+            {% if can_work_actions %}<th>Akcje</th>{% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for work in works %}
+            <tr>
+              <td>
+                <div class="work-main">
+                  <div class="work-avatar">
+                    <i class="bi bi-briefcase"></i>
+                  </div>
+
+                  <div>
+                    <a href="{% url 'work_detail' work.pk %}" class="work-link">
+                      {{ work.client }}
+                    </a>
+
+                    <div class="work-muted">{{ work.title }}</div>
+                    <div class="work-muted">{{ work.number }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                {% if work.planned_start %}
+                  <div class="fw-bold">
+                    {{ work.planned_start|date:"d.m.Y" }}
+                  </div>
+                  <div class="work-muted">
+                    do {{ work.planned_end|date:"d.m.Y" }}
+                  </div>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="d-flex flex-wrap gap-1">
+                  {% for u in work.assigned_employees.all %}
+                    <span class="badge-soft">
+                      {{ u.first_name }} {{ u.last_name }}
+                    </span>
+                  {% empty %}
+                    <span class="text-muted small">Brak</span>
+                  {% endfor %}
+                </div>
+              </td>
+
+              <td>
+                <div class="d-flex flex-wrap gap-2">
+                  {% if work.status == "new" %}
+                    <span class="badge-soft badge-new">Nowe</span>
+                  {% elif work.status == "in_progress" %}
+                    <span class="badge-soft badge-progress">W realizacji</span>
+                  {% elif work.status == "done" %}
+                    <span class="badge-soft badge-done">Zakończone</span>
+                  {% else %}
+                    <span class="badge-soft badge-cancelled">Anulowane</span>
+                  {% endif %}
+
+                  {% if work.is_ordered %}
+                    <span class="badge-soft badge-ordered">
+                      <i class="bi bi-cart-check"></i>
+                      Zamówiono
+                    </span>
+                  {% else %}
+                    <span class="badge-soft badge-not-ordered">
+                      <i class="bi bi-cart-x"></i>
+                      Brak zamówienia
+                    </span>
+                  {% endif %}
+                </div>
+              </td>
+
+              {% if can_work_actions %}<td>
+                {% if can_work_schedule_update or can_work_assign_workers or can_work_mark_ordered %}
+                <div class="work-actions">
+                  {% if can_work_schedule_update %}
+                  <button type="button"
+                          class="icon-btn icon-btn-blue"
+                          title="Ustal termin"
+                          data-bs-toggle="modal"
+                          data-bs-target="#scheduleWorkModal"
+                          data-action-url="{% url 'work_schedule_update' work.pk %}"
+                          data-start="{% if work.planned_start %}{{ work.planned_start|date:'Y-m-d\TH:i' }}{% endif %}"
+                          data-end="{% if work.planned_end %}{{ work.planned_end|date:'Y-m-d\TH:i' }}{% endif %}"
+                          data-title="{{ work.number }} – {{ work.title|escape }}">
+                    <i class="bi bi-calendar2-event"></i>
+                  </button>
+                  {% endif %}
+
+                  {% if can_work_assign_workers %}
+                  <button type="button"
+                          class="icon-btn icon-btn-orange"
+                          title="Wyznacz pracowników"
+                          data-bs-toggle="modal"
+                          data-bs-target="#assignWorkersModal"
+                          data-action-url="{% url 'work_assign_workers' work.pk %}"
+                          data-title="{{ work.number }} – {{ work.title|escape }}"
+                          data-selected="{% for u in work.assigned_employees.all %}{{ u.pk }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                    <i class="bi bi-people"></i>
+                  </button>
+                  {% endif %}
+
+                  {% if can_work_mark_ordered %}
+                  <button type="button"
+                          class="icon-btn icon-btn-green"
+                          title="Zamówiono sprzęt"
+                          data-bs-toggle="modal"
+                          data-bs-target="#orderedEquipmentModal"
+                          data-action-url="{% url 'work_mark_ordered' work.pk %}"
+                          data-title="{{ work.number }} – {{ work.title|escape }}"
+                          data-order-number="{{ work.order_number|default:'' }}">
+                    <i class="bi bi-cart-check"></i>
+                  </button>
+                  {% endif %}
+                </div>
+                {% endif %}
+              </td>{% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="work-mobile-list">
+      {% for work in works %}
+        <div class="work-mobile-card">
+          <div class="work-mobile-top">
+            <div>
+              <a href="{% url 'work_detail' work.pk %}" class="work-link">
+                {{ work.client }}
+              </a>
+              <div class="work-muted">{{ work.title }}</div>
+              <div class="work-muted">{{ work.number }}</div>
+            </div>
+
+            {% if work.status == "new" %}
+              <span class="badge-soft badge-new">Nowe</span>
+            {% elif work.status == "in_progress" %}
+              <span class="badge-soft badge-progress">W realizacji</span>
+            {% elif work.status == "done" %}
+              <span class="badge-soft badge-done">Zakończone</span>
+            {% else %}
+              <span class="badge-soft badge-cancelled">Anulowane</span>
+            {% endif %}
+          </div>
+
+          <div class="mt-3">
+            {% if work.is_ordered %}
+              <span class="badge-soft badge-ordered">
+                <i class="bi bi-cart-check"></i>
+                Zamówiono
+              </span>
+            {% else %}
+              <span class="badge-soft badge-not-ordered">
+                <i class="bi bi-cart-x"></i>
+                Brak zamówienia
+              </span>
+            {% endif %}
+          </div>
+
+          <div class="work-muted mt-3">
+            <i class="bi bi-calendar-event me-1"></i>
+            {% if work.planned_start %}
+              {{ work.planned_start|date:"d.m.Y" }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+
+          <div class="d-flex flex-wrap gap-1 mt-2">
+            {% for u in work.assigned_employees.all %}
+              <span class="badge-soft">{{ u.first_name }}</span>
+            {% empty %}
+              <span class="text-muted small">Brak pracowników</span>
+            {% endfor %}
+          </div>
+
+          {% if can_work_schedule_update or can_work_assign_workers or can_work_mark_ordered %}
+          <div class="work-mobile-actions">
+            {% if can_work_schedule_update %}
+            <button type="button"
+                    class="icon-btn icon-btn-blue"
+                    data-bs-toggle="modal"
+                    data-bs-target="#scheduleWorkModal"
+                    data-action-url="{% url 'work_schedule_update' work.pk %}"
+                    data-start="{% if work.planned_start %}{{ work.planned_start|date:'Y-m-d\TH:i' }}{% endif %}"
+                    data-end="{% if work.planned_end %}{{ work.planned_end|date:'Y-m-d\TH:i' }}{% endif %}"
+                    data-title="{{ work.number }} – {{ work.title|escape }}">
+              <i class="bi bi-calendar2-event"></i>
+            </button>
+            {% endif %}
+
+            {% if can_work_assign_workers %}
+            <button type="button"
+                    class="icon-btn icon-btn-orange"
+                    data-bs-toggle="modal"
+                    data-bs-target="#assignWorkersModal"
+                    data-action-url="{% url 'work_assign_workers' work.pk %}"
+                    data-title="{{ work.number }} – {{ work.title|escape }}"
+                    data-selected="{% for u in work.assigned_employees.all %}{{ u.pk }}{% if not forloop.last %},{% endif %}{% endfor %}">
+              <i class="bi bi-people"></i>
+            </button>
+            {% endif %}
+
+            {% if can_work_mark_ordered %}
+            <button type="button"
+                    class="icon-btn icon-btn-green"
+                    data-bs-toggle="modal"
+                    data-bs-target="#orderedEquipmentModal"
+                    data-action-url="{% url 'work_mark_ordered' work.pk %}"
+                    data-title="{{ work.number }} – {{ work.title|escape }}"
+                    data-order-number="{{ work.order_number|default:'' }}">
+              <i class="bi bi-cart-check"></i>
+            </button>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if can_view_work_prices %}
+    <div class="work-summary-grid">
+      <div class="work-summary-card"><span>Suma cen prac (netto)</span><strong>{{ work_summary.total_netto|floatformat:2 }} zł</strong></div>
+      <div class="work-summary-card"><span>Szacowany materiał</span><strong>{{ work_summary.materials|floatformat:2 }} zł</strong></div>
+      <div class="work-summary-card"><span>Szacowane akcesoria</span><strong>{{ work_summary.accessories|floatformat:2 }} zł</strong></div>
+      <div class="work-summary-card work-summary-profit"><span>Łączny zysk</span><strong>{{ work_summary.profit|floatformat:2 }} zł</strong></div>
+    </div>
+    {% endif %}
+
+  {% else %}
+    <div class="placeholder-box">
+      <i class="bi bi-briefcase"></i>
+      Brak prac dla tego filtra.
+    </div>
+  {% endif %}
+</div>
+
+<div class="modal fade" id="scheduleWorkModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content work-modal">
+      <form method="post" id="scheduleWorkForm" action="">
+        {% csrf_token %}
+
+        <div class="work-modal-header">
+          <div class="work-modal-icon">
+            <i class="bi bi-calendar2-event"></i>
+          </div>
+
+          <div>
+            <h4>Ustal termin pracy</h4>
+            <p id="scheduleWorkTitle">—</p>
+          </div>
+
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="work-modal-body">
+          <div class="mb-3">
+            <label class="work-label">Planowana data rozpoczęcia</label>
+            <input type="datetime-local" name="planned_start" id="workPlannedStart" class="form-control" min="" max="">
+          </div>
+
+          <div>
+            <label class="work-label">Planowana data zakończenia</label>
+            <input type="datetime-local" name="planned_end" id="workPlannedEnd" class="form-control" min="" max="">
+          </div>
+        </div>
+
+        <div class="work-modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">Anuluj</button>
+          <button type="submit" class="btn-orange">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="assignWorkersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content work-modal">
+      <form method="post" id="assignWorkersForm" action="">
+        {% csrf_token %}
+
+        <div class="work-modal-header">
+          <div class="work-modal-icon">
+            <i class="bi bi-people"></i>
+          </div>
+
+          <div>
+            <h4>Wyznacz pracowników</h4>
+            <p id="assignWorkersTitle">—</p>
+          </div>
+
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="work-modal-body">
+          <label class="work-label">Pracownicy</label>
+
+          <select name="workers" id="workersSelect" class="form-select" multiple size="6" data-max="3">
+            {% for u in workers %}
+              <option value="{{ u.pk }}">{{ u.first_name }} {{ u.last_name }}</option>
+            {% endfor %}
+          </select>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div class="small text-muted">
+              Wybrano: <span id="assignedCount">0</span>/3
+            </div>
+
+            <button type="button" class="btn-soft py-2 px-3" id="assignedClear">
+              Wyczyść
+            </button>
+          </div>
+
+          <div id="assignedChips" class="d-flex flex-wrap gap-2 mt-3"></div>
+        </div>
+
+        <div class="work-modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">Anuluj</button>
+          <button type="submit" class="btn-orange">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="orderedEquipmentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content work-modal">
+      <form method="post" id="orderedEquipmentForm" action="">
+        {% csrf_token %}
+
+        <div class="work-modal-header">
+          <div class="work-modal-icon">
+            <i class="bi bi-cart-check"></i>
+          </div>
+
+          <div>
+            <h4>Zamówiono sprzęt</h4>
+            <p id="orderedEquipmentTitle">—</p>
+          </div>
+
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="work-modal-body">
+          <label class="work-label">Numer zamówienia</label>
+          <input type="text"
+                 name="order_number"
+                 id="orderedEquipmentNumber"
+                 class="form-control"
+                 maxlength="100"
+                 placeholder="Np. ZAM/2026/001"
+                 required>
+        </div>
+
+        <div class="work-modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">Anuluj</button>
+          <button type="submit" class="btn-orange">
+            <i class="bi bi-save me-1"></i>
+            Zapisz
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const scheduleModal = document.getElementById('scheduleWorkModal');
+
+  if(scheduleModal){
+    const form = document.getElementById('scheduleWorkForm');
+    const title = document.getElementById('scheduleWorkTitle');
+    const start = document.getElementById('workPlannedStart');
+    const end = document.getElementById('workPlannedEnd');
+    const dayStart = '{{ workday_start_time }}';
+    const dayEnd = '{{ workday_end_time }}';
+    const inWorkday = (value) => !value || (value.slice(11,16) >= dayStart && value.slice(11,16) <= dayEnd);
+
+    scheduleModal.addEventListener('show.bs.modal', (ev)=>{
+      const btn = ev.relatedTarget;
+      form.action = btn?.getAttribute('data-action-url') || '';
+      title.textContent = btn?.getAttribute('data-title') || '—';
+      start.value = btn?.getAttribute('data-start') || '';
+      end.value = btn?.getAttribute('data-end') || '';
+    });
+    [start, end].forEach(input => input.addEventListener('change', ()=>{
+      input.setCustomValidity(inWorkday(input.value) ? '' : `Godzina musi mieścić się w zakresie ${dayStart}–${dayEnd}.`);
+    }));
+    form.addEventListener('submit', (event)=>{
+      if(!inWorkday(start.value) || !inWorkday(end.value)){
+        event.preventDefault();
+        alert(`Godzina musi mieścić się w zakresie ${dayStart}–${dayEnd}.`);
+      }
+    });
+  }
+
+  const workersModal = document.getElementById('assignWorkersModal');
+
+  if(workersModal){
+    const form = document.getElementById('assignWorkersForm');
+    const title = document.getElementById('assignWorkersTitle');
+    const sel = document.getElementById('workersSelect');
+    const chips = document.getElementById('assignedChips');
+    const count = document.getElementById('assignedCount');
+    const clear = document.getElementById('assignedClear');
+    const max = parseInt(sel?.dataset.max || '3', 10);
+
+    function selectedOptions(){
+      return [...sel.options].filter(o => o.selected);
+    }
+
+    function render(){
+      const selected = selectedOptions();
+      count.textContent = selected.length;
+      chips.innerHTML = '';
+
+      selected.forEach(opt => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'assigned-chip';
+        chip.textContent = opt.text + ' ✕';
+        chip.onclick = () => {
+          opt.selected = false;
+          sel.dispatchEvent(new Event('change', {bubbles:true}));
+        };
+        chips.appendChild(chip);
+      });
+
+      const limit = selected.length >= max;
+      [...sel.options].forEach(opt => {
+        if(!opt.selected) opt.disabled = limit;
+      });
+    }
+
+    function applySelected(csv){
+      const ids = (csv || '').split(',').map(x => x.trim()).filter(Boolean);
+      [...sel.options].forEach(o => {
+        o.selected = ids.includes(String(o.value));
+        o.disabled = false;
+      });
+      render();
+    }
+
+    sel.addEventListener('change', ()=>{
+      [...sel.options].forEach(o => o.disabled = false);
+      const selected = selectedOptions();
+
+      if(selected.length > max){
+        selected.slice(max).forEach(o => o.selected = false);
+      }
+
+      render();
+    });
+
+    clear?.addEventListener('click', ()=>{
+      [...sel.options].forEach(o => {
+        o.selected = false;
+        o.disabled = false;
+      });
+      render();
+    });
+
+    workersModal.addEventListener('show.bs.modal', (ev)=>{
+      const btn = ev.relatedTarget;
+      form.action = btn?.getAttribute('data-action-url') || '';
+      title.textContent = btn?.getAttribute('data-title') || '—';
+      applySelected(btn?.getAttribute('data-selected') || '');
+    });
+  }
+
+  const orderedModal = document.getElementById('orderedEquipmentModal');
+
+  if(orderedModal){
+    const form = document.getElementById('orderedEquipmentForm');
+    const title = document.getElementById('orderedEquipmentTitle');
+    const input = document.getElementById('orderedEquipmentNumber');
+
+    orderedModal.addEventListener('show.bs.modal', (ev) => {
+      const btn = ev.relatedTarget;
+
+      if(form) form.action = btn?.getAttribute('data-action-url') || '';
+      if(title) title.textContent = btn?.getAttribute('data-title') || '—';
+      if(input) input.value = btn?.getAttribute('data-order-number') || '';
+    });
+  }
+})();
+</script>
+
+{% endblock %}

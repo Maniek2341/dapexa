@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Django/local configuration
+.env
+*.log
+db.sqlite3
+staticfiles/
+
+# Uploaded/private data
+files/*
+!files/.gitkeep
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
+
+# Test/coverage/cache
+.pytest_cache/
+.coverage
+htmlcov/

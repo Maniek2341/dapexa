@@ -1,0 +1,89 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+
+{% include "app/urzadzenie/partials/usage_style.html" %}
+
+<div class="usage-header">
+  <div class="usage-title">
+    <div class="usage-icon">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+    <div>
+      <h1>Użycie w ofertach</h1>
+      <p>{{ product.name }}</p>
+    </div>
+  </div>
+
+  <a href="{% url 'product_detail' product.pk %}" class="btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+    Wróć do produktu
+  </a>
+</div>
+
+<div class="usage-card">
+  <div class="table-responsive">
+    <table class="table usage-table align-middle">
+      <thead>
+        <tr>
+          <th>Oferta</th>
+          <th>Wariant</th>
+          <th>Klient</th>
+          <th>Ilość</th>
+          <th>Cena netto</th>
+          <th>Wartość netto</th>
+          <th>Data</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for item in items %}
+          <tr>
+            <td>
+              <a href="{% url 'offer_detail' item.variant.offer.pk %}"
+                 class="fw-bold text-decoration-none"
+                 style="color:var(--text);">
+                {{ item.variant.offer.number }}
+              </a>
+              <div class="text-muted small">
+                {{ item.variant.offer.title }}
+              </div>
+            </td>
+
+            <td>
+              {{ item.variant.name }}
+              {% if item.variant.is_selected %}
+                <span class="detail-badge detail-badge-active ms-1">
+                  Wybrany
+                </span>
+              {% endif %}
+            </td>
+
+            <td>{{ item.variant.offer.client }}</td>
+
+            <td>
+              <strong>{{ item.quantity|floatformat:2 }}</strong>
+              <span class="text-muted small">{{ item.unit }}</span>
+            </td>
+
+            <td>{{ item.unit_price_netto|floatformat:2 }} zł</td>
+
+            <td>{{ item.total_netto|floatformat:2 }} zł</td>
+
+            <td>{{ item.variant.offer.issue_date|date:"d.m.Y" }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="7" class="text-center text-muted py-5">
+              Produkt nie został użyty w żadnej ofercie.
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% include "app/urzadzenie/partials/pagination.html" %}
+</div>
+
+{% endblock %}

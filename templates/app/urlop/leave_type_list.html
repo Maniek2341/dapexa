@@ -1,0 +1,750 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+
+<style>
+.leave-type-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.leave-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.leave-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.leave-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.leave-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.leave-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.leave-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.leave-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.leave-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.leave-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.leave-table{
+  color:var(--text);
+  margin:0;
+}
+
+.leave-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+  white-space:nowrap;
+}
+
+.leave-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.leave-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.leave-name{
+  color:var(--text);
+  font-weight:900;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+}
+
+.badge-code{
+  color:#ff9f43;
+  background:rgba(20,104,245,.12);
+  border-color:rgba(20,104,245,.22);
+}
+
+.badge-yes{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.badge-no{
+  color:var(--muted);
+  background:rgba(108,117,125,.14);
+  border-color:rgba(108,117,125,.22);
+}
+
+.badge-special{
+  color:#ffc857;
+  background:rgba(255,193,7,.16);
+  border-color:rgba(255,193,7,.25);
+}
+
+.leave-limit{
+  color:var(--text);
+  font-weight:900;
+}
+
+.leave-muted{
+  color:var(--muted);
+}
+
+.leave-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-green{
+  color:#00ff2a;
+  border-color:rgba(0,255,42,.18);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+
+.icon-btn-disabled{
+  color:var(--muted);
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.empty-state{
+  min-height:200px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  color:var(--muted);
+  text-align:center;
+}
+
+.empty-state i{
+  font-size:2rem;
+  color:#1468f5;
+}
+
+/* MOBILE */
+.leave-mobile-list{
+  display:none;
+}
+
+.leave-mobile-card{
+  background:
+    radial-gradient(circle at top right, rgba(20,104,245,.10), transparent 35%),
+    var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:1rem;
+  box-shadow:0 16px 40px rgba(0,0,0,.16);
+}
+
+.leave-mobile-card + .leave-mobile-card{
+  margin-top:1rem;
+}
+
+.mobile-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1rem;
+}
+
+.mobile-name{
+  color:var(--text);
+  font-weight:900;
+  font-size:1rem;
+}
+
+.mobile-code{
+  margin-top:.35rem;
+}
+
+.mobile-box{
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--border);
+  margin-bottom:1rem;
+}
+
+.mobile-label{
+  color:var(--muted);
+  font-size:.74rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:.3rem;
+}
+
+.mobile-value{
+  color:var(--text);
+  font-weight:800;
+}
+
+.mobile-bottom{
+  display:flex;
+  justify-content:flex-end;
+  gap:.5rem;
+  padding-top:.9rem;
+  border-top:1px solid var(--border);
+}
+
+/* MODAL */
+.delete-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.delete-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.13);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ff6b6b;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.delete-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.delete-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.delete-modal-body{
+  padding:1.5rem;
+}
+
+.delete-preview{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid rgba(220,53,69,.22);
+  background:rgba(220,53,69,.08);
+}
+
+.delete-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:768px){
+  .leave-type-head{
+    flex-direction:column;
+  }
+
+  .leave-type-head .btn-orange{
+    width:100%;
+    display:flex;
+    justify-content:center;
+  }
+
+  .leave-title{
+    font-size:1.35rem;
+  }
+
+  .leave-title-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+  }
+
+  .desktop-table{
+    display:none;
+  }
+
+  .leave-mobile-list{
+    display:block;
+    padding:1rem;
+  }
+
+  .leave-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .delete-modal-footer{
+    flex-direction:column;
+  }
+
+  .delete-modal-footer .btn-soft,
+  .delete-modal-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="leave-type-head">
+  <div class="leave-title-wrap">
+    <div class="leave-title-icon">
+      <i class="bi bi-calendar2-check"></i>
+    </div>
+
+    <div>
+      <h1 class="leave-title">Rodzaje urlopów</h1>
+      <div class="leave-subtitle">
+        Konfiguracja zasad naliczania, limitów i typów urlopów.
+      </div>
+    </div>
+  </div>
+
+  <a href="{% url 'leave_type_add' %}" class="btn-orange">
+    <i class="bi bi-plus-lg me-1"></i>
+    Dodaj rodzaj
+  </a>
+</div>
+
+<div class="leave-list-card">
+  <div class="leave-list-header">
+    <div class="leave-list-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista rodzajów urlopów</h3>
+      <p>Nazwa, kod, limit roczny, naliczanie do limitu i szybkie akcje.</p>
+    </div>
+  </div>
+
+  <div class="desktop-table">
+    <div class="table-responsive">
+      <table id="leaveTypeTable" class="table leave-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Nazwa</th>
+            <th>Kod</th>
+            <th>Limit roczny</th>
+            <th>Wliczany do limitu</th>
+            <th>Specjalny</th>
+            <th class="text-end">Akcje</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for type in leave_types %}
+            <tr>
+              <td>
+                <div class="leave-name">
+                  {{ type.name }}
+                </div>
+              </td>
+
+              <td>
+                <span class="badge-soft badge-code">
+                  {{ type.code }}
+                </span>
+              </td>
+
+              <td>
+                {% if type.counts_against_limit %}
+                  <span class="leave-limit">
+                    {{ type.annual_limit_days|floatformat:0 }} dni
+                  </span>
+                {% else %}
+                  <span class="leave-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if type.counts_against_limit %}
+                  <span class="badge-soft badge-yes">
+                    <i class="bi bi-check-circle"></i>
+                    Tak
+                  </span>
+                {% else %}
+                  <span class="badge-soft badge-no">
+                    <i class="bi bi-x-circle"></i>
+                    Nie
+                  </span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if type.is_special %}
+                  <span class="badge-soft badge-special">
+                    <i class="bi bi-star"></i>
+                    Specjalny
+                  </span>
+                {% else %}
+                  <span class="leave-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td class="text-end">
+                <div class="leave-actions">
+                  <a class="icon-btn icon-btn-green"
+                     href="{% url 'leave_type_edit' type.pk %}"
+                     title="Edytuj">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </a>
+
+                  {% if type.usage_count > 0 %}
+                    <span class="icon-btn icon-btn-disabled"
+                          title="Nie można usunąć">
+                      <i class="fa-solid fa-trash"></i>
+                    </span>
+                  {% else %}
+                    <button type="button"
+                            class="icon-btn icon-btn-danger"
+                            title="Usuń"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteLeaveTypeModal"
+                            data-delete-url="{% url 'leave_type_delete' type.pk %}"
+                            data-name="{{ type.name|escape }}">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <i class="bi bi-inbox"></i>
+                  <strong>Brak rodzajów urlopu</strong>
+                  <span>Nie dodano jeszcze żadnych typów urlopów.</span>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="leave-mobile-list">
+    {% for type in leave_types %}
+      <div class="leave-mobile-card">
+        <div class="mobile-top">
+          <div>
+            <div class="mobile-name">
+              {{ type.name }}
+            </div>
+
+            <div class="mobile-code">
+              <span class="badge-soft badge-code">
+                {{ type.code }}
+              </span>
+            </div>
+          </div>
+
+          {% if type.is_special %}
+            <span class="badge-soft badge-special">
+              Specjalny
+            </span>
+          {% endif %}
+        </div>
+
+        <div class="mobile-box">
+          <div class="mobile-label">Limit roczny</div>
+          <div class="mobile-value">
+            {% if type.counts_against_limit %}
+              {{ type.annual_limit_days|floatformat:0 }} dni
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mobile-box">
+          <div class="mobile-label">Wliczany do limitu</div>
+          <div class="mobile-value">
+            {% if type.counts_against_limit %}
+              <span class="badge-soft badge-yes">Tak</span>
+            {% else %}
+              <span class="badge-soft badge-no">Nie</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mobile-bottom">
+          <a class="icon-btn icon-btn-green"
+             href="{% url 'leave_type_edit' type.pk %}"
+             title="Edytuj">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </a>
+
+          {% if type.usage_count > 0 %}
+            <span class="icon-btn icon-btn-disabled"
+                  title="Nie można usunąć">
+              <i class="fa-solid fa-trash"></i>
+            </span>
+          {% else %}
+            <button type="button"
+                    class="icon-btn icon-btn-danger"
+                    title="Usuń"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteLeaveTypeModal"
+                    data-delete-url="{% url 'leave_type_delete' type.pk %}"
+                    data-name="{{ type.name|escape }}">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <strong>Brak rodzajów urlopu</strong>
+        <span>Nie dodano jeszcze żadnych typów urlopów.</span>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="modal fade" id="deleteLeaveTypeModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-modal">
+
+      <form method="post" id="deleteLeaveTypeForm">
+        {% csrf_token %}
+
+        <div class="delete-modal-header">
+          <div class="delete-modal-icon">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć rodzaj urlopu?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="delete-modal-body">
+          <div class="delete-preview">
+            <div class="small text-muted mb-1">
+              Usuwasz:
+            </div>
+
+            <strong id="deleteLeaveTypeName">—</strong>
+          </div>
+        </div>
+
+        <div class="delete-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-trash"></i>
+            Usuń rodzaj
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = document.getElementById("deleteLeaveTypeModal");
+  const form = document.getElementById("deleteLeaveTypeForm");
+  const nameBox = document.getElementById("deleteLeaveTypeName");
+
+  if (!modal || !form || !nameBox) return;
+
+  modal.addEventListener("show.bs.modal", function (event) {
+    const button = event.relatedTarget;
+
+    const url = button.getAttribute("data-delete-url");
+    const name = button.getAttribute("data-name");
+
+    form.action = url || "";
+    nameBox.innerText = name || "—";
+  });
+});
+</script>
+
+{% endblock %}

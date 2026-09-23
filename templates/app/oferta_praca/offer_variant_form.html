@@ -1,0 +1,552 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  .ts-wrapper {
+    width: 100%;
+  }
+
+  .ts-wrapper.single .ts-control,
+  .ts-wrapper.multi .ts-control {
+    min-height: 38px;
+    border-radius: .375rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    box-shadow: none;
+    padding: .45rem .75rem;
+  }
+
+  .ts-wrapper.focus .ts-control {
+    border-color: #1468f5;
+    box-shadow: 0 0 0 .2rem rgba(255, 122, 0, .15);
+  }
+
+  .ts-control input {
+    color: var(--text) !important;
+  }
+
+  .ts-control input::placeholder {
+    color: var(--muted) !important;
+    opacity: 1;
+  }
+
+  .ts-dropdown {
+    margin-top: .35rem;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 10px 30px rgba(0,0,0,.18);
+    overflow: hidden;
+  }
+
+  .ts-dropdown .active {
+    background: rgba(255, 122, 0, .12);
+    color: var(--text);
+  }
+
+  .ts-dropdown .option {
+    padding: .75rem .9rem;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+  }
+
+  .ts-dropdown .option:last-child {
+    border-bottom: 0;
+  }
+
+  .ts-option-row {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .ts-option-title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ts-empty-state {
+    padding: .9rem 1rem;
+    color: var(--muted);
+    font-size: .88rem;
+  }
+
+  .ts-wrapper.plugin-remove_button .item .remove {
+    border-left: 1px solid rgba(255,255,255,.08);
+  }
+
+  @media (max-width: 768px) {
+    .ts-wrapper.single .ts-control,
+    .ts-wrapper.multi .ts-control {
+      min-height: 36px;
+      padding: .4rem .65rem;
+      font-size: .9rem;
+    }
+
+    .ts-dropdown .option {
+      padding: .7rem .8rem;
+    }
+  }
+</style>
+<div class="d-flex justify-content-between mb-3 align-items-center">
+  <div>
+    <h1 class="h4 fw-bold mb-0">
+      {% if is_edit %}Edytuj wariant{% else %}Dodaj wariant{% endif %}
+    </h1>
+    <p class="text-muted mb-0">Oferta: {{ offer.number }} — {{ offer.title }}</p>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'offer_detail' offer.pk %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Wróć
+    </a>
+    <button form="variantForm" class="btn btn-brand">
+      <i class="bi bi-save me-1"></i>{% if is_edit %}Zapisz zmiany{% else %}Zapisz{% endif %}
+    </button>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    <div class="card">
+      <div class="card-body p-4">
+        <form id="variantForm" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.source_type.label }}</label>
+              {{ form.source_type }}
+              {% if form.source_type.errors %}
+                <div class="invalid-feedback d-block">{{ form.source_type.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">{{ form.name.label }}</label>
+              {{ form.name }}
+              {% if form.name.errors %}
+                <div class="invalid-feedback d-block">{{ form.name.errors|striptags }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">{{ form.description.label }}</label>
+              {{ form.description }}
+              {% if form.description.errors %}
+                <div class="invalid-feedback d-block">{{ form.description.errors|striptags }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div id="pdfSection" class="mt-4">
+            <h6 class="fw-bold mb-3">PDF i ceny</h6>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">{{ form.pdf_file.label }}</label>
+                {{ form.pdf_file }}
+                {% if form.pdf_file.errors %}
+                  <div class="invalid-feedback d-block">{{ form.pdf_file.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">{{ form.pdf_total_netto.label }}</label>
+                {{ form.pdf_total_netto }}
+                {% if form.pdf_total_netto.errors %}
+                  <div class="invalid-feedback d-block">{{ form.pdf_total_netto.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">{{ form.pdf_accessories_netto.label }}</label>
+                {{ form.pdf_accessories_netto }}
+                {% if form.pdf_accessories_netto.errors %}
+                  <div class="invalid-feedback d-block">{{ form.pdf_accessories_netto.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">{{ form.pdf_materials_netto.label }}</label>
+                {{ form.pdf_materials_netto }}
+                {% if form.pdf_materials_netto.errors %}
+                  <div class="invalid-feedback d-block">{{ form.pdf_materials_netto.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div id="itemsSection" class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="fw-bold mb-0">Pozycje wariantu</h6>
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="addItemRow">
+                <i class="bi bi-plus-lg me-1"></i>Dodaj pozycję
+                </button>
+            </div>
+
+            {{ item_formset.management_form }}
+
+            <div id="itemRows">
+                {% for item_form in item_formset %}
+                <div class="border rounded p-3 mb-3 item-row">
+                    {% for hidden in item_form.hidden_fields %}
+                    {{ hidden }}
+                    {% endfor %}
+
+                    <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Produkt</label>
+                        {{ item_form.product }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Nazwa</label>
+                        {{ item_form.name }}
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Ilość</label>
+                        {{ item_form.quantity }}
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">Jm.</label>
+                        {{ item_form.unit }}
+                    </div>
+                    <div class="col-md-1">
+                        <label class="form-label">VAT</label>
+                        {{ item_form.vat_rate }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Cena netto</label>
+                        {{ item_form.unit_price_netto }}
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        {% if item_form.DELETE %}
+                        <div class="form-check d-none">
+                            {{ item_form.DELETE }}
+                        </div>
+                        {% endif %}
+                        <button type="button" class="btn btn-outline-danger btn-sm removeItemRow">
+                        <i class="bi bi-trash me-1"></i>Usuń
+                        </button>
+                    </div>
+                    </div>
+
+                    {% if item_form.errors %}
+                    <div class="text-danger small mt-2">
+                        {{ item_form.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            </div>
+
+          <div class="col-12 d-flex justify-content-end gap-2 pt-3">
+            <a href="{% url 'offer_detail' offer.pk %}" class="btn btn-outline-secondary">Anuluj</a>
+            <button type="submit" class="btn btn-brand">
+              <i class="bi bi-save me-1"></i>Zapisz wariant
+            </button>
+          </div>
+        </form>
+
+        <div id="emptyItemFormTemplate" class="d-none">
+  <div class="border rounded p-3 mb-3 item-row">
+    {% with item_form=item_formset.empty_form %}
+      {% for hidden in item_form.hidden_fields %}
+        {{ hidden }}
+      {% endfor %}
+
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Produkt</label>
+          {{ item_form.product }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Nazwa</label>
+          {{ item_form.name }}
+        </div>
+        <div class="col-md-1">
+          <label class="form-label">Ilość</label>
+          {{ item_form.quantity }}
+        </div>
+        <div class="col-md-1">
+          <label class="form-label">Jm.</label>
+          {{ item_form.unit }}
+        </div>
+        <div class="col-md-1">
+          <label class="form-label">VAT</label>
+          {{ item_form.vat_rate }}
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Cena netto</label>
+          {{ item_form.unit_price_netto }}
+        </div>
+
+        <div class="col-md-3 d-flex align-items-end">
+          {% if item_form.DELETE %}
+            <div class="form-check d-none">
+              {{ item_form.DELETE }}
+            </div>
+          {% endif %}
+          <button type="button" class="btn btn-outline-danger btn-sm removeItemRow">
+            <i class="bi bi-trash me-1"></i>Usuń
+          </button>
+        </div>
+      </div>
+    {% endwith %}
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="card">
+      <div class="card-body p-3">
+        <h6 class="fw-bold mb-2">Informacja</h6>
+        <div class="small text-muted">
+          Przy PDF nazwa wariantu może zostać uzupełniona z nazwy pliku.
+          Przy pozycjach wartości netto policzą się automatycznie po zapisaniu.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+
+<script>
+(function () {
+  const source = document.getElementById("id_source_type");
+  const pdfSection = document.getElementById("pdfSection");
+  const itemsSection = document.getElementById("itemsSection");
+  const pdfInput = document.getElementById("id_pdf_file");
+  const variantNameInput = document.getElementById("id_name");
+
+  const addItemBtn = document.getElementById("addItemRow");
+  const itemRows = document.getElementById("itemRows");
+  const emptyTemplate = document.getElementById("emptyItemFormTemplate");
+  const totalForms = document.getElementById("id_items-TOTAL_FORMS");
+
+  function toggleSections() {
+    const mode = source?.value;
+    if (pdfSection) pdfSection.style.display = mode === "pdf" ? "" : "none";
+    if (itemsSection) itemsSection.style.display = mode === "items" ? "" : "none";
+  }
+
+  source?.addEventListener("change", toggleSections);
+
+  pdfInput?.addEventListener("change", function () {
+    const file = this.files?.[0];
+    if (!file) return;
+    if (!variantNameInput.value.trim()) {
+      variantNameInput.value = file.name.replace(/\.[^/.]+$/, "");
+    }
+  });
+
+  function getRow(el) {
+    return el?.closest(".item-row");
+  }
+
+  function initProductSelect(selectEl) {
+  if (!selectEl) return;
+  if (selectEl.tomselect) return;
+
+  new TomSelect(selectEl, {
+    create: false,
+    maxOptions: 50,
+    allowEmptyOption: true,
+    searchField: ["text"],
+    valueField: "value",
+    labelField: "text",
+    openOnFocus: false,
+    closeAfterSelect: true,
+    hideSelected: false,
+    placeholder: "Zacznij wpisywać produkt...",
+    render: {
+      no_results: function(data, escape) {
+        if (!data.input || !data.input.trim()) {
+          return '<div class="ts-empty-state">Zacznij wpisywać nazwę produktu</div>';
+        }
+        return '<div class="ts-empty-state">Brak wyników dla: "' + escape(data.input) + '"</div>';
+      },
+      option: function(data, escape) {
+        return `
+          <div class="ts-option-row">
+            <div class="ts-option-title">${escape(data.text || "")}</div>
+          </div>
+        `;
+      },
+      item: function(data, escape) {
+        return `<div>${escape(data.text || "")}</div>`;
+      }
+    },
+    score: function(search) {
+      const trimmed = (search || "").trim();
+      if (!trimmed) {
+        return function() { return 0; };
+      }
+      return this.getScoreFunction(search);
+    },
+    shouldOpen: function() {
+      const q = (this.control_input?.value || "").trim();
+      return q.length > 0;
+    },
+    onType: function(str) {
+      const q = (str || "").trim();
+      if (q.length > 0) {
+        this.open();
+        this.refreshOptions(false);
+      } else {
+        this.close();
+      }
+    },
+    onFocus: function() {
+      const q = (this.control_input?.value || "").trim();
+      if (!q) {
+        this.close();
+      }
+    }
+  });
+}
+
+  function destroyProductSelect(selectEl) {
+    if (selectEl && selectEl.tomselect) {
+      selectEl.tomselect.destroy();
+    }
+  }
+
+  function autofillFromProduct(row) {
+  const productSelect = row.querySelector(".product-select");
+  const itemNameInput = row.querySelector(".item-name-input");
+  const unitInput = row.querySelector(".item-unit-input");
+  const priceInput = row.querySelector(".item-price-input");
+  const vatInput = row.querySelector(".item-vat-input");
+
+  if (!productSelect) return;
+
+  const selected = productSelect.options[productSelect.selectedIndex];
+  if (!selected || !selected.value) return;
+
+  const productName = selected.dataset.productName || selected.text || "";
+  const productUnit = selected.dataset.productUnit || "";
+  const productPrice = selected.dataset.productPrice || "";
+  const productVat = selected.dataset.productVat || "";
+
+  if (itemNameInput) itemNameInput.value = productName;
+  if (unitInput) unitInput.value = productUnit;
+  if (priceInput) priceInput.value = productPrice;
+  if (vatInput) vatInput.value = productVat;
+}
+
+  function getVisibleRows() {
+    return [...itemRows.querySelectorAll(".item-row")].filter(
+      (row) => !row.classList.contains("d-none")
+    );
+  }
+
+  function reindexVisibleRows() {
+    const rows = getVisibleRows();
+
+    rows.forEach((row, index) => {
+      row.querySelectorAll("select.product-select").forEach((select) => {
+        destroyProductSelect(select);
+      });
+
+      row.querySelectorAll("input, select, textarea, label").forEach((el) => {
+        ["name", "id", "for"].forEach((attr) => {
+          const val = el.getAttribute(attr);
+          if (val) {
+            el.setAttribute(
+              attr,
+              val.replace(/items-(\d+|__prefix__)-/g, `items-${index}-`)
+            );
+          }
+        });
+      });
+    });
+
+    totalForms.value = rows.length;
+
+    rows.forEach((row) => {
+      const select = row.querySelector(".product-select");
+      initProductSelect(select);
+    });
+  }
+
+  function removeRow(row) {
+    const deleteInput = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+    const idInput = row.querySelector('input[name$="-id"]');
+    const hasPersistedId = !!(idInput && idInput.value);
+
+    if (hasPersistedId) {
+      if (deleteInput) deleteInput.checked = true;
+      row.classList.add("d-none");
+      return;
+    }
+
+    const select = row.querySelector(".product-select");
+    destroyProductSelect(select);
+
+    row.remove();
+    reindexVisibleRows();
+  }
+
+  addItemBtn?.addEventListener("click", function () {
+    if (!emptyTemplate || !itemRows || !totalForms) return;
+
+    const index = parseInt(totalForms.value, 10);
+    const html = emptyTemplate.innerHTML.replace(/__prefix__/g, index);
+
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = html.trim();
+
+    const row = wrapper.firstElementChild;
+    if (!row) return;
+
+    itemRows.appendChild(row);
+    totalForms.value = index + 1;
+
+    const select = row.querySelector(".product-select");
+    initProductSelect(select);
+  });
+
+  itemRows?.addEventListener("change", function (e) {
+    const target = e.target;
+    const row = getRow(target);
+    if (!row) return;
+
+    if (target.classList.contains("product-select")) {
+      autofillFromProduct(row);
+    }
+  });
+
+  itemRows?.addEventListener("click", function (e) {
+    const btn = e.target.closest(".removeItemRow");
+    if (!btn) return;
+
+    e.preventDefault();
+    const row = getRow(btn);
+    if (!row) return;
+
+    removeRow(row);
+  });
+
+  document.querySelectorAll(".product-select").forEach((select) => {
+    initProductSelect(select);
+  });
+
+  toggleSections();
+})();
+</script>
+
+{% endblock %}

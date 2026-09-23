@@ -1,0 +1,161 @@
+{% if request.user.role != request.user.Role.CLIENT %}
+  <div class="nav-section">Główne</div>
+  {% if perms.core.access_dashboard %}
+    <a class="nav-link" href="{% url 'dashboard' %}">
+      <i class="bi bi-speedometer2"></i> Strona Główna
+    </a>
+  {% endif %}
+
+  <div class="nav-section">Obsługa klienta</div>
+  {% if request.user.role != request.user.Role.PODWYKONAWCA and perms.klient.access_klient %}
+    <a class="nav-link" href="{% url 'klient' %}">
+      <i class="bi bi-people"></i> Klienci
+    </a>
+  {% endif %}
+  {% if perms.serwis.access_serwis_nowe %}
+    <a class="nav-link" href="{% url 'serwis_nowe' %}">
+      <i class="bi bi-tools"></i> Serwisy
+    </a>
+  {% endif %}
+  {% if request.user.role != request.user.Role.PODWYKONAWCA %}
+    {% if perms.protokol.access_protokol_nowe %}
+      <a class="nav-link" href="{% url 'protokol_nowe' %}">
+        <i class="bi bi-file-earmark-text"></i> Protokoły
+      </a>
+    {% endif %}
+    {% if perms.obsluga.access_service_contract_list %}
+      <a class="nav-link" href="{% url 'service_contract_list' %}">
+        <i class="bi bi-gear-wide-connected"></i> Obsługa
+      </a>
+    {% endif %}
+    {% if perms.gwarancja.access_warranty_claim_list %}
+      <a class="nav-link" href="{% url 'warranty_claim_list' %}">
+        <i class="bi bi-shield-check"></i> Gwarancje
+      </a>
+    {% endif %}
+  {% endif %}
+
+  <div class="nav-section">Realizacja</div>
+  {% if request.user.role == request.user.Role.OWNER or request.user.role == request.user.Role.MANAGER or request.user.role == request.user.Role.BIURO %}
+    {% if perms.zadanie.access_task_list %}
+      <a class="nav-link" href="{% url 'task_list' %}">
+        <i class="bi bi-check2-square"></i> Zadania
+      </a>
+    {% endif %}
+  {% endif %}
+  {% if perms.praca.access_workorder_list %}
+    <a class="nav-link" href="{% url 'workorder_list' %}">
+      <i class="bi bi-hammer"></i> Prace
+    </a>
+  {% endif %}
+  {% if request.user.role == request.user.Role.OWNER or request.user.role == request.user.Role.MANAGER or request.user.role == request.user.Role.BIURO %}
+    {% if perms.oferta_praca.access_offer_list %}
+      <a class="nav-link" href="{% url 'offer_list' %}">
+        <i class="bi bi-file-earmark-richtext"></i> Oferty
+      </a>
+    {% endif %}
+  {% endif %}
+
+  {% if request.user.role != request.user.Role.PODWYKONAWCA %}
+    <div class="nav-section">Zasoby</div>
+    {% if perms.pojazd.access_vehicle_list %}
+      <a class="nav-link" href="{% url 'vehicle_list' %}">
+        <i class="bi bi-truck"></i> Pojazdy
+      </a>
+    {% endif %}
+    {% if perms.sprzet.access_tool_list %}
+      <a class="nav-link" href="{% url 'tool_list' %}">
+        <i class="bi bi-wrench-adjustable"></i> Sprzęt
+      </a>
+    {% endif %}
+    {% if perms.urzadzenie.access_product_list %}
+      <a class="nav-link" href="{% url 'product_list' %}">
+        <i class="bi bi-cpu"></i> Urządzenia
+      </a>
+    {% endif %}
+    {% if perms.magazyn.access_stock_list %}
+      <a class="nav-link" href="{% url 'stock_list' %}">
+        <i class="bi bi-box-seam"></i> Magazyn
+      </a>
+    {% endif %}
+    {% if request.user.role == request.user.Role.OWNER or request.user.role == request.user.Role.MANAGER or request.user.role == request.user.Role.BIURO %}
+      {% if perms.dokument.access_documents_list %}
+        <a class="nav-link" href="{% url 'documents_list' %}">
+          <i class="bi bi-folder"></i> Dokumenty
+        </a>
+      {% endif %}
+    {% endif %}
+  {% endif %}
+
+  <div class="nav-section">Czas pracy</div>
+  {% if perms.rcp.access_time_entry_list %}
+    <a class="nav-link" href="{% url 'time_entry_list' %}">
+      <i class="bi bi-clock-history"></i> RCP
+    </a>
+  {% endif %}
+  {% if request.user.role == request.user.Role.OWNER or request.user.role == request.user.Role.MANAGER or request.user.role == request.user.Role.BIURO %}
+    {% if perms.rcp.access_time_entry_request_list %}
+      <a class="nav-link" href="{% url 'time_entry_request_list' %}">
+        <i class="bi bi-hourglass-split"></i> Wnioski RCP
+      </a>
+    {% endif %}
+  {% endif %}
+  {% if perms.core.access_user_calendar %}
+    <a class="nav-link" href="{% url 'user_calendar' %}">
+      <i class="bi bi-calendar3"></i> Kalendarz
+    </a>
+  {% endif %}
+
+  {% if perms.urlop.access_urlop_add %}
+    <div class="nav-section">Urlopy</div>
+    <a class="nav-link" href="{% url 'urlop_add' %}">
+      <i class="bi bi-calendar-plus"></i> Złóż wniosek urlopowy
+    </a>
+  {% endif %}
+
+  {% if request.user.role == request.user.Role.OWNER or request.user.role == request.user.Role.MANAGER or request.user.role == request.user.Role.BIURO %}
+    <div class="nav-section">Ustawienia</div>
+    {% if perms.core.access_employee_permission_list %}
+      <a class="nav-link" href="{% url 'employee_permission_list' %}">
+        <i class="bi bi-person-lock"></i> Role i uprawnienia
+      </a>
+    {% endif %}
+    {% if perms.core.access_employee_list %}
+      <a class="nav-link" href="{% url 'employee_list' %}">
+        <i class="bi bi-person-badge"></i> Pracownicy
+      </a>
+    {% endif %}
+    {% if perms.core.access_company_settings %}
+      <a class="nav-link" href="{% url 'company_settings' %}">
+        <i class="bi bi-gear"></i> Ustawienia firmy
+      </a>
+    {% endif %}
+
+    <div class="nav-section">Zarządzanie urlopami</div>
+    {% if perms.urlop.access_hr_leave_list %}
+      <a class="nav-link" href="{% url 'hr_leave_list' %}">
+        <i class="bi bi-calendar2-week"></i> Urlopy pracowników
+      </a>
+    {% endif %}
+    {% if perms.urlop.access_leave_type_list %}
+      <a class="nav-link" href="{% url 'leave_type_list' %}">
+        <i class="bi bi-list-check"></i> Rodzaje urlopów
+      </a>
+    {% endif %}
+    {% if perms.urlop.access_leave_allowance_list %}
+      <a class="nav-link" href="{% url 'leave_allowance_list' %}">
+        <i class="bi bi-calendar-check"></i> Limity urlopowe
+      </a>
+    {% endif %}
+  {% endif %}
+
+  <div class="nav-section">Pomoc</div>
+  {% if request.user.is_superuser or request.user.role == request.user.Role.OWNER or request.user.role == request.user.Role.MANAGER or request.user.role == request.user.Role.BIURO %}
+    <a class="nav-link" href="{% url 'support_list' %}">
+      <i class="bi bi-headset"></i> Wsparcie techniczne
+    </a>
+  {% endif %}
+  <a class="nav-link" href="{% url 'documentation_index' %}">
+    <i class="bi bi-journal-text"></i> Dokumentacja
+  </a>
+{% endif %}

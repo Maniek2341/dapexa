@@ -1,0 +1,10 @@
+Dzień dobry {{ transfer.new_owner.get_full_name|default:transfer.new_owner.email }},
+
+{{ transfer.current_owner.get_full_name|default:transfer.current_owner.email }} chce przekazać Ci rolę właściciela firmy {{ transfer.company.name }}.
+
+Aby zaakceptować przekazanie, otwórz poniższy link i potwierdź operację:
+{{ confirmation_url }}
+
+Link jest ważny do {{ expires_at|date:"d.m.Y, H:i" }} i może zostać użyty tylko raz.
+
+Jeżeli nie oczekujesz tej wiadomości, zignoruj ją. Bez potwierdzenia role nie zostaną zmienione.

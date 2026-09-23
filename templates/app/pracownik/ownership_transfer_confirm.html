@@ -1,0 +1,55 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+<div class="container py-5" style="max-width:760px;">
+  <div class="card border-0 shadow-lg" style="border-radius:24px; overflow:hidden; background:var(--card); color:var(--text);">
+    <div class="p-4 p-md-5" style="border-bottom:1px solid var(--border);">
+      <div class="d-flex align-items-center gap-3">
+        <div class="d-flex align-items-center justify-content-center" style="width:58px;height:58px;border-radius:18px;background:rgba(20,104,245,.14);color:#1468f5;font-size:1.5rem;">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div>
+          <h1 class="h3 fw-bold mb-1">Przekazanie własności firmy</h1>
+          <p class="mb-0 text-muted">Operacja wymaga potwierdzenia obu właścicieli.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 p-md-5">
+      {% if error %}
+        <div class="alert alert-danger mb-0"><i class="bi bi-exclamation-triangle me-2"></i>{{ error }}</div>
+      {% elif success %}
+        <div class="alert alert-success mb-0"><i class="bi bi-check-circle me-2"></i>{{ success }}</div>
+      {% else %}
+        <div class="mb-4 p-3" style="border:1px solid var(--border);border-radius:18px;">
+          <div class="text-muted small mb-1">Firma</div>
+          <div class="fw-bold fs-5">{{ transfer.company.name }}</div>
+          <hr style="border-color:var(--border);">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="text-muted small">Obecny właściciel</div>
+              <strong>{{ transfer.current_owner.get_full_name|default:transfer.current_owner.email }}</strong>
+            </div>
+            <div class="col-md-6">
+              <div class="text-muted small">Nowy właściciel</div>
+              <strong>{{ transfer.new_owner.get_full_name|default:transfer.new_owner.email }}</strong>
+            </div>
+          </div>
+        </div>
+        {% if is_owner_confirmation %}
+          <div class="alert alert-warning">Po tym potwierdzeniu role jeszcze się nie zmienią. Przyszły właściciel otrzyma osobny, jednorazowy link e-mail.</div>
+        {% else %}
+          <div class="alert alert-warning">Po potwierdzeniu nowa osoba otrzyma pełne uprawnienia właściciela, a obecny właściciel zostanie managerem.</div>
+        {% endif %}
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning fw-bold px-4 py-2">
+            <i class="bi bi-check-circle me-2"></i>
+            {% if is_owner_confirmation %}Potwierdzam przekazanie firmy{% else %}Potwierdzam przejęcie firmy{% endif %}
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

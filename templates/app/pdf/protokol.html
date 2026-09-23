@@ -1,0 +1,252 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+
+<style>
+@page {
+    size: A4;
+    margin: 15mm;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+    color: #000;
+    text-align: center;
+}
+
+.header-small {
+    font-size: 8pt;
+    margin-bottom: 10px;
+}
+
+.logo-box {
+    margin: 10px 0 15px 0;
+}
+
+.title {
+    text-align: center;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 9pt;
+    margin-bottom: 15px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #000;
+    padding: 4px;
+    vertical-align: top;
+}
+
+.no-border td {
+    border: none;
+}
+
+.label {
+    font-size: 8pt;
+    font-weight: bold;
+}
+
+.center {
+    text-align: center;
+}
+
+.right {
+    text-align: right;
+}
+
+.section-title {
+    text-align: center;
+    font-weight: bold;
+    font-size: 9pt;
+    margin: 10px 0 4px 0;
+}
+
+.description-box {
+    height: 140px;
+}
+
+.material-table th {
+    font-size: 8pt;
+    font-weight: bold;
+}
+
+.signature-section {
+    height: 60px;
+}
+
+.footer-sign {
+    text-align: center;
+    font-size: 8pt;
+}
+</style>
+</head>
+<body>
+
+<div class="header-small">
+    Załącznik nr {{ protocol.number }} Protokół potwierdzający wykonanie usługi
+</div>
+
+<table style="width:100%; border:none;">
+    <tr>
+        <td style="border:none; text-align:left; vertical-align:middle; width:50%;">
+            <img src="{{ company_logo_url }}" height="100" alt="Logo firmy">
+        </td>
+        <td style="border:none; text-align:right; vertical-align:middle; width:50%;">
+            <div style="font-size:14pt; font-weight:bold;">
+                PROTOKÓŁ ODBIORU PRAC
+            </div>
+        </td>
+    </tr>
+</table>
+
+<!-- DANE GŁÓWNE -->
+<table>
+<tr>
+    <td colspan="2" class="label">KLIENT</td>
+    <td colspan="3" class="label">Miejsce wykonania zlecenia</td>
+</tr>
+<tr>
+    <td colspan="2">{{ protocol.client }}</td>
+    <td colspan="3">
+        {% if protocol.address_street %}
+            {{ protocol.address_street }}<br>
+        {% endif %}
+    
+        {% if protocol.address_postal_code or protocol.address_city %}
+            {{ protocol.address_postal_code }} {{ protocol.address_city }}<br>
+        {% endif %}
+    
+        {% if protocol.address_country %}
+            {{ protocol.address_country }}
+        {% endif %}
+    </td>
+</tr>
+
+<tr>
+    <td class="label">Data realizacji ZLECENIA</td>
+    <td colspan="2" class="label">Numer ZLECENIA</td>
+    <td colspan="2" class="label">Data otrzymania ZLECENIA</td>  
+</tr>
+
+<tr>
+    <td>{{ protocol.end_time|date:"d.m.Y" }}</td>
+    <td colspan="2">{{ protocol.number }}</td>
+    <td colspan="2">{{ protocol.service.created_at|date:"d.m.Y" }}</td>
+</tr>
+
+<tr>
+    <td class="label">Godzina rozpoczęcia prac</td>
+    <td class="label">Godzina zakończenia prac</td>
+    <td colspan="2" class="label">Liczba pracowników</td>
+    <td>{{ protocol.pracownicy_szt }}</td>
+</tr>
+
+<tr>
+    <td>
+        {% if start_time_calculated %}
+            {{ start_time_calculated|date:"H:i" }}
+        {% endif %}
+    </td>
+    <td>{{ protocol.end_time|date:"H:i" }}</td>
+    <td colspan="2" class="label">Łączna liczba godzin</td>
+    <td>{{ protocol.robocizna }}</td>
+</tr>
+</table>
+
+<br>
+
+<!-- TREŚĆ -->
+<table>
+<tr>
+    <td class="label">Treść zlecenia:</td>
+</tr>
+<tr>
+    <td class="description-box">
+        {{ protocol.protocol_description }}
+    </td>
+</tr>
+</table>
+
+<br>
+
+<table>
+<tr>
+    <td class="label">Opis wykonanych prac:</td>
+</tr>
+<tr>
+    <td class="description-box">
+        {{ protocol.wykonane_prace }}
+    </td>
+</tr>
+</table>
+
+<br>
+
+<div class="section-title">
+    MATERIAŁY WYKORZYSTANE DO WYKONANIA ZLECENIA
+</div>
+
+<table class="material-table">
+<tr>
+    <th>LP.</th>
+    <th>Nazwa materiału</th>
+    <th>Ilość</th>
+    <th>Cena jednostkowa netto</th>
+    <th>Wartość materiałów netto</th>
+</tr>
+
+{% for item in protocol.protokolurz.all %}
+{% with price=item.cena|default:item.urzadzenia.net_price %}
+<tr>
+    <td class="center">{{ forloop.counter }}</td>
+    <td>{{ item.urzadzenia.name }}</td>
+    <td class="center">{{ item.sztuki }}</td>
+    <td class="right">{{ price|floatformat:2 }}</td>
+    {% widthratio item.sztuki 1 price as total %}
+    <td class="right">{{ total|floatformat:2 }}</td>
+</tr>
+{% endwith %}
+{% endfor %}
+
+{% for i in "12345678"|slice:":8"|make_list %}
+<tr>
+    <td>&nbsp;</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+</tr>
+{% endfor %}
+</table>
+
+<br>
+
+<div class="section-title">
+    POTWIERDZENIE WYKONANIA PRAC
+</div>
+
+<table>
+<tr class="signature-section">
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td class="footer-sign">podpis pracownika jednostki/komórki organizacyjnej</td>
+    <td class="footer-sign">podpis wykonawcy</td>
+</tr>
+</table>
+
+</body>
+</html>

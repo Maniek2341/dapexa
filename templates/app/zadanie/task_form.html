@@ -1,0 +1,433 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+
+<style>
+.task-form-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.task-form-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.task-form-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.task-form-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.task-form-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.task-form-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.task-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.task-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.task-card-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+}
+
+.task-card-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.task-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.task-card-body{
+  padding:1.5rem;
+}
+
+.task-section{
+  padding:1.25rem;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.025);
+  border-radius:22px;
+  margin-bottom:1.25rem;
+}
+
+.task-section:last-child{
+  margin-bottom:0;
+}
+
+.task-section-head{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  margin-bottom:1.2rem;
+}
+
+.task-section-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.11);
+  border:1px solid rgba(20,104,245,.17);
+  color:#1468f5;
+  font-size:1.15rem;
+  flex-shrink:0;
+}
+
+.task-section-head h4{
+  margin:0;
+  color:var(--text);
+  font-size:1rem;
+  font-weight:900;
+}
+
+.task-section-head p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.84rem;
+}
+
+.task-label{
+  display:block;
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:800;
+  margin-bottom:.45rem;
+}
+
+.task-card .form-control,
+.task-card .form-select,
+.task-card select,
+.task-card textarea{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.task-card textarea{
+  min-height:140px;
+}
+
+.task-card .form-control:focus,
+.task-card .form-select:focus,
+.task-card select:focus,
+.task-card textarea:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.task-errors,
+.errorlist{
+  margin:.45rem 0 0;
+  padding:0;
+  list-style:none;
+  color:#ff6b6b;
+  font-size:.82rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.task-form-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+@media(max-width:768px){
+  .task-form-head{
+    flex-direction:column;
+  }
+
+  .task-form-actions,
+  .task-form-actions a,
+  .task-form-actions button{
+    width:100%;
+  }
+
+  .task-form-actions{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .task-card-body{
+    padding:1rem;
+  }
+
+  .task-section{
+    padding:1rem;
+  }
+
+  .task-form-footer{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .task-form-footer a,
+  .task-form-footer button{
+    width:100%;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="task-form-head">
+  <div class="task-form-title-wrap">
+    <div class="task-form-title-icon">
+      <i class="bi bi-check2-square"></i>
+    </div>
+
+    <div>
+      <h1 class="task-form-title">Dodaj zadanie</h1>
+      <div class="task-form-subtitle">
+        Utwórz nowe zadanie dla osoby, roli lub wszystkich.
+      </div>
+    </div>
+  </div>
+
+  <div class="task-form-actions">
+    <a href="{% url 'task_list' %}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>
+      Wróć
+    </a>
+  </div>
+</div>
+
+<div class="task-card">
+  <div class="task-card-header">
+    <div class="task-card-icon">
+      <i class="bi bi-clipboard-check"></i>
+    </div>
+
+    <div>
+      <h3>Dane zadania</h3>
+      <p>Opis, termin, przypisanie i status zadania.</p>
+    </div>
+  </div>
+
+  <div class="task-card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="task-section">
+        <div class="task-section-head">
+          <div class="task-section-icon">
+            <i class="bi bi-journal-text"></i>
+          </div>
+
+          <div>
+            <h4>Opis zadania</h4>
+            <p>Wpisz, co dokładnie trzeba wykonać.</p>
+          </div>
+        </div>
+
+        <label class="task-label">Opis</label>
+        {{ form.description }}
+        <div class="task-errors">{{ form.description.errors }}</div>
+      </div>
+
+      <div class="task-section">
+        <div class="task-section-head">
+          <div class="task-section-icon">
+            <i class="bi bi-calendar-check"></i>
+          </div>
+
+          <div>
+            <h4>Termin i status</h4>
+            <p>Ustaw datę wykonania oraz aktualny status.</p>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="task-label">Termin wykonania</label>
+            {{ form.due_date }}
+            <div class="task-errors">{{ form.due_date.errors }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="task-label">Status</label>
+            {{ form.status }}
+            <div class="task-errors">{{ form.status.errors }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-section">
+        <div class="task-section-head">
+          <div class="task-section-icon">
+            <i class="bi bi-person-check"></i>
+          </div>
+
+          <div>
+            <h4>Przypisanie</h4>
+            <p>Wybierz osobę, rolę albo zadanie dla wszystkich.</p>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="task-label">Typ przypisania</label>
+            {{ form.assignment_type }}
+            <div class="task-errors">{{ form.assignment_type.errors }}</div>
+          </div>
+
+          <div class="col-md-4 assignment-user-box">
+            <label class="task-label">Pracownik</label>
+            {{ form.assigned_user }}
+            <div class="task-errors">{{ form.assigned_user.errors }}</div>
+          </div>
+
+          <div class="col-md-4 assignment-role-box">
+            <label class="task-label">Rola</label>
+            {{ form.assigned_role }}
+            <div class="task-errors">{{ form.assigned_role.errors }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="task-form-footer">
+        <a href="{% url 'task_list' %}" class="btn-soft">
+          Anuluj
+        </a>
+
+        <button type="submit" class="btn-orange">
+          <i class="bi bi-save me-1"></i>
+          Zapisz zadanie
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function toggleAssignmentFields() {
+  const typeInput = document.getElementById("id_assignment_type");
+  if (!typeInput) return;
+
+  const type = typeInput.value;
+
+  const userBox = document.querySelector(".assignment-user-box");
+  const roleBox = document.querySelector(".assignment-role-box");
+
+  const userInput = document.getElementById("id_assigned_user");
+  const roleInput = document.getElementById("id_assigned_role");
+
+  if (type === "user") {
+    if (userBox) userBox.style.display = "block";
+    if (roleBox) roleBox.style.display = "none";
+    if (roleInput) roleInput.value = "";
+  } else if (type === "role") {
+    if (userBox) userBox.style.display = "none";
+    if (roleBox) roleBox.style.display = "block";
+    if (userInput) userInput.value = "";
+  } else {
+    if (userBox) userBox.style.display = "none";
+    if (roleBox) roleBox.style.display = "none";
+    if (userInput) userInput.value = "";
+    if (roleInput) roleInput.value = "";
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  toggleAssignmentFields();
+
+  const assignmentType = document.getElementById("id_assignment_type");
+  if (assignmentType) {
+    assignmentType.addEventListener("change", toggleAssignmentFields);
+  }
+});
+</script>
+
+{% endblock %}

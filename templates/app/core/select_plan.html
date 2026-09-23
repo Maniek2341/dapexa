@@ -1,0 +1,80 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+
+{% block content %}
+<style>
+.plan-page { color:var(--text); max-width:1180px; }
+.plan-card { height:100%; padding:1.5rem; background:radial-gradient(circle at top left,rgba(20,104,245,.1),transparent 38%),var(--card); border:1px solid var(--border); border-radius:24px; box-shadow:0 18px 50px rgba(0,0,0,.16); position:relative; overflow:hidden; }
+.plan-card.current { border-color:rgba(20,104,245,.55); box-shadow:0 16px 42px rgba(20,104,245,.09); }
+.plan-card.featured{border-color:rgba(20,104,245,.55);box-shadow:0 20px 55px rgba(20,104,245,.13)}
+.plan-card.featured::before{content:"Najczęściej wybierany";position:absolute;top:0;right:1.25rem;padding:.35rem .7rem;border-radius:0 0 10px 10px;background:#1468f5;color:#fff;font-size:.68rem;font-weight:900}
+.plan-card h5{font-size:1.25rem;font-weight:900;color:var(--text)}
+.plan-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:rgba(20,104,245,.13);border:1px solid rgba(20,104,245,.2);color:#1468f5;font-size:1.2rem}
+.plan-badge { display:inline-flex; padding:.35rem .65rem; color:#ff9a3c; background:rgba(20,104,245,.1); border:1px solid rgba(20,104,245,.22); border-radius:999px; font-size:.72rem; font-weight:900; }
+.plan-prices { display:grid; grid-template-columns:1fr 1fr; gap:.65rem; margin-top:auto; }
+.plan-submit { width:100%; padding:.8rem .65rem; color:var(--text); background:rgba(255,255,255,.035); border:1px solid var(--border); border-radius:12px; font-weight:850; transition:.18s ease; }
+.plan-submit:hover { color:#fff; background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%); border-color:transparent; }
+.plan-submit:disabled { opacity:.48; cursor:not-allowed; }
+.plan-price-label { display:block; margin-top:.2rem; color:var(--muted); font-size:.7rem; font-weight:600; }
+</style>
+<div class="container py-5 plan-page">
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h1 class="h3 fw-bold mb-2">{% if is_existing_subscription %}Zmień pakiet{% else %}Wybierz pakiet{% endif %}</h1>
+            <p class="text-muted mb-0">
+                {% if is_existing_subscription %}Stripe rozliczy zmianę proporcjonalnie do pozostałej części okresu.{% else %}Aby dalej korzystać z aplikacji, wybierz jeden z dostępnych pakietów.{% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        {% for pkg in packages %}
+        <div class="col-md-4">
+            <div class="plan-card d-flex flex-column{% if subscription.package == pkg.code %} current{% endif %}{% if pkg.code == 'pro' %} featured{% endif %}">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <div class="d-flex align-items-center gap-3"><div class="plan-icon"><i class="bi {% if pkg.code == 'start' %}bi-rocket-takeoff{% elif pkg.code == 'standard' %}bi-buildings{% else %}bi-gem{% endif %}"></i></div><h5 class="card-title mb-1">{{ pkg.name }}</h5></div>
+                    {% if subscription.package == pkg.code %}<span class="plan-badge">Aktualny pakiet</span>{% endif %}
+                </div>
+                    <p class="text-muted small mb-3">
+                        {% if pkg.code == "start" %}Idealny na początek{% endif %}
+                        {% if pkg.code == "standard" %}Najlepszy dla rozwijających się firm{% endif %}
+                        {% if pkg.code == "pro" %}Maksymalne możliwości{% endif %}
+                    </p>
+
+                    <ul class="small text-muted mb-4 ps-3">
+                        {% for feat in pkg.features %}
+                        <li>{{ feat }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="mt-auto">
+                        <form method="post" action="{% url 'change_package' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="package" value="{{ pkg.code }}">
+                            <div class="plan-prices">
+                              <button type="submit" name="billing_period" value="monthly" class="plan-submit" {% if subscription.package == pkg.code %}disabled{% endif %}>
+                                {{ pkg.price_monthly }}<span class="plan-price-label">Miesięcznie</span>
+                              </button>
+                              <button type="submit" name="billing_period" value="yearly" class="plan-submit" {% if subscription.package == pkg.code %}disabled{% endif %}>
+                                {{ pkg.price_yearly }}<span class="plan-price-label">Rocznie</span>
+                              </button>
+                            </div>
+                        </form>
+                    </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            {% if subscription and subscription.trial_days_left <= 0 and not is_existing_subscription %}
+                <p class="text-muted small mb-0">
+                    Twój okres testowy wygasł. Dane pozostaną zapisane, ale dostęp do panelu jest zablokowany,
+                    dopóki nie aktywujesz płatnego pakietu.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

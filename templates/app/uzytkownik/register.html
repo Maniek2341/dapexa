@@ -1,0 +1,742 @@
+{% extends 'app/core/before_login_base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* --- KARTY PAKIETÓW --- */
+    .package-card {
+        border-radius: 1.25rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        transition:
+            transform 0.2s ease,
+            box-shadow 0.2s ease,
+            border-color 0.2s ease,
+            background-color 0.2s ease;
+        cursor: pointer;
+        position: relative;
+        background: #ffffff;
+    }
+
+    .package-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.15);
+        border-color: rgba(13, 110, 253, 0.4);
+    }
+
+    .package-card.selected {
+        border-color: #0d6efd;
+        box-shadow:
+            0 0 0 1px rgba(13, 110, 253, 0.25),
+            0 20px 40px rgba(13, 110, 253, 0.18);
+        background: radial-gradient(circle at top left, rgba(13,110,253,0.07), #ffffff);
+    }
+
+    .package-card .card-body {
+        padding: 1.75rem 1.5rem 1.5rem;
+    }
+
+    .package-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(15, 23, 42, 0.04);
+        color: #0f172a;
+    }
+
+    .password-rule {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: #64748b; /* slate-500 */
+        transition: color 0.2s ease;
+    }
+
+    .password-rule.valid {
+        color: #198754; /* bootstrap success */
+    }
+
+    .password-rule i {
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .password-rule.valid i {
+        transform: scale(1.1);
+    }
+
+    .package-chip.popular {
+        background: rgba(13, 110, 253, 0.08);
+        color: #0d6efd;
+    }
+
+    .package-price {
+        font-size: 1.4rem;
+        font-weight: 700;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .package-price span {
+        font-size: 0.9rem;
+        font-weight: 500;
+        opacity: 0.85;
+    }
+
+    .package-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .package-features {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .package-features li::before {
+        content: "•";
+        color: #0d6efd;
+        display: inline-block;
+        width: 1rem;
+        margin-left: 0;
+    }
+
+    .package-radio {
+        position: absolute;
+        top: 1rem;
+        right: 1.15rem;
+        transform: scale(1.1);
+        cursor: pointer;
+    }
+
+    @media (max-width: 767.98px) {
+        .package-card {
+            margin-bottom: 0.5rem;
+        }
+    }
+
+    /* --- TOGGLE MIESIĘCZNIE / ROCZNIE --- */
+    .billing-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(148, 163, 184, 0.12);
+    }
+
+    .billing-label {
+        opacity: 0.6;
+        transition: color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .billing-label.active {
+        color: #0d6efd;
+        opacity: 1;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 52px;
+        height: 28px;
+    }
+
+    .switch input { display: none; }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        background-color: #cbd5f5;
+        border-radius: 34px;
+        transition: 0.4s;
+        top: 0; left: 0; right: 0; bottom: 0;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 22px;
+        width: 22px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        border-radius: 50%;
+        transition: 0.4s;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+    }
+
+    input:checked + .slider {
+        background-color: #0d6efd;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(24px);
+    }
+</style>
+
+<div class="auth-form-section">
+    <div class="container">
+        <!-- Logo -->
+        <img src="{% static 'assets/panel/img/logo-1.png'%}" alt="Logo firmy" class="logo">
+        
+        <!-- Indykator kroków -->
+        <div class="step-indicator">
+            <div class="step active" id="step1-indicator">
+                <span>1</span>
+                <span class="step-label">Dane osobowe</span>
+            </div>
+            <div class="step" id="step2-indicator">
+                <span>2</span>
+                <span class="step-label">Dane firmy</span>
+            </div>
+            <div class="step" id="step3-indicator">
+                <span>3</span>
+                <span class="step-label">Pakiety</span>
+            </div>
+        </div>
+
+
+        <!-- Formularz -->
+        <form id="registrationForm" method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            <div class="d-none" aria-hidden="true">
+                <label for="id_registration_website">Strona internetowa</label>
+                <input type="text" id="id_registration_website" name="registration_website" value="" tabindex="-1" autocomplete="off">
+            </div>
+
+            <!-- Formularz krok 1 - Dane osobowe -->
+            <div class="form-step active" id="step1">
+                <h1 class="form-title">Utwórz konto</h1>
+                <p class="form-subtitle">Wprowadź swoje dane osobowe</p>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="first_name" class="form-label">Imię</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            {{ user_form.first_name }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="last_name" class="form-label">Nazwisko</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            {{ user_form.last_name }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="email" class="form-label">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        {{ user_form.email }}
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="password1" class="form-label">Hasło</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            {{ user_form.password1 }}
+                        </div>
+                    
+                        <!-- Pasek siły hasła -->
+                        <div id="password-strength" class="mt-2">
+                            <div id="password-strength-bar" style="
+                                height: 6px;
+                                width: 0%;
+                                background: red;
+                                border-radius: 4px;
+                                transition: width .3s ease, background .3s ease;">
+                            </div>
+                            <small id="password-strength-text" class="text-muted"></small>
+                        </div>
+                    
+                        <!-- Checklista wymagań hasła -->
+                        <div id="password-rules" class="mt-2 small">
+                            <div class="password-rule" data-rule="length">
+                                <i class="fa-regular fa-circle me-1"></i>
+                                Minimum 8 znaków
+                            </div>
+                            <div class="password-rule" data-rule="lower">
+                                <i class="fa-regular fa-circle me-1"></i>
+                                Przynajmniej jedna mała litera (a–z)
+                            </div>
+                            <div class="password-rule" data-rule="upper">
+                                <i class="fa-regular fa-circle me-1"></i>
+                                Przynajmniej jedna wielka litera (A–Z)
+                            </div>
+                            <div class="password-rule" data-rule="digit">
+                                <i class="fa-regular fa-circle me-1"></i>
+                                Przynajmniej jedna cyfra (0–9)
+                            </div>
+                            <div class="password-rule" data-rule="special">
+                                <i class="fa-regular fa-circle me-1"></i>
+                                Przynajmniej jeden znak specjalny (!@#$…)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="password2" class="form-label">Potwierdź hasło</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            {{ user_form.password2 }}
+                            
+                        </div>
+                        <div id="password-match" class="mt-1 small"></div>
+                    </div>
+                </div>
+
+                <div class="form-check mb-4">
+                    {{ user_form.two_factor_enabled }}
+                    <label class="form-check-label" for="{{ user_form.two_factor_enabled.id_for_label }}">
+                        Włącz weryfikację dwuetapową przy logowaniu
+                    </label>
+                    <div class="form-text">
+                        Po wpisaniu hasła system wyśle jednorazowy kod na Twój adres e-mail.
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <div></div> <!-- Pusty div dla wyrównania -->
+                    <button type="button" class="btn btn-primary" onclick="nextStep()">Dalej</button>
+                </div>
+            </div>
+            
+            <!-- Formularz krok 2 - Dane firmy -->
+            <div class="form-step" id="step2">
+                <h1 class="form-title">Dane Twojej firmy</h1>
+                <p class="form-subtitle">Wprowadź informacje o firmie</p>
+                
+                <div class="mb-4">
+                    <label for="company-name" class="form-label">Nazwa firmy</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-building"></i></span>
+                        {{ company_form.name }}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="street" class="form-label">Adres firmy</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+                        {{ company_form.street }}
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="postalcode" class="form-label">Kod pocztowy</label>
+                        {{ company_form.postcode }}
+                    </div>
+                    <div class="col-md-8">
+                        <label for="city" class="form-label">Miasto</label>
+                        {{ company_form.city }}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="phone" class="form-label">Telefon kontaktowy</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                        {{ company_form.phone }}
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline-primary" onclick="prevStep()">Wstecz</button>
+                    <button type="button" class="btn btn-primary" onclick="nextStep2()">Dalej</button>
+                </div>
+            </div>
+
+            <!-- Formularz krok 3 - Wybór pakietu -->
+            <div class="form-step" id="step3">
+                <h1 class="form-title">Pakiety</h1>
+                <p class="form-subtitle">To jest informacja o pakietach, przy rejestracji dostajesz 14 dni okresu testowego</p>
+                <!-- Hidden billing_period dla SubscriptionForm -->
+                <input type="hidden"
+                       id="billing_period_input"
+                       name="sub-billing_period"
+                       value="{{ subscription_form.billing_period.value|default:'monthly' }}">
+                <!-- Toggle miesięcznie / rocznie -->
+                <div class="d-flex justify-content-center mb-4">
+                    <div class="billing-toggle">
+                        <span class="billing-label active" id="billing-label-monthly">Miesięcznie</span>
+                        <label class="switch">
+                            <input type="checkbox" id="billingToggle">
+                            <span class="slider round"></span>
+                        </label>
+                        <span class="billing-label" id="billing-label-yearly">Rocznie</span>
+                    </div>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <!-- Pakiet Start -->
+                    <div class="col-md-4">
+                        <label class="package-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="package-name">Start</span>
+                                </div>
+                                <p class="text-muted small mb-3">Idealny na start i testy systemu.</p>
+                                <div class="mb-3 package-price">
+                                    <span class="price-monthly">100 zł <span>/ mies.</span></span>
+                                    <span class="price-yearly d-none">1000 zł <span>/ rok</span></span>
+                                </div>
+                                <div class="text-muted small mb-2">Bez zobowiązań, pełen dostęp do podstawowych funkcji.</div>
+                                <ul class="package-features small">
+                                    <li>Podstawowe moduły CRM</li>
+                                    <li>Do 3 użytkowników</li>
+                                    <li>Podstawowe raporty</li>
+                                </ul>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Pakiet Standard (Najczęściej wybierany) -->
+                    <div class="col-md-4">
+                        <label class="package-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="package-name">Standard</span>
+                                </div>
+                                <p class="text-muted small mb-3">Świetny wybór dla rozwijających się firm serwisowych.</p>
+                                <div class="mb-3 package-price">
+                                    <span class="price-monthly">199 zł <span>/ mies.</span></span>
+                                    <span class="price-yearly d-none">1990 zł <span>/ rok</span></span>
+                                </div>
+                                <div class="text-muted small mb-2">Najlepszy stosunek funkcji do ceny.</div>
+                                <ul class="package-features small">
+                                    <li>Wszystkie moduły serwisowe</li>
+                                    <li>Do 10 użytkowników</li>
+                                    <li>Zaawansowane raporty i statystyki</li>
+                                    <li>Priorytetowe wsparcie mailowe</li>
+                                </ul>
+                            </div>
+                        </label>
+                    </div>
+                    <!-- Pakiet Pro -->
+                    <div class="col-md-4">
+                        <label class="package-card h-100">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="package-name">Pro</span>
+                                </div>
+                                <p class="text-muted small mb-3">Pełna automatyzacja i maksymalne możliwości.</p>
+                                <div class="mb-3 package-price">
+                                    <span class="price-monthly">399 zł <span>/ mies.</span></span>
+                                    <span class="price-yearly d-none">3990 zł <span>/ rok</span></span>
+                                </div>
+                                <div class="text-muted small mb-2">Dla firm, które chcą poukładać cały biznes.</div>
+                                <ul class="package-features small">
+                                    <li>Nieograniczona liczba użytkowników</li>
+                                    <li>Pełna automatyzacja procesów</li>
+                                    <li>Priorytetowe wsparcie 1:1</li>
+                                    <li>Dedykowany opiekun wdrożeniowy</li>
+                                </ul>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline-primary" onclick="prevStep2()">Wstecz</button>
+                    <button type="submit" class="btn btn-primary">Zarejestruj firmę</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="auth-image-section d-none d-lg-block">
+    <!-- Tekst na zdjęciu -->
+    <div class="position-absolute top-50 start-50 translate-middle text-white text-center p-4" style="z-index: 2; width: 80%;">
+        <div>
+            <h3 class="mb-4" style="font-weight: bold;">Wypróbuj funkcje aplikacji za darmo przez 14 dni</h3>
+          <h5>Twój 14-dniowy okres testowy obejmuje:</h5>
+          </div>
+          <ul class="list-unstyled mt-4">
+            <li class="d-flex align-items-start mb-4">
+              <i class="fa-solid fa-circle-check text-success me-2 mt-1 fs-5 mr-2"></i>
+              <div>
+                <h5>Dostęp do funkcji premium</h5>
+              </div>
+            </li>
+          
+            <li class="d-flex align-items-start mb-4">
+              <i class="fa-solid fa-circle-check text-success me-2 mt-1 fs-5 mr-2"></i>
+              <div>
+                <h5>Dostęp do najważniejszych funkcji</h5>
+              </div>
+            </li>
+
+            <li class="d-flex align-items-start mb-4">
+              <i class="fa-solid fa-circle-check text-success me-2 mr-2 mt-1 fs-5"></i>
+              <div>
+                <h5>Dodanie jednego pracownika</h5>
+              </div>
+            </li>
+          
+            <li class="d-flex align-items-start mb-4">
+              <i class="fa-solid fa-circle-check text-success me-2 mt-1 fs-5 mr-2"></i>
+              <div>
+                <h5>Wsparcie klienta na czacie przez 24/7 do 14 dni</h5>
+              </div>
+            </li>
+          
+            <li class="d-flex align-items-start">
+              <i class="fa-solid fa-circle-check text-success me-2 mt-1 fs-5 mr-2"></i>
+              <div>
+                <h5>Zakup planu w dowolnym momencie</h5>
+              </div>
+            </li>
+          </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Funkcje do zmiany kroków
+    function nextStep() {
+        const step1Valid = validateStep1();
+        if (!step1Valid) return;
+        
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step2').classList.add('active');
+        
+        document.getElementById('step1-indicator').classList.remove('active');
+        document.getElementById('step1-indicator').classList.add('completed');
+        document.getElementById('step2-indicator').classList.add('active');
+    }
+    
+    function prevStep() {
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step1').classList.add('active');
+        
+        document.getElementById('step2-indicator').classList.remove('active');
+        document.getElementById('step1-indicator').classList.remove('completed');
+        document.getElementById('step1-indicator').classList.add('active');
+    }
+
+    function nextStep2() {
+        const step2Valid = validateStep2();
+        if (!step2Valid) return;
+
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step3').classList.add('active');
+
+        document.getElementById('step2-indicator').classList.remove('active');
+        document.getElementById('step2-indicator').classList.add('completed');
+        document.getElementById('step3-indicator').classList.add('active');
+    }
+
+    function prevStep2() {
+        document.getElementById('step3').classList.remove('active');
+        document.getElementById('step2').classList.add('active');
+
+        document.getElementById('step3-indicator').classList.remove('active');
+        document.getElementById('step2-indicator').classList.remove('completed');
+        document.getElementById('step2-indicator').classList.add('active');
+    }
+    
+    function validateStep1() {
+        // Możesz dodać walidację JS
+        return true;
+    }
+
+    function validateStep2() {
+        // Możesz dodać walidację JS
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const billingToggle = document.getElementById('billingToggle');
+        const billingLabelMonthly = document.getElementById('billing-label-monthly');
+        const billingLabelYearly = document.getElementById('billing-label-yearly');
+        const billingPeriodInput = document.getElementById('billing_period_input');
+
+        const monthlyPrices = document.querySelectorAll('.price-monthly');
+        const yearlyPrices = document.querySelectorAll('.price-yearly');
+
+        function updateBillingUI() {
+            const yearly = billingToggle.checked;
+
+            billingPeriodInput.value = yearly ? "yearly" : "monthly";
+
+            if (yearly) {
+                billingLabelMonthly.classList.remove('active');
+                billingLabelYearly.classList.add('active');
+                monthlyPrices.forEach(el => el.classList.add('d-none'));
+                yearlyPrices.forEach(el => el.classList.remove('d-none'));
+            } else {
+                billingLabelMonthly.classList.add('active');
+                billingLabelYearly.classList.remove('active');
+                monthlyPrices.forEach(el => el.classList.remove('d-none'));
+                yearlyPrices.forEach(el => el.classList.add('d-none'));
+            }
+        }
+
+        if (billingToggle) {
+            billingToggle.addEventListener('change', updateBillingUI);
+            updateBillingUI();
+        }
+
+        // >>> KOD POCZTOWY: automatyczne formatowanie 00-000
+        const postcodeInput = document.getElementById('id_company-postcode');
+        if (postcodeInput) {
+            postcodeInput.addEventListener('input', function (e) {
+                // tylko cyfry
+                let value = this.value.replace(/\D/g, '');
+                // max 5 cyfr
+                if (value.length > 5) {
+                    value = value.slice(0, 5);
+                }
+
+                if (value.length >= 3) {
+                    this.value = value.slice(0, 2) + '-' + value.slice(2);
+                } else {
+                    this.value = value;
+                }
+            });
+
+            // opcjonalnie lekkie „doformatowanie” przy wyjściu z pola
+            postcodeInput.addEventListener('blur', function () {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length === 5) {
+                    this.value = value.slice(0, 2) + '-' + value.slice(2);
+                }
+            });
+        }
+        // <<< KONIEC: kod pocztowy
+         // >>> TELEFON: max 9 cyfr
+         const phoneInput = document.getElementById('id_company-phone');
+         if (phoneInput) {
+             phoneInput.addEventListener('input', function () {
+                 // tylko cyfry
+                 let value = this.value.replace(/\D/g, '');
+                 // max 9 cyfr
+                 if (value.length > 9) {
+                     value = value.slice(0, 9);
+                 }
+                 this.value = value;
+             });
+         }
+         // <<< KONIEC: telefon
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        // ... MASZ JUŻ billingToggle, postcode, phone itd.
+    
+        // >>> SIŁA HASŁA + CHECKLISTA
+        const passwordInput = document.getElementById("id_user-password1");
+        const strengthBar = document.getElementById("password-strength-bar");
+        const strengthText = document.getElementById("password-strength-text");
+        const passwordRules = document.querySelectorAll("#password-rules .password-rule");
+    
+        function evaluatePassword(password) {
+            return {
+                length: password.length >= 8,
+                lower: /[a-z]/.test(password),
+                upper: /[A-Z]/.test(password),
+                digit: /[0-9]/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+            };
+        }
+    
+        function updatePasswordChecklist(password) {
+            const result = evaluatePassword(password);
+    
+            passwordRules.forEach(rule => {
+                const key = rule.getAttribute("data-rule");
+                const icon = rule.querySelector("i");
+    
+                if (result[key]) {
+                    rule.classList.add("valid");
+                    if (icon) {
+                        icon.classList.remove("fa-regular", "fa-circle");
+                        icon.classList.add("fa-solid", "fa-circle-check");
+                    }
+                } else {
+                    rule.classList.remove("valid");
+                    if (icon) {
+                        icon.classList.remove("fa-solid", "fa-circle-check");
+                        icon.classList.add("fa-regular", "fa-circle");
+                    }
+                }
+            });
+    
+            // policz wynik siły (ile spełnionych warunków)
+            const score = Object.values(result).filter(Boolean).length;
+            const width = (score / 5) * 100;
+    
+            let color = "red";
+            let label = "Bardzo słabe";
+    
+            if (score === 2) {
+                color = "orange";
+                label = "Słabe";
+            } else if (score === 3) {
+                color = "#ffc107"; // żółty
+                label = "Średnie";
+            } else if (score === 4) {
+                color = "#0dcaf0"; // cyan
+                label = "Dobre";
+            } else if (score === 5) {
+                color = "#198754"; // zielony
+                label = "Bardzo dobre";
+            }
+    
+            strengthBar.style.width = width + "%";
+            strengthBar.style.background = color;
+            strengthText.textContent = password.length ? label : "";
+        }
+    
+        if (passwordInput) {
+            passwordInput.addEventListener("input", function () {
+                updatePasswordChecklist(this.value);
+            });
+    
+            // jeśli formularz wraca z błędem i pole już ma wartość – od razu odśwież
+            if (passwordInput.value) {
+                updatePasswordChecklist(passwordInput.value);
+            }
+        }
+        // <<< KONIEC: SIŁA HASŁA + CHECKLISTA
+        // >>> ZGODNOŚĆ HASEŁ - wyświetlanie POD inputem
+        const password2Input = document.getElementById("id_user-password2");
+        const passwordMatchBox = document.getElementById("password-match");
+
+        function checkPasswordMatch() {
+            const p1 = passwordInput.value;
+            const p2 = password2Input.value;
+
+            if (!p2.length) {
+                passwordMatchBox.textContent = "";
+                passwordMatchBox.style.color = "";
+                return;
+            }
+
+            if (p1 === p2) {
+                passwordMatchBox.textContent = "Hasła są identyczne";
+                passwordMatchBox.style.color = "#198754"; // success green
+            } else {
+                passwordMatchBox.textContent = "Hasła nie są takie same";
+                passwordMatchBox.style.color = "#dc3545"; // danger red
+            }
+        }
+
+        if (password2Input) {
+            password2Input.addEventListener("input", checkPasswordMatch);
+            passwordInput.addEventListener("input", checkPasswordMatch);
+        }
+        // <<< KONIEC
+    });
+</script>
+{% endblock %}

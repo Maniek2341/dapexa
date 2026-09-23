@@ -1,0 +1,14 @@
+Witaj {{ employee.first_name }},
+
+Twoje konto w systemie {{ company.name }} zostało utworzone.
+
+Kliknij poniższy link, aby ustawić hasło i aktywować konto:
+
+{{ activation_link }}
+
+Link jest jednorazowy i wygaśnie po 24 godzinach.
+
+Jeśli nie oczekiwałeś/aś tej wiadomości, zignoruj ten email.
+
+Pozdrawiamy,
+Zespół {{ company.name }}

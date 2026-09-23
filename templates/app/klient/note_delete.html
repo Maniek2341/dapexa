@@ -1,0 +1,65 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1 fw-bold">Usuń notatkę</h1>
+    <div class="text-muted" style="color:var(--muted)!important">
+      Potwierdź usunięcie notatki. Operacja jest nieodwracalna.
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-xl-8">
+    <div class="card border border-danger">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-2">Czy na pewno chcesz usunąć tę notatkę?</h5>
+
+        <div class="small text-muted mb-3" style="color:var(--muted)!important">
+          Klient:
+          <strong>
+            {% if client.client_type == "company" %}
+              {{ client.name|default:"—" }}
+            {% else %}
+              {{ client.first_name }} {{ client.last_name }}
+            {% endif %}
+          </strong>
+        </div>
+
+        <div class="p-3 rounded-3 border" style="border-color: rgba(255,255,255,.08)!important;">
+          <div class="small text-muted mb-2">
+            {{ note.created_at|date:"d.m.Y H:i" }}
+            •
+            {% if note.author %}{{ note.author.first_name }} {{ note.author.last_name }}{% else %}System{% endif %}
+          </div>
+          <div class="tekst">{{ note.content|linebreaksbr }}</div>
+        </div>
+
+        <form method="post" action="{% url 'client_note_delete' note.pk %}" class="mt-4">
+          {% csrf_token %}
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'klient_detail' client.pk %}" class="btn btn-outline-secondary">Anuluj</a>
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-trash me-2"></i>Usuń notatkę
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="fw-bold mb-2">Wskazówka</h6>
+        <div class="text-muted small" style="color:var(--muted)!important">
+          Jeśli chcesz tylko ukryć notatkę, zamiast usuwać mogę dorobić status „archiwalna”.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

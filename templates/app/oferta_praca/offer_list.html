@@ -1,0 +1,832 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.offer-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.offer-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.offer-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.offer-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.offer-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.offer-filter-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.status-filters{
+  display:flex;
+  gap:.65rem;
+  flex-wrap:wrap;
+  margin-bottom:1rem;
+}
+
+.filter-pill{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  padding:.65rem .95rem;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  font-weight:800;
+  font-size:.82rem;
+  text-decoration:none;
+}
+
+.filter-pill:hover{
+  color:#1468f5;
+  border-color:rgba(20,104,245,.35);
+  background:rgba(20,104,245,.08);
+}
+
+.filter-pill.active{
+  color:#fff;
+  border-color:rgba(20,104,245,.45);
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 10px 24px rgba(20,104,245,.18);
+}
+
+.offer-filter-card .form-control,
+.offer-filter-card .form-select{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.offer-filter-card .form-control:focus,
+.offer-filter-card .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.offer-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.offer-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.offer-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.offer-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.offer-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.offer-table{
+  color:var(--text);
+  margin:0;
+}
+
+.offer-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+  white-space:nowrap;
+}
+
+.offer-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.offer-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.offer-main{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+}
+
+.offer-avatar{
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.2rem;
+  flex-shrink:0;
+}
+
+.offer-link{
+  color:var(--text);
+  font-weight:900;
+  text-decoration:none;
+}
+
+.offer-link:hover{
+  color:#1468f5;
+}
+
+.offer-muted{
+  color:var(--muted);
+  font-size:.84rem;
+  margin-top:.15rem;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  white-space:nowrap;
+}
+
+.badge-new{
+  color:#adb5bd;
+  background:rgba(108,117,125,.14);
+  border-color:rgba(108,117,125,.24);
+}
+
+.badge-meeting{
+  color:#adb5bd;
+  background:rgba(108,117,125,.14);
+  border-color:rgba(108,117,125,.24);
+}
+
+.badge-todo{
+  color:#ffc857;
+  background:rgba(255,193,7,.16);
+  border-color:rgba(255,193,7,.25);
+}
+
+.badge-prepared{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.15);
+  border-color:rgba(13,110,253,.25);
+}
+
+.badge-sent{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.badge-transferred{
+  color:#20c997;
+  background:rgba(32,201,151,.14);
+  border-color:rgba(32,201,151,.24);
+}
+
+.badge-old{
+  color:#adb5bd;
+  background:rgba(33,37,41,.18);
+  border-color:rgba(33,37,41,.28);
+}
+
+.badge-critical,
+.badge-high{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+}
+
+.badge-normal{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.15);
+  border-color:rgba(13,110,253,.25);
+}
+
+.badge-low{
+  color:var(--muted);
+  background:rgba(108,117,125,.12);
+  border-color:rgba(108,117,125,.22);
+}
+
+.offer-actions{
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-green{
+  color:#00ff2a;
+  border-color:rgba(0,255,42,.18);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+
+.placeholder-box{
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.6rem;
+  text-align:center;
+  color:var(--muted);
+  border:1px dashed var(--border);
+  border-radius:22px;
+  background:rgba(255,255,255,.02);
+  margin:1.5rem;
+}
+
+.placeholder-box i{
+  font-size:2rem;
+  color:#1468f5;
+}
+
+.offer-mobile-list{
+  display:none;
+}
+
+/* MODAL */
+.delete-offer-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-offer-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-offer-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.delete-offer-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.13);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ff6b6b;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.delete-offer-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.delete-offer-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.delete-offer-body{
+  padding:1.5rem;
+}
+
+.delete-offer-preview{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid rgba(220,53,69,.22);
+  background:rgba(220,53,69,.08);
+}
+
+.delete-offer-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:768px){
+  .offer-page-head{
+    flex-direction:column;
+  }
+
+  .offer-page-head .btn-orange{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+
+  .status-filters{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:.25rem;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .filter-pill{
+    white-space:nowrap;
+    font-size:.76rem;
+    padding:.55rem .8rem;
+  }
+
+  .offer-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .offer-table-wrap{
+    display:none;
+  }
+
+  .offer-mobile-list{
+    display:grid;
+    gap:1rem;
+    padding:1rem;
+  }
+
+  .offer-mobile-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:1rem;
+    box-shadow:0 14px 35px rgba(0,0,0,.12);
+  }
+
+  .delete-offer-footer{
+    flex-direction:column;
+  }
+
+  .delete-offer-footer .btn-soft,
+  .delete-offer-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="offer-page-head">
+  <div class="offer-title-wrap">
+    <div class="offer-title-icon">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+
+    <div>
+      <h1 class="offer-title">Lista ofert</h1>
+      <div class="offer-subtitle">Podgląd i zarządzanie ofertami.</div>
+    </div>
+  </div>
+
+  <a class="btn-orange" href="{% url 'offer_create' %}">
+    <i class="bi bi-plus-lg me-1"></i>
+    Nowa oferta
+  </a>
+</div>
+
+<div class="offer-filter-card">
+
+  <div class="status-filters">
+    <a href="?status=nowe&q={{ filters.q }}" class="filter-pill {% if active_status == 'nowe' %}active{% endif %}">Nowe</a>
+    <a href="?status=spotkanie&q={{ filters.q }}" class="filter-pill {% if active_status == 'spotkanie' %}active{% endif %}">Spotkanie</a>
+    <a href="?status=do_zrobienia&q={{ filters.q }}" class="filter-pill {% if active_status == 'do_zrobienia' %}active{% endif %}">Do zrobienia</a>
+    <a href="?status=przygotowane&q={{ filters.q }}" class="filter-pill {% if active_status == 'przygotowane' %}active{% endif %}">Przygotowane</a>
+    <a href="?status=wyslane&q={{ filters.q }}" class="filter-pill {% if active_status == 'wyslane' %}active{% endif %}">Wysłane</a>
+    <a href="?status=przekazane&q={{ filters.q }}" class="filter-pill {% if active_status == 'przekazane' %}active{% endif %}">Przekazane</a>
+    <a href="?status=nieaktualne&q={{ filters.q }}" class="filter-pill {% if active_status == 'nieaktualne' %}active{% endif %}">Nieaktualne</a>
+    <a href="?status=all&q={{ filters.q }}" class="filter-pill {% if active_status == 'all' %}active{% endif %}">Wszystkie</a>
+  </div>
+
+  <form method="get">
+    <input type="hidden" name="status" value="{{ active_status }}">
+
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md">
+        <input type="text"
+               name="q"
+               value="{{ filters.q }}"
+               class="form-control"
+               placeholder="Numer, tytuł, klient, opis...">
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="client" class="form-select">
+          <option value="">Wszyscy klienci</option>
+          {% for client in clients %}
+            <option value="{{ client.id }}" {% if filters.client == client.id|stringformat:"s" %}selected{% endif %}>
+              {{ client.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="priority" class="form-select">
+          <option value="">Wszystkie priorytety</option>
+          {% for value, label in priority_choices %}
+            <option value="{{ value }}" {% if filters.priority == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-auto d-flex gap-2">
+        <button type="submit" class="btn-orange">
+          <i class="bi bi-search me-1"></i>
+          Szukaj
+        </button>
+
+        <a href="{% url 'offer_list' %}?status={{ active_status }}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+    </div>
+  </form>
+
+</div>
+
+<div class="offer-list-card">
+  <div class="offer-list-header">
+    <div class="offer-list-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista ofert</h3>
+      <p>Klient, tytuł, data, priorytet, status i szybkie akcje.</p>
+    </div>
+  </div>
+
+  {% if offers %}
+    <div class="table-responsive offer-table-wrap">
+      <table class="table offer-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Oferta</th>
+            <th>Tytuł</th>
+            <th>Data</th>
+            <th>Status</th>
+            <th>Akcje</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for offer in offers %}
+            <tr>
+              <td>
+                <div class="offer-main">
+                  <div class="offer-avatar">
+                    <i class="bi bi-file-earmark-text"></i>
+                  </div>
+
+                  <div>
+                    <a href="{% url 'offer_detail' offer.pk %}" class="offer-link">
+                      {{ offer.client }}
+                    </a>
+                    <div class="offer-muted">{{ offer.number }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <div class="fw-bold">{{ offer.title }}</div>
+              </td>
+
+              <td>
+                {{ offer.issue_date|date:"d.m.Y" }}
+              </td>
+
+              <td>
+                <div class="d-flex flex-wrap gap-2">
+                  {% if offer.priority == 'critical' %}
+                    <span class="badge-soft badge-critical">Krytyczny</span>
+                  {% elif offer.priority == 'high' %}
+                    <span class="badge-soft badge-high">Wysoki</span>
+                  {% elif offer.priority == 'normal' %}
+                    <span class="badge-soft badge-normal">Normalny</span>
+                  {% else %}
+                    <span class="badge-soft badge-low">Niski</span>
+                  {% endif %}
+
+                  {% if offer.status == 6 %}
+                    <span class="badge-soft badge-meeting">Spotkanie</span>
+                  {% elif offer.status == 7 %}
+                    <span class="badge-soft badge-todo">Do zrobienia</span>
+                  {% elif offer.status == 2 %}
+                    <span class="badge-soft badge-prepared">Przygotowane</span>
+                  {% elif offer.status == 3 %}
+                    <span class="badge-soft badge-sent">Wysłane</span>
+                  {% elif offer.status == 4 %}
+                    <span class="badge-soft badge-old">Nieaktualne</span>
+                  {% elif offer.status == 5 %}
+                    <span class="badge-soft badge-transferred">Przekazane</span>
+                  {% elif offer.status == 1 %}
+                    <span class="badge-soft badge-new">Nowe</span>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td>
+                <div class="offer-actions">
+                  <a class="icon-btn icon-btn-green" href="">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </a>
+
+                  <button type="button"
+                          class="icon-btn icon-btn-danger"
+                          title="Usuń"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteOfferModal"
+                          data-delete-url=""
+                          data-title="{{ offer.number }} – {{ offer.title|escape }}">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="offer-mobile-list">
+      {% for offer in offers %}
+        <div class="offer-mobile-card">
+          <a href="{% url 'offer_detail' offer.pk %}" class="offer-link">
+            {{ offer.client }}
+          </a>
+
+          <div class="offer-muted">{{ offer.title }}</div>
+          <div class="offer-muted">{{ offer.number }}</div>
+
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            {% if offer.priority == 'critical' %}
+              <span class="badge-soft badge-critical">Krytyczny</span>
+            {% elif offer.priority == 'high' %}
+              <span class="badge-soft badge-high">Wysoki</span>
+            {% elif offer.priority == 'normal' %}
+              <span class="badge-soft badge-normal">Normalny</span>
+            {% else %}
+              <span class="badge-soft badge-low">Niski</span>
+            {% endif %}
+
+            {% if offer.status == 6 %}
+              <span class="badge-soft badge-meeting">Spotkanie</span>
+            {% elif offer.status == 7 %}
+              <span class="badge-soft badge-todo">Do zrobienia</span>
+            {% elif offer.status == 2 %}
+              <span class="badge-soft badge-prepared">Przygotowane</span>
+            {% elif offer.status == 3 %}
+              <span class="badge-soft badge-sent">Wysłane</span>
+            {% elif offer.status == 4 %}
+              <span class="badge-soft badge-old">Nieaktualne</span>
+            {% elif offer.status == 5 %}
+              <span class="badge-soft badge-transferred">Przekazane</span>
+            {% elif offer.status == 1 %}
+              <span class="badge-soft badge-new">Nowe</span>
+            {% endif %}
+          </div>
+
+          <div class="offer-muted mt-3">
+            <i class="bi bi-calendar-event me-1"></i>
+            {{ offer.issue_date|date:"d.m.Y" }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <div class="placeholder-box">
+      <i class="bi bi-file-earmark-text"></i>
+      Brak rekordów dla tego filtra.
+    </div>
+  {% endif %}
+</div>
+
+<div class="modal fade" id="deleteOfferModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-offer-modal">
+
+      <form id="deleteOfferForm" method="post" action="">
+        {% csrf_token %}
+
+        <div class="delete-offer-header">
+          <div class="delete-offer-icon">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć ofertę?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="delete-offer-body">
+          <div class="delete-offer-preview">
+            <div class="small text-muted mb-1">Usuwasz:</div>
+            <strong id="deleteOfferPreview">—</strong>
+          </div>
+        </div>
+
+        <div class="delete-offer-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-trash"></i>
+            Usuń ofertę
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modalEl = document.getElementById('deleteOfferModal');
+  if (!modalEl) return;
+
+  const form = document.getElementById('deleteOfferForm');
+  const previewEl = document.getElementById('deleteOfferPreview');
+
+  modalEl.addEventListener('show.bs.modal', (event) => {
+    const btn = event.relatedTarget;
+    const url = btn?.getAttribute('data-delete-url') || '';
+    const preview = btn?.getAttribute('data-title') || '—';
+
+    if (form) form.action = url;
+    if (previewEl) previewEl.textContent = preview;
+  });
+})();
+</script>
+
+{% endblock %}

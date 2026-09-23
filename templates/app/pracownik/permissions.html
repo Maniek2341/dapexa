@@ -1,0 +1,173 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+<style>
+.perm-head, .perm-person, .perm-actions { display:flex; align-items:center; }
+.perm-head { justify-content:space-between; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.perm-title-wrap { display:flex; align-items:center; gap:1rem; }
+.perm-title-icon, .perm-avatar {
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  color:#1468f5; background:rgba(20,104,245,.12); border:1px solid rgba(20,104,245,.2);
+}
+.perm-title-icon { width:62px; height:62px; border-radius:20px; font-size:1.6rem; }
+.perm-title { margin:0; color:var(--text); font-size:1.6rem; font-weight:900; }
+.perm-subtitle { margin-top:.25rem; color:var(--muted); font-size:.92rem; }
+.perm-card { background:var(--card); border:1px solid var(--border); border-radius:26px; overflow:hidden; box-shadow:0 18px 55px rgba(0,0,0,.14); }
+.perm-info { padding:1rem 1.25rem; color:var(--muted); background:rgba(20,104,245,.06); border-bottom:1px solid var(--border); }
+.perm-info strong { color:var(--text); }
+.perm-table { margin:0; color:var(--text); }
+.perm-table th { padding:1rem 1.25rem; color:var(--muted); background:rgba(255,255,255,.025); border-color:var(--border); font-size:.78rem; text-transform:uppercase; }
+.perm-table td { padding:1rem 1.25rem; border-color:var(--border); vertical-align:middle; }
+.perm-person { gap:.85rem; }
+.perm-avatar { width:44px; height:44px; border-radius:14px; font-weight:900; }
+.perm-name { color:var(--text); font-weight:900; }
+.perm-email { color:var(--muted); font-size:.82rem; }
+.perm-badge { display:inline-flex; padding:.4rem .7rem; border-radius:999px; color:var(--text); background:rgba(255,255,255,.06); border:1px solid var(--border); font-size:.78rem; font-weight:800; }
+.perm-list { display:flex; gap:.4rem; flex-wrap:wrap; }
+.perm-granted { color:#47d18c; background:rgba(25,135,84,.13); border-color:rgba(25,135,84,.24); }
+.perm-none { color:var(--muted); }
+.perm-actions { justify-content:flex-end; }
+.btn-orange, .btn-soft { border-radius:14px; padding:.75rem 1rem; font-weight:800; text-decoration:none; display:inline-flex; align-items:center; gap:.45rem; }
+.btn-orange { color:#fff; border:0; background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%); }
+.btn-orange:hover { color:#fff; }
+.btn-soft { color:var(--text); border:1px solid var(--border); background:rgba(255,255,255,.04); }
+.perm-empty { padding:4rem 1rem; text-align:center; color:var(--muted); }
+.perm-head-actions { display:flex; gap:.65rem; flex-wrap:wrap; }
+.perm-section-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:1.5rem 0 .8rem; }
+.perm-section-title { margin:0; color:var(--text); font-size:1.05rem; font-weight:900; }
+.role-group-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+.role-group-card { padding:1.1rem; background:var(--card); border:1px solid var(--border); border-radius:20px; box-shadow:0 10px 28px rgba(0,0,0,.1); }
+.role-group-top { display:flex; justify-content:space-between; align-items:flex-start; gap:.75rem; }
+.role-group-name { color:var(--text); font-weight:900; }
+.role-group-meta { margin-top:.65rem; color:var(--muted); font-size:.83rem; }
+.role-group-actions { display:flex; gap:.5rem; margin-top:1rem; padding-top:.85rem; border-top:1px solid var(--border); }
+.icon-btn { width:38px; height:38px; display:inline-flex; align-items:center; justify-content:center; color:var(--text); background:transparent; border:1px solid var(--border); border-radius:12px; }
+.icon-btn-danger { color:#ff6b6b; border-color:rgba(220,53,69,.25); }
+@media(max-width:768px) {
+  .perm-title { font-size:1.35rem; }
+  .perm-table thead { display:none; }
+  .perm-table, .perm-table tbody, .perm-table tr, .perm-table td { display:block; width:100%; }
+  .perm-table tr { padding:1rem; border-bottom:1px solid var(--border); }
+  .perm-table td { padding:.45rem 0; border:0; }
+  .perm-actions { justify-content:flex-start; margin-top:.4rem; }
+  .role-group-grid { grid-template-columns:1fr; }
+}
+</style>
+
+<div class="perm-head">
+  <div class="perm-title-wrap">
+    <div class="perm-title-icon"><i class="bi bi-person-lock"></i></div>
+    <div>
+      <h1 class="perm-title">Role i uprawnienia</h1>
+      <div class="perm-subtitle">Kontroluj dodatkowe uprawnienia pracowników swojej firmy.</div>
+    </div>
+  </div>
+  <div class="perm-head-actions">
+    <a href="{% url 'employee_group_create' %}" class="btn-orange"><i class="bi bi-people-fill"></i> Nowa grupa</a>
+    <a href="{% url 'employee_list' %}" class="btn-soft"><i class="bi bi-people"></i> Pracownicy</a>
+  </div>
+</div>
+
+<div class="perm-section-head">
+  <h2 class="perm-section-title"><i class="bi bi-collection me-1" style="color:#1468f5"></i> Grupy uprawnień ról</h2>
+</div>
+
+{% if role_groups %}
+  <div class="role-group-grid">
+    {% for role_group in role_groups %}
+      <div class="role-group-card">
+        <div class="role-group-top">
+          <div>
+            <div class="role-group-name">{{ role_group.name }}</div>
+            <div class="role-group-meta">
+              {{ role_group.get_role_display }}
+              {% if role_group.is_system %}· grupa domyślna{% endif %}
+            </div>
+          </div>
+          <span class="perm-badge perm-granted">{{ role_group.member_count }} os.</span>
+        </div>
+        <div class="role-group-meta">
+          <i class="bi bi-shield-check me-1"></i>
+          {{ role_group.group.permissions.all|length }} przypisanych uprawnień
+        </div>
+        <div class="role-group-actions">
+          <a href="{% url 'employee_group_edit' role_group.pk %}" class="icon-btn" title="Edytuj grupę">
+            <i class="bi bi-pencil-square"></i>
+          </a>
+          {% if not role_group.is_system %}
+            <form method="post" action="{% url 'employee_group_delete' role_group.pk %}" onsubmit="return confirm('Czy na pewno usunąć tę grupę?');">
+              {% csrf_token %}
+              <button type="submit" class="icon-btn icon-btn-danger" title="Usuń grupę">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="perm-info" style="border:1px solid var(--border);border-radius:18px;margin-bottom:1.5rem;">
+    Nie utworzono jeszcze grup. Grupa automatycznie nadaje swoje prawa wszystkim pracownikom wybranej roli.
+  </div>
+{% endif %}
+
+<div class="perm-section-head">
+  <h2 class="perm-section-title"><i class="bi bi-person-check me-1" style="color:#1468f5"></i> Indywidualne uprawnienia pracowników</h2>
+</div>
+
+<div class="perm-card">
+  <div class="perm-info">
+    <i class="bi bi-shield-check me-1"></i>
+    <strong>Właściciel</strong> ma pełne prawa. Poniżej zarządzasz dodatkowymi prawami pozostałych pracowników.
+  </div>
+
+  {% if employees %}
+    <div class="table-responsive">
+      <table class="table perm-table align-middle">
+        <thead>
+          <tr><th>Pracownik</th><th>Rola</th><th>Nadane uprawnienia</th><th class="text-end">Akcje</th></tr>
+        </thead>
+        <tbody>
+          {% for employee in employees %}
+            <tr>
+              <td>
+                <div class="perm-person">
+                  <div class="perm-avatar">{{ employee.first_name|first }}{{ employee.last_name|first }}</div>
+                  <div>
+                    <div class="perm-name">{{ employee.get_full_name|default:employee.email }}</div>
+                    <div class="perm-email">{{ employee.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="perm-badge">{{ employee.get_role_display }}</span></td>
+              <td>
+                <div class="perm-list">
+                  {% for permission in employee.company_permissions %}
+                    <span class="perm-badge perm-granted"><i class="bi bi-check2 me-1"></i>{{ permission.name }}</span>
+                  {% endfor %}
+                  {% for group in employee.role_permission_groups %}
+                    <span class="perm-badge"><i class="bi bi-collection me-1"></i>Grupa: {{ group.company_role_group.name }}</span>
+                  {% endfor %}
+                  {% if not employee.company_permissions and not employee.role_permission_groups %}
+                    <span class="perm-none">Brak dodatkowych uprawnień</span>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <div class="perm-actions">
+                  <a href="{% url 'employee_permission_edit' employee.pk %}" class="btn-orange">
+                    <i class="bi bi-shield-lock"></i> Zarządzaj
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="perm-empty"><i class="bi bi-people fs-1 d-block mb-2"></i>Brak pracowników, którym można nadać uprawnienia.</div>
+  {% endif %}
+</div>
+{% endblock %}

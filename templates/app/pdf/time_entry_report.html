@@ -1,0 +1,154 @@
+{% load time_extras %}
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <title>Raport godzin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: #111;
+    }
+
+    .header {
+      margin-bottom: 20px;
+    }
+
+    .company-logo {
+      max-height: 58px;
+      max-width: 220px;
+      object-fit: contain;
+      margin-bottom: 8px;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .muted {
+      color: #666;
+      font-size: 11px;
+    }
+
+    .stats {
+      margin: 16px 0 20px;
+    }
+
+    .stats table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .stats td {
+      border: 1px solid #ddd;
+      padding: 8px;
+    }
+
+    .stats .label {
+      font-weight: 700;
+      width: 30%;
+      background: #f5f5f5;
+    }
+
+    table.report {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    table.report th,
+    table.report td {
+      border: 1px solid #dcdcdc;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table.report th {
+      background: #f3f3f3;
+      font-weight: 700;
+    }
+
+    .right {
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <img src="{{ company_logo_url }}" class="company-logo" alt="Logo firmy">
+    <div class="title">Raport godzin pracy</div>
+    <div class="muted">
+      Pracownik:
+      {{ viewed_user.first_name }} {{ viewed_user.last_name }}
+      {% if viewed_user.email %}• {{ viewed_user.email }}{% endif %}
+    </div>
+    <div class="muted">
+      Firma:
+      {{ company.name|default:"-" }}
+    </div>
+    <div class="muted">
+      Okres:
+      {{ active_month_label|default:"Cały okres" }}
+    </div>
+    <div class="muted">
+      Wygenerowano: {{ generated_at|date:"d.m.Y H:i" }}
+    </div>
+  </div>
+
+  <div class="stats">
+    <table>
+      <tr>
+        <td class="label">Suma godzin</td>
+        <td>{{ total_hours|decimal_hours_to_hm }} h</td>
+      </tr>
+      <tr>
+        <td class="label">Dni pracy</td>
+        <td>{{ work_days_count }}</td>
+      </tr>
+      <tr>
+        <td class="label">Średnio dziennie</td>
+        <td>{{ avg_daily_hours|decimal_hours_to_hm }}</td>
+      </tr>
+      <tr>
+        <td class="label">Nadgodziny</td>
+        <td>{{ overtime_hours|decimal_hours_to_hm }} h</td>
+      </tr>
+    </table>
+  </div>
+
+  <table class="report">
+    <thead>
+        <tr>
+            <th>Data</th>
+            <th>Godziny</th>
+            <th>Liczba godzin</th>
+            <th>Nadgodziny</th>
+            <th>Tryb pracy</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for entry in entries %}
+    <tr>
+        <td>{{ entry.date|date:"d.m.Y" }}</td>
+        <td>{{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}</td>
+        <td>{{ entry.duration_hours|decimal_hours_to_hm }}</td>
+        <td>
+            {{ daily_overtime|get_item:entry.date|decimal_hours_to_hm }}
+        </td>
+        <td>{{ entry.get_work_mode_display }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5">Brak wpisów RCP</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+</body>
+</html>

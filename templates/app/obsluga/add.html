@@ -1,0 +1,931 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+
+<style>
+.obsluga-form-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.obsluga-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.obsluga-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.obsluga-title{
+  margin:0;
+  color:var(--text);
+  font-size:1.6rem;
+  font-weight:900;
+}
+
+.obsluga-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.obsluga-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.obsluga-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.obsluga-card-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.obsluga-card-header h2{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.obsluga-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.obsluga-card-body{
+  padding:1.5rem;
+}
+
+.form-section{
+  padding:1.25rem;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.025);
+  border-radius:22px;
+  margin-bottom:1.25rem;
+}
+
+.form-section:last-child{
+  margin-bottom:0;
+}
+
+.form-section-head{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  margin-bottom:1.25rem;
+}
+
+.section-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.11);
+  border:1px solid rgba(20,104,245,.17);
+  color:#1468f5;
+  font-size:1.15rem;
+  flex-shrink:0;
+}
+
+.form-section-head h3{
+  margin:0;
+  color:var(--text);
+  font-size:1rem;
+  font-weight:900;
+}
+
+.form-section-head p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.84rem;
+}
+
+.form-label-custom{
+  display:block;
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:800;
+  margin-bottom:.45rem;
+}
+
+.obsluga-card .form-control,
+.obsluga-card .form-select,
+.obsluga-card select,
+.obsluga-card textarea,
+.obsluga-card input[type="file"]{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.obsluga-card textarea{
+  min-height:130px;
+}
+
+.obsluga-card .form-control:focus,
+.obsluga-card .form-select:focus,
+.obsluga-card select:focus,
+.obsluga-card textarea:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.help-text{
+  color:var(--muted);
+  font-size:.8rem;
+  margin-top:.45rem;
+}
+
+.error-text{
+  color:#ff6b6b;
+  font-size:.82rem;
+  margin-top:.4rem;
+}
+
+.upload-preview-img{
+  width:86px;
+  height:86px;
+  object-fit:cover;
+  border-radius:14px;
+  border:1px solid var(--border);
+}
+
+.file-list{
+  color:var(--muted);
+  padding-left:1.1rem;
+}
+
+.upload-info{
+  margin-top:.9rem;
+  padding:.9rem 1rem;
+  border-radius:16px;
+  background:rgba(255,193,7,.08);
+  border:1px solid rgba(255,193,7,.15);
+  color:#ffcf66;
+  font-size:.84rem;
+  display:flex;
+  gap:.6rem;
+  align-items:flex-start;
+}
+
+.form-footer{
+  padding:1.25rem 1.5rem;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+  flex-wrap:wrap;
+  background:rgba(255,255,255,.02);
+}
+
+.preview-panel{
+  position:sticky;
+  top:90px;
+}
+
+.preview-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.preview-body{
+  padding:1.5rem;
+}
+
+.preview-hero{
+  padding:1.2rem;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 42%),
+    rgba(255,255,255,.03);
+  border:1px solid var(--border);
+  margin-bottom:1rem;
+}
+
+.preview-title{
+  color:var(--text);
+  font-size:1.15rem;
+  font-weight:900;
+}
+
+.preview-muted{
+  color:var(--muted);
+  font-size:.86rem;
+  margin-top:.2rem;
+}
+
+.preview-list{
+  display:grid;
+  gap:.75rem;
+}
+
+.preview-item{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.85rem .95rem;
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--border);
+  font-size:.86rem;
+}
+
+.preview-item span:first-child{
+  color:var(--muted);
+}
+
+.preview-item span:last-child{
+  color:var(--text);
+  font-weight:800;
+  text-align:right;
+}
+
+@media(max-width:991px){
+  .preview-panel{
+    position:static;
+  }
+}
+
+@media(max-width:768px){
+  .obsluga-form-head{
+    flex-direction:column;
+  }
+
+  .obsluga-form-head .btn-soft{
+    width:100%;
+  }
+
+  .obsluga-title-wrap{
+    align-items:flex-start;
+  }
+
+  .obsluga-title-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .obsluga-title{
+    font-size:1.3rem;
+  }
+
+  .obsluga-card-body{
+    padding:1rem;
+  }
+
+  .form-section{
+    padding:1rem;
+    border-radius:18px;
+  }
+
+  .form-section-head{
+    align-items:flex-start;
+  }
+
+  .form-footer{
+    display:grid;
+    grid-template-columns:1fr;
+    padding:1rem;
+  }
+
+  .form-footer a,
+  .form-footer button{
+    width:100%;
+  }
+}
+</style>
+
+<div class="obsluga-form-head">
+  <div class="obsluga-title-wrap">
+    <div class="obsluga-title-icon">
+      <i class="bi bi-clipboard-check"></i>
+    </div>
+
+    <div>
+      {% if contract %}
+        <h1 class="obsluga-title">Edytuj obsługę</h1>
+        <div class="obsluga-subtitle">
+          Zmień dane obsługi, harmonogram i ustawienia umowy.
+        </div>
+      {% else %}
+        <h1 class="obsluga-title">Dodaj obsługę</h1>
+        <div class="obsluga-subtitle">
+          Utwórz umowę, harmonogram lub stałą obsługę techniczną klienta.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <a href="{% url 'service_contract_list' %}" class="btn-soft">
+    <i class="bi bi-arrow-left"></i>
+    Wróć do listy
+  </a>
+</div>
+
+<form id="serviceForm" method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+
+  <div class="row g-4">
+
+    <div class="col-xl-8">
+      <div class="obsluga-card">
+
+        <div class="obsluga-card-header">
+          <div class="obsluga-card-icon">
+            <i class="bi bi-ui-checks-grid"></i>
+          </div>
+
+          <div>
+            <h2>Dane obsługi</h2>
+            <p>Uzupełnij klienta, terminy, rozliczenie, opis i załączniki.</p>
+          </div>
+        </div>
+
+        <div class="obsluga-card-body">
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <div class="form-section">
+            <div class="form-section-head">
+              <div class="section-icon">
+                <i class="bi bi-building"></i>
+              </div>
+
+              <div>
+                <h3>Klient i lokalizacja</h3>
+                <p>Wybierz klienta oraz lokalizację, której dotyczy obsługa.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label-custom" for="{{ form.client.id_for_label }}">
+                  Klient
+                </label>
+
+                {{ form.client }}
+
+                {% for error in form.client.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-6 d-none" id="locationWrapper">
+                <label class="form-label-custom" for="{{ form.location.id_for_label }}">
+                  Lokalizacja klienta
+                </label>
+
+                {{ form.location }}
+
+                <div class="help-text">
+                  Opcjonalnie, np. oddział, budynek, wspólnota.
+                </div>
+
+                {% for error in form.location.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-head">
+              <div class="section-icon">
+                <i class="bi bi-clipboard-check"></i>
+              </div>
+
+              <div>
+                <h3>Podstawowe informacje</h3>
+                <p>Nazwa obsługi, typ, status i częstotliwość.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.title.id_for_label }}">
+                  Nazwa obsługi
+                </label>
+
+                {{ form.title }}
+
+                {% for error in form.title.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label-custom" for="{{ form.contract_type.id_for_label }}">
+                  Typ
+                </label>
+
+                {{ form.contract_type }}
+
+                {% for error in form.contract_type.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label-custom" for="{{ form.status.id_for_label }}">
+                  Status
+                </label>
+
+                {{ form.status }}
+
+                {% for error in form.status.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label-custom" for="{{ form.frequency.id_for_label }}">
+                  Częstotliwość
+                </label>
+
+                {{ form.frequency }}
+
+                {% for error in form.frequency.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-head">
+              <div class="section-icon">
+                <i class="bi bi-calendar-event"></i>
+              </div>
+
+              <div>
+                <h3>Terminy</h3>
+                <p>Data rozpoczęcia, zakończenia i kolejny planowany termin.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label-custom" for="{{ form.start_date.id_for_label }}">
+                  Data rozpoczęcia
+                </label>
+
+                {{ form.start_date }}
+
+                {% for error in form.start_date.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label-custom" for="{{ form.end_date.id_for_label }}">
+                  Data zakończenia
+                </label>
+
+                {{ form.end_date }}
+
+                {% for error in form.end_date.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label-custom" for="{{ form.next_service_date.id_for_label }}">
+                  Następny termin
+                </label>
+
+                {{ form.next_service_date }}
+
+                {% for error in form.next_service_date.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-head">
+              <div class="section-icon">
+                <i class="bi bi-person-badge"></i>
+              </div>
+
+              <div>
+                <h3>Opiekun i rozliczenie</h3>
+                <p>Osoba odpowiedzialna oraz miesięczna cena netto.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label-custom" for="{{ form.caretaker.id_for_label }}">
+                  Opiekun
+                </label>
+
+                {{ form.caretaker }}
+
+                {% for error in form.caretaker.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label-custom" for="{{ form.monthly_price_net.id_for_label }}">
+                  Cena miesięczna netto
+                </label>
+
+                {{ form.monthly_price_net }}
+
+                {% for error in form.monthly_price_net.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-head">
+              <div class="section-icon">
+                <i class="bi bi-card-text"></i>
+              </div>
+
+              <div>
+                <h3>Opis i uwagi</h3>
+                <p>Zakres obsługi oraz informacje wewnętrzne.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.description.id_for_label }}">
+                  Zakres obsługi
+                </label>
+
+                {{ form.description }}
+
+                {% for error in form.description.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.notes.id_for_label }}">
+                  Uwagi
+                </label>
+
+                {{ form.notes }}
+
+                {% for error in form.notes.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-head">
+              <div class="section-icon">
+                <i class="bi bi-paperclip"></i>
+              </div>
+
+              <div>
+                <h3>Pliki i zdjęcia</h3>
+                <p>Dodaj zdjęcia instalacji, umowy, dokumentację lub PDF.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.images.id_for_label }}">
+                  Zdjęcia
+                </label>
+
+                {{ form.images }}
+
+                <div class="help-text">
+                  Możesz dodać zdjęcia rejestratora, rozdzielni, klimatyzatora lub instalacji.
+                </div>
+
+                <div id="imgPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+
+                {% for error in form.images.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label-custom" for="{{ form.attachments.id_for_label }}">
+                  Załączniki
+                </label>
+
+                {{ form.attachments }}
+
+                <div class="help-text">
+                  Możesz dodać umowę, protokół, PDF, dokumentację lub inne pliki.
+                </div>
+
+                <ul id="fileList" class="file-list small mt-3 mb-0"></ul>
+
+                {% for error in form.attachments.errors %}
+                  <div class="error-text">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="upload-info">
+              <i class="bi bi-info-circle"></i>
+              Pliki zostaną przypisane do tej obsługi i będą dostępne w szczegółach.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="form-footer">
+          <a href="{% url 'service_contract_list' %}" class="btn-soft">
+            Anuluj
+          </a>
+
+          <button type="submit" class="btn-orange">
+            <i class="bi bi-check2-circle"></i>
+            {% if contract %}
+              Zapisz zmiany
+            {% else %}
+              Zapisz obsługę
+            {% endif %}
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="preview-panel">
+        <div class="preview-card">
+          <div class="obsluga-card-header">
+            <div class="obsluga-card-icon">
+              <i class="bi bi-eye"></i>
+            </div>
+
+            <div>
+              <h2>Podgląd</h2>
+              <p>Krótka informacja o module obsługi.</p>
+            </div>
+          </div>
+
+          <div class="preview-body">
+            <div class="preview-hero">
+              <div class="preview-title">Co dodajesz?</div>
+              <div class="preview-muted">
+                Stałą usługę, umowę, przegląd lub harmonogram dla klienta.
+              </div>
+            </div>
+
+            <div class="preview-list">
+              <div class="preview-item">
+                <span>Elementy instalacji</span>
+                <span>Dodasz później</span>
+              </div>
+
+              <div class="preview-item">
+                <span>Parametry</span>
+                <span>Kamery, moc, dni nagrań</span>
+              </div>
+
+              <div class="preview-item">
+                <span>Wizyty</span>
+                <span>Planowane i wykonane</span>
+              </div>
+
+              <div class="preview-item">
+                <span>Pliki</span>
+                <span>Zdjęcia, PDF, dokumenty</span>
+              </div>
+            </div>
+
+            <button type="submit" form="serviceForm" class="btn-orange w-100 mt-3">
+              <i class="bi bi-check2-circle"></i>
+              {% if contract %}
+                Zapisz zmiany
+              {% else %}
+                Zapisz obsługę
+              {% endif %}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</form>
+
+{{ form.location.value|json_script:"selected-location-id" }}
+
+<script>
+(function(){
+  const form = document.getElementById('serviceForm');
+  if (!form) return;
+
+  const clientInput = form.querySelector('[name="client"]');
+  const locationSelect = form.querySelector('[name="location"]');
+  const locationWrapper = document.getElementById('locationWrapper');
+
+  const selectedLocationElement = document.getElementById('selected-location-id');
+  const selectedLocationId = selectedLocationElement
+    ? JSON.parse(selectedLocationElement.textContent)
+    : null;
+
+  if (!clientInput || !locationSelect || !locationWrapper) return;
+
+  function resetLocation(){
+    locationSelect.innerHTML = '<option value="">---------</option>';
+    locationWrapper.classList.add('d-none');
+  }
+
+  function getLocationLabel(loc){
+    return (
+      loc.name ||
+      loc.address ||
+      loc.full_address ||
+      loc.label ||
+      loc.display ||
+      `Lokalizacja #${loc.id}`
+    );
+  }
+
+  function loadLocations(clientId, selectedId = null){
+    if (!clientId){
+      resetLocation();
+      return;
+    }
+
+    fetch(`/serwis/api/client-locations/?client=${clientId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!Array.isArray(data) || data.length === 0){
+          resetLocation();
+          return;
+        }
+
+        locationSelect.innerHTML = '<option value="">Wybierz lokalizację</option>';
+
+        data.forEach(loc => {
+          const option = document.createElement('option');
+
+          option.value = loc.id;
+          option.textContent = getLocationLabel(loc);
+
+          if (selectedId && String(loc.id) === String(selectedId)) {
+            option.selected = true;
+          }
+
+          locationSelect.appendChild(option);
+        });
+
+        locationWrapper.classList.remove('d-none');
+      })
+      .catch(() => {
+        resetLocation();
+      });
+  }
+
+  clientInput.addEventListener('change', function(){
+    loadLocations(this.value, null);
+  });
+
+  if (clientInput.value) {
+    loadLocations(clientInput.value, selectedLocationId);
+  }
+})();
+</script>
+
+<script>
+(function(){
+  const form = document.getElementById('serviceForm');
+  if (!form) return;
+
+  const imgInput = form.querySelector('input[name="images"]');
+  const attInput = form.querySelector('input[name="attachments"]');
+  const imgPreview = document.getElementById('imgPreview');
+  const fileList = document.getElementById('fileList');
+
+  imgInput?.addEventListener('change', () => {
+    if (!imgPreview) return;
+
+    imgPreview.innerHTML = '';
+
+    [...imgInput.files].forEach(file => {
+      const url = URL.createObjectURL(file);
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'upload-preview-img';
+
+      imgPreview.appendChild(img);
+    });
+  });
+
+  attInput?.addEventListener('change', () => {
+    if (!fileList) return;
+
+    fileList.innerHTML = '';
+
+    [...attInput.files].forEach(file => {
+      const li = document.createElement('li');
+      li.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+      fileList.appendChild(li);
+    });
+  });
+})();
+</script>
+
+{% endblock %}

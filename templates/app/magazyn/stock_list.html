@@ -1,0 +1,866 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+.stock-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.stock-head-actions{display:flex;align-items:center;gap:.4rem;}
+.stock-head-actions a{border-radius:14px;}
+
+.stock-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.stock-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.stock-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.stock-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.stock-filter-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.stock-filter-card .form-control,
+.stock-filter-card .form-select{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.stock-filter-card .form-control:focus,
+.stock-filter-card .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.stock-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.stock-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.stock-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.stock-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.stock-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.stock-table{
+  color:var(--text);
+  margin:0;
+}
+
+.stock-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+  white-space:nowrap;
+}
+
+.stock-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.stock-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.product-cell{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+}
+
+.product-avatar{
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.2rem;
+  flex-shrink:0;
+}
+
+.product-name{
+  color:var(--text);
+  font-weight:900;
+}
+
+.product-meta{
+  color:var(--muted);
+  font-size:.84rem;
+  margin-top:.15rem;
+}
+
+.qty-main{
+  font-size:1.05rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.qty-sub{
+  color:var(--muted);
+  font-size:.78rem;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  white-space:nowrap;
+}
+
+.stock-ok{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.stock-low{
+  color:#ffc857;
+  background:rgba(255,193,7,.16);
+  border-color:rgba(255,193,7,.25);
+}
+
+.stock-empty{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+}
+
+.warehouse-badge{
+  color:var(--muted);
+}
+
+.stock-actions{
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  transition:.2s;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+  transform:translateY(-1px);
+}
+
+.icon-btn-green{
+  color:#47d18c;
+  border-color:rgba(25,135,84,.25);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.empty-state{
+  min-height:230px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.65rem;
+  text-align:center;
+  color:var(--muted);
+  padding:2rem;
+}
+
+.empty-state i{
+  font-size:2.4rem;
+  color:#1468f5;
+}
+
+.empty-state h3{
+  color:var(--text);
+  font-weight:900;
+  margin:0;
+}
+
+/* MODALE */
+.stock-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.stock-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.stock-modal-header.danger{
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.stock-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.stock-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.stock-modal-icon.danger{
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+  color:#ff6b6b;
+}
+
+.stock-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.stock-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.stock-modal-body{
+  padding:1.5rem;
+}
+
+.stock-label{
+  display:block;
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:800;
+  margin-bottom:.45rem;
+}
+
+.stock-modal .form-control,
+.stock-modal textarea{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+
+.stock-modal textarea{
+  min-height:120px;
+}
+
+.stock-modal .form-control:focus,
+.stock-modal textarea:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.stock-preview{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+}
+
+.stock-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+.btn-success-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#198754,#47d18c);
+}
+
+@media(max-width:768px){
+  .stock-page-head{
+    flex-direction:column;
+  }
+
+  .stock-page-head .btn-orange{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+
+  .stock-filter-card{
+    padding:1rem;
+  }
+
+  .stock-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .stock-table{
+    min-width:950px;
+  }
+
+  .stock-modal-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .stock-modal-body{
+    padding:1rem;
+  }
+
+  .stock-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .stock-modal-footer .btn-soft,
+  .stock-modal-footer .btn-success-modern,
+  .stock-modal-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+
+</style>
+
+<div class="stock-page-head">
+  <div class="stock-title-wrap">
+    <div class="stock-title-icon">
+      <i class="bi bi-boxes"></i>
+    </div>
+
+    <div>
+      <h1 class="stock-title">Stany magazynowe</h1>
+      <div class="stock-subtitle">
+        Podgląd ilości produktów w magazynach oraz minimalnych stanów.
+      </div>
+    </div>
+  </div>
+
+  <div class="stock-head-actions">
+  {% if can_manage_stock %}<a href="{% url 'stock_item_create' %}" class="btn-orange">
+    <i class="bi bi-plus-circle me-1"></i>
+    Dodaj ruch
+  </a>{% endif %}
+  {% if can_manage_stock %}<a href="{% url 'warehouse_create' %}" class="btn-soft">
+    <i class="bi bi-building-add me-1"></i>Dodaj magazyn
+  </a>{% endif %}
+  </div>
+</div>
+
+<div class="stock-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md">
+        <input type="text"
+               name="q"
+               class="form-control"
+               placeholder="Szukaj produktu lub SKU..."
+               value="{{ filters.q }}">
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="warehouse" class="form-select">
+          <option value="">Wszystkie magazyny</option>
+          {% for warehouse in warehouses %}
+            <option value="{{ warehouse.id }}"
+              {% if filters.warehouse == warehouse.id|stringformat:"s" %}selected{% endif %}>
+              {{ warehouse.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="status" class="form-select">
+          <option value="">Wszystkie stany</option>
+          <option value="ok" {% if filters.status == "ok" %}selected{% endif %}>Stan OK</option>
+          <option value="low" {% if filters.status == "low" %}selected{% endif %}>Niski stan</option>
+          <option value="empty" {% if filters.status == "empty" %}selected{% endif %}>Brak na stanie</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-auto d-flex gap-2">
+        <button class="btn-orange">
+          <i class="bi bi-search me-1"></i>
+          Szukaj
+        </button>
+
+        <a href="{% url 'stock_list' %}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="stock-list-card">
+  <div class="stock-list-header">
+    <div class="stock-list-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista stanów magazynowych</h3>
+      <p>Produkt, magazyn, ilość, minimum, status i szybkie ruchy.</p>
+    </div>
+  </div>
+
+  {% if stock_items %}
+    <div class="table-responsive">
+      <table class="table stock-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Produkt</th>
+            <th>Magazyn</th>
+            <th>Ilość</th>
+            <th>Minimalny stan</th>
+            <th>Status</th>
+            {% if can_manage_stock %}<th>Akcje</th>{% endif %}
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for stock in stock_items %}
+            <tr>
+              {% if can_manage_stock %}<td>
+                <div class="product-cell">
+                  <div class="product-avatar">
+                    <i class="bi bi-box-seam"></i>
+                  </div>
+
+                  <div>
+                    <div class="product-name">{{ stock.product.name }}</div>
+                    <div class="product-meta">
+                      {% if stock.product.sku %}
+                        SKU: {{ stock.product.sku }}
+                      {% else %}
+                        Brak SKU
+                      {% endif %}
+                      {% if stock.product.category %}
+                        · {{ stock.product.category.name }}
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </td>{% endif %}
+
+              <td>
+                <span class="badge-soft warehouse-badge">
+                  <i class="bi bi-building"></i>
+                  {{ stock.warehouse.name }}
+                </span>
+              </td>
+
+              <td>
+                <div class="qty-main">
+                  {{ stock.quantity|floatformat:2 }} {{ stock.product.unit }}
+                </div>
+                <div class="qty-sub">Aktualny stan</div>
+              </td>
+
+              <td>
+                <div class="qty-main">
+                  {{ stock.min_quantity|floatformat:2 }} {{ stock.product.unit }}
+                </div>
+                <div class="qty-sub">Wymagane minimum</div>
+              </td>
+
+              <td>
+                {% if stock.quantity <= 0 %}
+                  <span class="badge-soft stock-empty">
+                    <i class="bi bi-x-circle"></i>
+                    Brak
+                  </span>
+                {% elif stock.quantity < stock.min_quantity %}
+                  <span class="badge-soft stock-low">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Niski stan
+                  </span>
+                {% else %}
+                  <span class="badge-soft stock-ok">
+                    <i class="bi bi-check-circle"></i>
+                    OK
+                  </span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="stock-actions">
+                  <button type="button"
+                          class="icon-btn icon-btn-green"
+                          data-bs-toggle="modal"
+                          data-bs-target="#stockInModal"
+                          data-url="{% url 'stock_in' stock.pk %}"
+                          data-product-name="{{ stock.product.name }}"
+                          data-warehouse-name="{{ stock.warehouse.name }}"
+                          data-quantity="{{ stock.quantity }}"
+                          data-unit="{{ stock.product.unit }}">
+                    <i class="bi bi-plus-circle"></i>
+                  </button>
+
+                  <button type="button"
+                          class="icon-btn icon-btn-danger"
+                          data-bs-toggle="modal"
+                          data-bs-target="#stockOutModal"
+                          data-stock-id="{{ stock.id }}"
+                          data-product-name="{{ stock.product.name }}"
+                          data-warehouse-name="{{ stock.warehouse.name }}"
+                          data-quantity="{{ stock.quantity }}"
+                          data-unit="{{ stock.product.unit }}">
+                    <i class="bi bi-dash-circle"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="bi bi-boxes"></i>
+      <h3>Brak stanów magazynowych</h3>
+      <p>Nie znaleziono produktów w magazynie dla wybranych filtrów.</p>
+    </div>
+  {% endif %}
+</div>
+
+<div class="modal fade" id="stockInModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content stock-modal">
+      <form method="post" id="stockInForm">
+        {% csrf_token %}
+
+        <div class="stock-modal-header">
+          <div class="stock-modal-icon">
+            <i class="bi bi-plus-circle"></i>
+          </div>
+
+          <div>
+            <h4>Przyjęcie na magazyn</h4>
+            <p>Zwiększenie stanu magazynowego produktu.</p>
+          </div>
+
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="stock-modal-body">
+          <div class="stock-preview mb-4">
+            <div class="fw-bold fs-5" id="stockInProductName">—</div>
+            <div class="text-muted small">
+              Magazyn: <span id="stockInWarehouse">—</span>
+            </div>
+            <div class="text-muted small">
+              Aktualny stan: <span id="stockInQuantity">—</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="stock-label">Ilość do przyjęcia</label>
+            <input type="number" step="0.01" min="0.01" name="quantity" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="stock-label">Numer dokumentu</label>
+            <input type="text" name="document_number" class="form-control" placeholder="Np. PZ/2026/001">
+          </div>
+
+          <div>
+            <label class="stock-label">Notatka</label>
+            <textarea name="note" rows="4" class="form-control"></textarea>
+          </div>
+        </div>
+
+        <div class="stock-modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit" class="btn-success-modern">
+            <i class="bi bi-plus-circle"></i>
+            Przyjmij na magazyn
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="stockOutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content stock-modal">
+      <form method="post" id="stockOutForm">
+        {% csrf_token %}
+
+        <div class="stock-modal-header danger">
+          <div class="stock-modal-icon danger">
+            <i class="bi bi-dash-circle"></i>
+          </div>
+
+          <div>
+            <h4>Wydanie z magazynu</h4>
+            <p>Zmniejszenie stanu magazynowego produktu.</p>
+          </div>
+
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="stock-modal-body">
+          <div class="stock-preview mb-4">
+            <div class="fw-bold fs-5" id="stockOutProductName">—</div>
+            <div class="text-muted small">
+              Magazyn: <span id="stockOutWarehouse">—</span>
+            </div>
+            <div class="text-muted small">
+              Aktualny stan: <span id="stockOutQuantity">—</span>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="stock-label">Ilość do wydania</label>
+            <input type="number" step="0.01" min="0.01" name="quantity" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="stock-label">Numer dokumentu</label>
+            <input type="text" name="document_number" class="form-control">
+          </div>
+
+          <div>
+            <label class="stock-label">Notatka</label>
+            <textarea name="note" rows="4" class="form-control"></textarea>
+          </div>
+        </div>
+
+        <div class="stock-modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit" class="btn-danger-modern">
+            <i class="bi bi-dash-circle"></i>
+            Wydaj z magazynu
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const stockInModal = document.getElementById("stockInModal");
+  const stockOutModal = document.getElementById("stockOutModal");
+
+  if (stockInModal) {
+    stockInModal.addEventListener("show.bs.modal", function(event) {
+      const button = event.relatedTarget;
+
+      document.getElementById("stockInProductName").textContent =
+        button.dataset.productName || "—";
+
+      document.getElementById("stockInWarehouse").textContent =
+        button.dataset.warehouseName || "—";
+
+      document.getElementById("stockInQuantity").textContent =
+        (button.dataset.quantity || "0") + " " + (button.dataset.unit || "");
+
+      document.getElementById("stockInForm").action =
+        button.dataset.url || "";
+    });
+  }
+
+  if (stockOutModal) {
+    stockOutModal.addEventListener("show.bs.modal", function(event) {
+      const button = event.relatedTarget;
+
+      document.getElementById("stockOutProductName").textContent =
+        button.dataset.productName || "—";
+
+      document.getElementById("stockOutWarehouse").textContent =
+        button.dataset.warehouseName || "—";
+
+      document.getElementById("stockOutQuantity").textContent =
+        (button.dataset.quantity || "0") + " " + (button.dataset.unit || "");
+
+      document.getElementById("stockOutForm").action =
+        `/magazyn/${button.dataset.stockId}/out/`;
+    });
+  }
+})();
+</script>
+
+{% endblock %}

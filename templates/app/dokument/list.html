@@ -1,0 +1,587 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+
+<style>
+.document-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.document-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.document-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.document-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.document-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.document-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.document-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.document-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.document-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.document-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.document-table{
+  color:var(--text);
+  margin:0;
+}
+
+.document-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+}
+
+.document-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.document-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.document-main{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+}
+
+.document-avatar{
+  width:50px;
+  height:50px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.2rem;
+  flex-shrink:0;
+}
+
+.document-name{
+  color:var(--text);
+  font-weight:900;
+}
+
+.document-file{
+  color:var(--muted);
+  font-size:.84rem;
+  margin-top:.15rem;
+  max-width:440px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--muted);
+}
+
+.document-actions{
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-blue{ color:#7aa7ff; }
+.icon-btn-green{ color:#00ff2a; }
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+
+.empty-state{
+  min-height:230px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.65rem;
+  text-align:center;
+  color:var(--muted);
+  padding:2rem;
+}
+
+.empty-state i{
+  font-size:2.4rem;
+  color:#1468f5;
+}
+
+.empty-state h3{
+  color:var(--text);
+  font-weight:900;
+  margin:0;
+}
+
+.delete-document-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-document-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-document-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.delete-document-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.13);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ff6b6b;
+  font-size:1.55rem;
+}
+
+.delete-document-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.delete-document-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.delete-document-body{
+  padding:1.5rem;
+}
+
+.delete-document-preview{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid rgba(220,53,69,.22);
+  background:rgba(220,53,69,.08);
+}
+
+.delete-document-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:768px){
+  .document-page-head{
+    flex-direction:column;
+  }
+
+  .document-page-head .btn-orange{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+
+  .document-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .document-table{
+    min-width:780px;
+  }
+
+  .delete-document-footer{
+    flex-direction:column;
+  }
+
+  .delete-document-footer .btn-soft,
+  .delete-document-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="document-page-head">
+  <div class="document-title-wrap">
+    <div class="document-title-icon">
+      <i class="bi bi-folder2-open"></i>
+    </div>
+
+    <div>
+      <h1 class="document-title">Dokumenty</h1>
+      <div class="document-subtitle">
+        Lista dokumentów dodanych w Twojej firmie.
+      </div>
+    </div>
+  </div>
+
+  <a href="{% url 'document_add' %}" class="btn-orange">
+    <i class="bi bi-plus-lg me-1"></i>
+    Dodaj dokument
+  </a>
+</div>
+
+<div class="document-list-card">
+  <div class="document-list-header">
+    <div class="document-list-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista dokumentów</h3>
+      <p>Nazwa, folder, autor i szybkie akcje.</p>
+    </div>
+  </div>
+
+  {% if documents %}
+    <div class="table-responsive">
+      <table class="table document-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Nazwa</th>
+            <th>Folder</th>
+            <th>Dodał</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for document in documents %}
+            <tr>
+              <td>
+                <div class="document-main">
+                  <div class="document-avatar">
+                    <i class="bi bi-file-earmark-text"></i>
+                  </div>
+
+                  <div>
+                    <div class="document-name">{{ document.name }}</div>
+                    <div class="document-file">{{ document.file.name }}</div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                {% if document.folder %}
+                  <span class="badge-soft">
+                    <i class="bi bi-folder"></i>
+                    {{ document.folder.name }}
+                  </span>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if document.uploaded_by %}
+                  {{ document.uploaded_by.get_full_name|default:document.uploaded_by.email }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="document-actions">
+                  <a href="{{ document.file.url }}"
+                     class="icon-btn icon-btn-blue"
+                     title="Podgląd">
+                    <i class="fa-solid fa-eye"></i>
+                  </a>
+
+                  <a href="{% url 'document_edit' document.pk %}"
+                     class="icon-btn icon-btn-green"
+                     title="Edytuj">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </a>
+
+                  <button type="button"
+                          class="icon-btn icon-btn-danger"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteDocumentModal"
+                          data-document-id="{{ document.pk }}"
+                          data-document-name="{{ document.name }}"
+                          title="Usuń">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="bi bi-folder2-open"></i>
+      <h3>Brak dokumentów</h3>
+      <p>Dodaj pierwszy dokument do swojej firmy.</p>
+
+      <a href="{% url 'document_add' %}" class="btn-orange">
+        <i class="bi bi-plus-lg me-1"></i>
+        Dodaj dokument
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% if is_paginated %}
+  <nav class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Poprzednia</a>
+        </li>
+      {% endif %}
+
+      <li class="page-item active">
+        <span class="page-link">{{ page_obj.number }}</span>
+      </li>
+
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">Następna</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+{% endif %}
+
+<div class="modal fade" id="deleteDocumentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-document-modal">
+
+      <form method="post" id="deleteDocumentForm">
+        {% csrf_token %}
+
+        <div class="delete-document-header">
+          <div class="delete-document-icon">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć dokument?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="delete-document-body">
+          <div class="delete-document-preview">
+            <div class="small text-muted mb-1">
+              Usuwasz dokument:
+            </div>
+
+            <strong id="deleteDocumentName">—</strong>
+          </div>
+        </div>
+
+        <div class="delete-document-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-trash"></i>
+            Usuń dokument
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const deleteModal = document.getElementById("deleteDocumentModal");
+  if (!deleteModal) return;
+
+  deleteModal.addEventListener("show.bs.modal", function (event) {
+    const button = event.relatedTarget;
+
+    const documentId = button.getAttribute("data-document-id");
+    const documentName = button.getAttribute("data-document-name");
+
+    const form = document.getElementById("deleteDocumentForm");
+    const nameBox = document.getElementById("deleteDocumentName");
+
+    form.action = `/dokumenty/${documentId}/usun/`;
+    nameBox.textContent = documentName || "—";
+  });
+});
+</script>
+
+{% endblock %}

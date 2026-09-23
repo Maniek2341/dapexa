@@ -1,0 +1,939 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+.emp-form-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.emp-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emp-title-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1468f5;
+  font-size: 1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border: 1px solid rgba(20,104,245,.18);
+}
+
+.emp-title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.emp-subtitle {
+  margin-top: .25rem;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+.emp-section-divider{display:flex;align-items:center;gap:.8rem;margin:.35rem 0 .1rem;color:var(--text);font-size:.9rem;font-weight:900}
+.emp-section-divider::after{content:"";height:1px;flex:1;background:var(--border)}
+.emp-section-divider span{white-space:nowrap}
+.emp-form-body .form-text{color:var(--muted);font-size:.75rem;margin-top:.35rem}
+
+.btn-orange {
+  border: 0;
+  color: #fff;
+  font-weight: 800;
+  border-radius: 14px;
+  padding: .78rem 1.15rem;
+  background: linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow: 0 14px 32px rgba(20,104,245,.22);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.btn-orange:hover {
+  color: #fff;
+  filter: brightness(1.05);
+}
+
+.btn-soft {
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  border-radius: 14px;
+  font-weight: 800;
+  padding: .78rem 1.15rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.btn-soft:hover {
+  background: rgba(255,255,255,.07);
+  color: var(--text);
+}
+
+.emp-form-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 18px 55px rgba(0,0,0,.14);
+}
+
+.emp-form-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.3rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.emp-form-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20,104,245,.12);
+  border: 1px solid rgba(20,104,245,.18);
+  color: #1468f5;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.emp-form-header h3 {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.emp-form-header p {
+  margin: .15rem 0 0;
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+.emp-form-body {
+  padding: 1.5rem;
+}
+
+.emp-label {
+  color: var(--text);
+  font-size: .86rem;
+  font-weight: 900;
+  margin-bottom: .45rem;
+}
+
+.emp-form-card .form-control,
+.emp-form-card .form-select,
+.training-card .form-control,
+.training-card .form-select,
+.emp-form-card input:not([type="checkbox"]),
+.emp-form-card select,
+.training-card input:not([type="checkbox"]),
+.training-card select,
+.training-card textarea {
+  background: rgba(255,255,255,.04) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  min-height: 52px;
+  box-shadow: none !important;
+}
+
+.emp-form-card .form-control:focus,
+.emp-form-card .form-select:focus,
+.training-card .form-control:focus,
+.training-card .form-select:focus,
+.emp-form-card input:not([type="checkbox"]):focus,
+.emp-form-card select:focus,
+.training-card input:not([type="checkbox"]):focus,
+.training-card select:focus,
+.training-card textarea:focus {
+  border-color: rgba(20,104,245,.5) !important;
+  box-shadow: 0 0 0 .2rem rgba(20,104,245,.13) !important;
+}
+
+.emp-form-card input[type="checkbox"] {
+  min-height: auto !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 5px !important;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: #1468f5;
+}
+
+.emp-check-card {
+  display: flex;
+  align-items: flex-start;
+  gap: .85rem;
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.025);
+  cursor: pointer;
+  height: 100%;
+}
+
+.emp-check-card * {
+  cursor: pointer;
+}
+
+.emp-check-title {
+  color: var(--text);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.emp-check-desc {
+  color: var(--muted);
+  font-size: .82rem;
+  margin-top: .25rem;
+}
+
+.emp-form-actions {
+  padding: 0 1.5rem 1.5rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: .75rem;
+  flex-wrap: wrap;
+}
+
+.emp-help-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 1.25rem;
+  box-shadow: 0 14px 35px rgba(0,0,0,.12);
+}
+
+.emp-help-title {
+  color: var(--text);
+  font-weight: 900;
+  margin-bottom: .75rem;
+}
+
+.emp-help-item {
+  padding: .8rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.emp-help-item:last-child {
+  border-bottom: 0;
+}
+
+.emp-help-label {
+  color: var(--muted);
+  font-size: .76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.emp-help-value {
+  color: var(--text);
+  font-weight: 700;
+  margin-top: .2rem;
+}
+
+.error-box {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 18px;
+  background: rgba(220,53,69,.10);
+  border: 1px solid rgba(220,53,69,.22);
+  color: #ff6b6b;
+}
+
+.field-errors {
+  color: #ff6b6b;
+  font-size: .82rem;
+  margin-top: .35rem;
+}
+
+.training-card {
+  margin-top: 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 18px 55px rgba(0,0,0,.14);
+}
+
+.training-list {
+  display: grid;
+  gap: .75rem;
+}
+
+.training-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,.025);
+}
+
+.training-name {
+  color: var(--text);
+  font-weight: 900;
+}
+
+.training-meta {
+  margin-top: .25rem;
+  color: var(--muted);
+  font-size: .82rem;
+}
+
+.training-badge {
+  flex-shrink: 0;
+  padding: .35rem .65rem;
+  border-radius: 999px;
+  color: #47d18c;
+  background: rgba(25,135,84,.13);
+  font-size: .72rem;
+  font-weight: 850;
+}
+
+.training-badge.expired {
+  color: #ff6b6b;
+  background: rgba(220,53,69,.12);
+}
+
+.training-empty {
+  padding: 1.25rem;
+  color: var(--muted);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 18px;
+}
+
+.contract-card {
+  margin-top: 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 18px 55px rgba(0,0,0,.14);
+}
+
+.contract-item {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255,255,255,.025);
+}
+
+.contract-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .65rem;
+  flex-wrap: wrap;
+  margin-top: .85rem;
+}
+
+.btn-danger-soft {
+  border: 1px solid rgba(220,53,69,.25);
+  background: rgba(220,53,69,.08);
+  color: #ff6b6b;
+  border-radius: 14px;
+  font-weight: 800;
+  padding: .72rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.contract-card .form-control,
+.contract-card .form-select,
+.contract-card input:not([type="checkbox"]),
+.contract-card select,
+.contract-card textarea {
+  background: rgba(255,255,255,.04) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 16px !important;
+  min-height: 52px;
+  box-shadow: none !important;
+}
+
+.contract-card .form-control:focus,
+.contract-card .form-select:focus,
+.contract-card input:not([type="checkbox"]):focus,
+.contract-card select:focus,
+.contract-card textarea:focus {
+  border-color: rgba(20,104,245,.5) !important;
+  box-shadow: 0 0 0 .2rem rgba(20,104,245,.13) !important;
+}
+
+@media (max-width: 768px) {
+  .emp-form-head {
+    flex-direction: column;
+  }
+
+  .emp-form-head .btn-soft {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .emp-title {
+    font-size: 1.35rem;
+  }
+
+  .emp-title-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+  }
+
+  .emp-form-header {
+    padding: 1rem;
+    align-items: flex-start;
+  }
+
+  .emp-form-body {
+    padding: 1rem;
+  }
+
+  .emp-form-actions {
+    padding: 0 1rem 1rem;
+    flex-direction: column-reverse;
+  }
+
+  .emp-form-actions .btn-soft,
+  .emp-form-actions .btn-orange {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+}
+</style>
+
+<!-- PAGE HEAD -->
+<div class="emp-form-head">
+  <div class="emp-title-wrap">
+    <div class="emp-title-icon">
+      <i class="bi {% if is_edit %}bi-person-gear{% else %}bi-person-plus-fill{% endif %}"></i>
+    </div>
+    <div>
+      <h1 class="emp-title">{% if is_edit %}Edytuj pracownika{% else %}Dodaj pracownika{% endif %}</h1>
+      <div class="emp-subtitle">
+        {% if is_edit %}
+          Zaktualizuj dane pracownika przypisanego do Twojej firmy.
+        {% else %}
+          Utwórz konto użytkownika przypisane do Twojej firmy.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <a href="{% url 'employee_list' %}" class="btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+    Wróć
+  </a>
+</div>
+
+<form method="post" novalidate>
+  {% csrf_token %}
+
+  <div class="row g-4">
+
+    <!-- MAIN FORM CARD -->
+    <div class="col-lg-8">
+      <div class="emp-form-card">
+
+        <div class="emp-form-header">
+          <div class="emp-form-icon">
+            <i class="bi bi-pencil-square"></i>
+          </div>
+          <div>
+            <h3>Dane pracownika</h3>
+            <p>Imię, nazwisko, kontakt, rola i dostęp do systemu.</p>
+          </div>
+        </div>
+
+        <div class="emp-form-body">
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.first_name.label }}</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}
+                <div class="field-errors">{{ form.first_name.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.last_name.label }}</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}
+                <div class="field-errors">{{ form.last_name.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.email.label }}</label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                <div class="field-errors">{{ form.email.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.gender.label }}</label>
+              {{ form.gender }}
+              {% if form.gender.errors %}
+                <div class="field-errors">{{ form.gender.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.birthday.label }}</label>
+              {{ form.birthday }}
+              {% if form.birthday.errors %}
+                <div class="field-errors">{{ form.birthday.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.role.label }}</label>
+              {{ form.role }}
+              {% if form.role.errors %}
+                <div class="field-errors">{{ form.role.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.wyksztalcenie.label }}</label>
+              {{ form.wyksztalcenie }}
+              {% if form.wyksztalcenie.errors %}
+                <div class="field-errors">{{ form.wyksztalcenie.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.position.label }}</label>
+              {{ form.position }}
+              {% if form.position.errors %}
+                <div class="field-errors">{{ form.position.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-12"><div class="emp-section-divider"><span>Dane zatrudnienia</span></div></div>
+
+            <div class="col-md-4">
+              <label class="form-label emp-label">{{ form.employment_start_date.label }}</label>
+              {{ form.employment_start_date }}
+              {% if form.employment_start_date.errors %}<div class="field-errors">{{ form.employment_start_date.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label emp-label">{{ form.previous_employment_years.label }}</label>
+              {{ form.previous_employment_years }}
+              <div class="form-text">Łączny staż przed rozpoczęciem pracy w tej firmie.</div>
+              {% if form.previous_employment_years.errors %}<div class="field-errors">{{ form.previous_employment_years.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label emp-label">{{ form.employment_fraction.label }}</label>
+              {{ form.employment_fraction }}
+              <div class="form-text">Np. 1.00 — pełny etat, 0.50 — pół etatu.</div>
+              {% if form.employment_fraction.errors %}<div class="field-errors">{{ form.employment_fraction.errors }}</div>{% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.phone_priv.label }}</label>
+              {{ form.phone_priv }}
+              {% if form.phone_priv.errors %}
+                <div class="field-errors">{{ form.phone_priv.errors }}</div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label emp-label">{{ form.phone.label }}</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}
+                <div class="field-errors">{{ form.phone.errors }}</div>
+              {% endif %}
+            </div>
+
+          </div>
+
+          {% if form.non_field_errors %}
+            <div class="error-box">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="emp-form-actions">
+          <a href="{% url 'employee_list' %}" class="btn-soft">
+            Anuluj
+          </a>
+          <button type="submit" class="btn-orange">
+            <i class="bi bi-check2-circle me-1"></i>
+            {% if is_edit %}Zapisz zmiany{% else %}Dodaj pracownika{% endif %}
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- HELP CARD -->
+    <div class="col-lg-4">
+      <div class="emp-help-card">
+        <div class="emp-help-title">
+          <i class="bi bi-info-circle me-1" style="color:#1468f5;"></i>
+          Podpowiedź
+        </div>
+
+        <div class="emp-help-item">
+          <div class="emp-help-label">Imię i nazwisko</div>
+          <div class="emp-help-value">Dane wyświetlane w całym systemie.</div>
+        </div>
+
+        <div class="emp-help-item">
+          <div class="emp-help-label">E-mail</div>
+          <div class="emp-help-value">Służy do logowania i powiadomień. Musi być unikalny.</div>
+        </div>
+
+        <div class="emp-help-item">
+          <div class="emp-help-label">Rola</div>
+          <div class="emp-help-value">Określa poziom dostępu do funkcji systemu.</div>
+        </div>
+
+        <div class="emp-help-item">
+          <div class="emp-help-label">Hasło</div>
+          <div class="emp-help-value">
+            {% if is_edit %}
+              Edycja danych nie zmienia hasła pracownika.
+            {% else %}
+              Pracownik ustawi hasło przez link aktywacyjny wysłany e-mailem.
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="emp-help-item">
+          <div class="emp-help-label">Aktywny pracownik</div>
+          <div class="emp-help-value">Odznacz, aby tymczasowo zablokować dostęp bez usuwania konta.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</form>
+
+{% if is_edit %}
+  <div class="contract-card">
+    <div class="emp-form-header">
+      <div class="emp-form-icon">
+        <i class="bi bi-file-earmark-person"></i>
+      </div>
+      <div>
+        <h3>Umowy pracownika</h3>
+        <p>Dodawaj, edytuj i usuwaj umowy pracownika wraz ze zdjęciem dokumentu.</p>
+      </div>
+    </div>
+
+    <div class="emp-form-body">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="form_action" value="add_contract">
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label emp-label">{{ contract_form.contract_type.label }}</label>
+                {{ contract_form.contract_type }}
+                {% if contract_form.contract_type.errors %}<div class="field-errors">{{ contract_form.contract_type.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label emp-label">{{ contract_form.date_from.label }}</label>
+                {{ contract_form.date_from }}
+                {% if contract_form.date_from.errors %}<div class="field-errors">{{ contract_form.date_from.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label emp-label">{{ contract_form.date_to.label }}</label>
+                {{ contract_form.date_to }}
+                {% if contract_form.date_to.errors %}<div class="field-errors">{{ contract_form.date_to.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label emp-label">{{ contract_form.contract_image.label }}</label>
+                {{ contract_form.contract_image }}
+                {% if contract_form.contract_image.errors %}<div class="field-errors">{{ contract_form.contract_image.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label emp-label">{{ contract_form.notes.label }}</label>
+                {{ contract_form.notes }}
+                {% if contract_form.notes.errors %}<div class="field-errors">{{ contract_form.notes.errors }}</div>{% endif %}
+              </div>
+
+              {% if contract_form.non_field_errors %}
+                <div class="col-12">
+                  <div class="error-box">{{ contract_form.non_field_errors }}</div>
+                </div>
+              {% endif %}
+
+              <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn-orange">
+                  <i class="bi bi-plus-circle me-1"></i>
+                  Dodaj umowę
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="col-lg-7">
+          {% if contracts_with_forms %}
+            <div class="training-list">
+              {% for item in contracts_with_forms %}
+                {% with contract=item.contract edit_form=item.form %}
+                  <div class="contract-item">
+                    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                      <div>
+                        <div class="training-name">{{ contract.get_contract_type_display }}</div>
+                        <div class="training-meta">
+                          Od {{ contract.date_from|date:"d.m.Y" }}
+                          {% if contract.date_to %} do {{ contract.date_to|date:"d.m.Y" }}{% else %} · bez daty zakończenia{% endif %}
+                        </div>
+                        {% if contract.contract_image %}
+                          <div class="training-meta">
+                            <a href="{{ contract.contract_image.url }}" target="_blank" rel="noopener" class="btn-soft" style="padding:.45rem .7rem;margin-top:.35rem;">
+                              <i class="bi bi-image"></i>
+                              Zobacz zdjęcie umowy
+                            </a>
+                          </div>
+                        {% endif %}
+                      </div>
+                      <span class="training-badge{% if contract.is_finished %} expired{% endif %}">
+                        {% if contract.is_finished %}Zakończona{% else %}Aktywna{% endif %}
+                      </span>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                      {% csrf_token %}
+                      <input type="hidden" name="form_action" value="edit_contract">
+                      <input type="hidden" name="contract_id" value="{{ contract.pk }}">
+
+                      <div class="row g-3">
+                        <div class="col-md-4">
+                          <label class="form-label emp-label">{{ edit_form.contract_type.label }}</label>
+                          {{ edit_form.contract_type }}
+                          {% if edit_form.contract_type.errors %}<div class="field-errors">{{ edit_form.contract_type.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                          <label class="form-label emp-label">{{ edit_form.date_from.label }}</label>
+                          {{ edit_form.date_from }}
+                          {% if edit_form.date_from.errors %}<div class="field-errors">{{ edit_form.date_from.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                          <label class="form-label emp-label">{{ edit_form.date_to.label }}</label>
+                          {{ edit_form.date_to }}
+                          {% if edit_form.date_to.errors %}<div class="field-errors">{{ edit_form.date_to.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label emp-label">{{ edit_form.contract_image.label }}</label>
+                          {{ edit_form.contract_image }}
+                          {% if edit_form.contract_image.errors %}<div class="field-errors">{{ edit_form.contract_image.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-12">
+                          <label class="form-label emp-label">{{ edit_form.notes.label }}</label>
+                          {{ edit_form.notes }}
+                          {% if edit_form.notes.errors %}<div class="field-errors">{{ edit_form.notes.errors }}</div>{% endif %}
+                        </div>
+                        {% if edit_form.non_field_errors %}
+                          <div class="col-12"><div class="error-box">{{ edit_form.non_field_errors }}</div></div>
+                        {% endif %}
+                      </div>
+
+                      <div class="contract-actions">
+                        <button type="submit" class="btn-orange">
+                          <i class="bi bi-check2-circle"></i>
+                          Zapisz umowę
+                        </button>
+                      </div>
+                    </form>
+
+                    <form method="post" class="contract-actions" onsubmit="return confirm('Czy na pewno usunąć tę umowę pracownika?');">
+                      {% csrf_token %}
+                      <input type="hidden" name="form_action" value="delete_contract">
+                      <input type="hidden" name="contract_id" value="{{ contract.pk }}">
+                      <button type="submit" class="btn-danger-soft">
+                        <i class="bi bi-trash"></i>
+                        Usuń umowę
+                      </button>
+                    </form>
+                  </div>
+                {% endwith %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="training-empty">
+              <i class="bi bi-file-earmark-person fs-2 d-block mb-2"></i>
+              Ten pracownik nie ma jeszcze dodanych umów.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="training-card">
+    <div class="emp-form-header">
+      <div class="emp-form-icon">
+        <i class="bi bi-mortarboard"></i>
+      </div>
+      <div>
+        <h3>Szkolenia pracownika</h3>
+        <p>Dodawaj ukończone szkolenia, terminy ważności i numery certyfikatów.</p>
+      </div>
+    </div>
+
+    <div class="emp-form-body">
+      <div class="row g-4">
+        <div class="col-lg-7">
+          {% if trainings %}
+            <div class="training-list">
+              {% for training in trainings %}
+                <div class="training-item">
+                  <div>
+                    <div class="training-name">{{ training.name }}</div>
+                    <div class="training-meta">
+                      Ukończono: {{ training.completed_at|date:"d.m.Y" }}
+                      {% if training.valid_until %} · ważne do {{ training.valid_until|date:"d.m.Y" }}{% endif %}
+                    </div>
+                    {% if training.organizer %}
+                      <div class="training-meta">Organizator: {{ training.organizer }}</div>
+                    {% endif %}
+                    {% if training.certificate_number %}
+                      <div class="training-meta">Certyfikat: {{ training.certificate_number }}</div>
+                    {% endif %}
+                    {% if training.certificate_image %}
+                      <div class="training-meta">
+                        <a href="{{ training.certificate_image.url }}" target="_blank" rel="noopener" class="btn-soft" style="padding:.45rem .7rem;margin-top:.35rem;">
+                          <i class="bi bi-image"></i>
+                          Zobacz zdjęcie certyfikatu
+                        </a>
+                      </div>
+                    {% endif %}
+                    {% if training.notes %}
+                      <div class="training-meta">{{ training.notes|truncatechars:140 }}</div>
+                    {% endif %}
+                  </div>
+                  {% if training.valid_until %}
+                    <span class="training-badge{% if training.is_expired %} expired{% endif %}">
+                      {% if training.is_expired %}Wygasło{% else %}Aktywne{% endif %}
+                    </span>
+                  {% else %}
+                    <span class="training-badge">Bezterminowe</span>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="training-empty">
+              <i class="bi bi-mortarboard fs-2 d-block mb-2"></i>
+              Ten pracownik nie ma jeszcze dodanych szkoleń.
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="col-lg-5">
+          <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="form_action" value="add_training">
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label emp-label">{{ training_form.name.label }}</label>
+                {{ training_form.name }}
+                {% if training_form.name.errors %}<div class="field-errors">{{ training_form.name.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label emp-label">{{ training_form.organizer.label }}</label>
+                {{ training_form.organizer }}
+                {% if training_form.organizer.errors %}<div class="field-errors">{{ training_form.organizer.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label emp-label">{{ training_form.completed_at.label }}</label>
+                {{ training_form.completed_at }}
+                {% if training_form.completed_at.errors %}<div class="field-errors">{{ training_form.completed_at.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label emp-label">{{ training_form.valid_until.label }}</label>
+                {{ training_form.valid_until }}
+                {% if training_form.valid_until.errors %}<div class="field-errors">{{ training_form.valid_until.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label emp-label">{{ training_form.certificate_number.label }}</label>
+                {{ training_form.certificate_number }}
+                {% if training_form.certificate_number.errors %}<div class="field-errors">{{ training_form.certificate_number.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label emp-label">{{ training_form.certificate_image.label }}</label>
+                {{ training_form.certificate_image }}
+                {% if training_form.certificate_image.errors %}<div class="field-errors">{{ training_form.certificate_image.errors }}</div>{% endif %}
+              </div>
+
+              <div class="col-12">
+                <label class="form-label emp-label">{{ training_form.notes.label }}</label>
+                {{ training_form.notes }}
+                {% if training_form.notes.errors %}<div class="field-errors">{{ training_form.notes.errors }}</div>{% endif %}
+              </div>
+
+              {% if training_form.non_field_errors %}
+                <div class="col-12">
+                  <div class="error-box">{{ training_form.non_field_errors }}</div>
+                </div>
+              {% endif %}
+
+              <div class="col-12 d-flex justify-content-end">
+                <button type="submit" class="btn-orange">
+                  <i class="bi bi-plus-circle me-1"></i>
+                  Dodaj szkolenie
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% endblock %}

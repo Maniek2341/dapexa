@@ -1,0 +1,3559 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+  /* ===== DETAIL LAYOUT ===== */
+
+.service-detail-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.service-detail-title{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.service-detail-icon{
+  width:64px;
+  height:64px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.7rem;
+  flex-shrink:0;
+}
+
+.service-detail-title h1{
+  margin:0;
+  font-size:1.8rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.service-detail-sub{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:.55rem;
+}
+
+.detail-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.45rem .75rem;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:800;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+
+.detail-badge-orange{
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  border-color:rgba(20,104,245,.18);
+}
+
+.detail-badge-success{
+  background:rgba(25,135,84,.15);
+  color:#47d18c;
+  border-color:rgba(25,135,84,.18);
+}
+
+.detail-badge-danger{
+  background:rgba(220,53,69,.15);
+  color:#ff6b81;
+  border-color:rgba(220,53,69,.18);
+}
+
+/* ===== ACTIONS ===== */
+
+.detail-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.75rem 1.1rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.75rem 1.1rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.07);
+}
+
+/* ===== GRID ===== */
+
+.detail-grid{
+  display:grid;
+  grid-template-columns:1.35fr .65fr;
+  gap:1.25rem;
+}
+
+.detail-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.detail-card-header{
+  padding:1.2rem 1.35rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 38%),
+    rgba(255,255,255,.02);
+}
+
+.detail-card-header h2{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.detail-card-header span{
+  display:block;
+  margin-top:.2rem;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.detail-card-body{
+  padding:1.35rem;
+}
+
+/* ===== INFO ===== */
+
+.info-list{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:1rem;
+}
+
+.info-item{
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.info-label{
+  color:var(--muted);
+  font-size:.78rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:.35rem;
+}
+
+.info-value{
+  color:var(--text);
+  font-size:.98rem;
+  font-weight:800;
+  word-break:break-word;
+}
+
+/* ===== TABS ===== */
+
+.detail-tabs{
+  margin-top:1.25rem;
+}
+
+.detail-tabs .nav-link{
+  color:var(--muted);
+  border:1px solid var(--border) !important;
+  background:rgba(255,255,255,.03) !important;
+  border-radius:999px;
+  font-weight:800;
+  margin-right:.5rem;
+  margin-bottom:.5rem;
+  transition:all .2s ease;
+}
+
+.detail-tabs .nav-link.active{
+  color:#fff !important;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%) !important;
+  border-color:transparent !important;
+}
+
+.detail-tabs .nav-link:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.07) !important;
+}
+
+.tab-panel{
+  margin-top:1rem;
+}
+
+/* ===== TIMELINE ===== */
+
+.crm-timeline-scroll{
+  max-height:520px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+
+.crm-timeline-scroll::-webkit-scrollbar{
+  width:6px;
+}
+
+.crm-timeline-scroll::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.15);
+  border-radius:6px;
+}
+
+.crm-day{
+  margin:1rem 0 .5rem;
+}
+
+.crm-day-pill{
+  display:inline-flex;
+  align-items:center;
+  padding:.35rem .8rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.crm-item{
+  position:relative;
+  padding-left:2rem;
+  margin-bottom:1rem;
+}
+
+.crm-item::before{
+  content:"";
+  position:absolute;
+  left:11px;
+  top:0;
+  bottom:-1rem;
+  width:1px;
+  background:rgba(255,255,255,.08);
+}
+
+.crm-dot{
+  position:absolute;
+  left:0;
+  top:.25rem;
+  width:24px;
+  height:24px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.18);
+  z-index:2;
+}
+
+.crm-card{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:18px;
+  padding:1rem;
+}
+
+/* ===== MEDIA ===== */
+
+.media-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:.75rem;
+}
+
+.media-tile{
+  position:relative;
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  aspect-ratio:4/3;
+  cursor:pointer;
+}
+
+.media-tile img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:transform .15s ease;
+}
+
+.media-tile:hover img{
+  transform:scale(1.03);
+}
+
+.media-badge{
+  position:absolute;
+  left:10px;
+  top:10px;
+  background:rgba(0,0,0,.45);
+  color:#fff;
+  border-radius:999px;
+  padding:.2rem .45rem;
+  font-size:.8rem;
+}
+
+.file-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:.65rem .75rem;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--card);
+}
+
+.file-main{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  flex:1;
+  min-width:0;
+  text-decoration:none;
+  color:inherit;
+}
+
+.file-ico{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+}
+
+.file-name{
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.file-sub{
+  font-size:.82rem;
+}
+
+.icon-btn{
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-danger{
+  border-color:rgba(220,53,69,.35);
+  color:#ff6b6b;
+}
+
+/* ===== MOBILE ===== */
+
+@media(max-width:992px){
+
+  .detail-grid{
+    grid-template-columns:1fr;
+  }
+
+}
+
+@media(max-width:768px){
+
+  .service-detail-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .service-detail-title{
+    align-items:flex-start;
+  }
+
+  .service-detail-title h1{
+    font-size:1.35rem;
+  }
+
+  .service-detail-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    font-size:1.3rem;
+  }
+
+  .detail-actions{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+
+  .detail-actions a,
+  .detail-actions button{
+    width:100%;
+    justify-content:center;
+    text-align:center;
+  }
+
+  .info-list{
+    grid-template-columns:1fr;
+  }
+
+  .media-grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:.6rem;
+  }
+
+  .detail-card{
+    border-radius:20px;
+  }
+
+  .detail-card-body{
+    padding:1rem;
+  }
+
+  .detail-card-header{
+    padding:1rem;
+  }
+
+  .crm-item{
+    padding-left:1.7rem;
+  }
+
+}
+
+@media(max-width:576px){
+
+  .detail-actions{
+    grid-template-columns:1fr;
+  }
+
+  .media-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .detail-tabs .nav{
+    flex-wrap:nowrap;
+    overflow:auto;
+    padding-bottom:.35rem;
+  }
+
+  .detail-tabs .nav-link{
+    white-space:nowrap;
+  }
+
+}
+/* FIX: HTML używa product-detail, więc mapujemy style */
+.product-detail-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.product-detail-title{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.product-detail-icon{
+  width:64px;
+  height:64px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.7rem;
+  flex-shrink:0;
+}
+
+.product-detail-title h1{
+  margin:0;
+  font-size:1.8rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.product-detail-sub{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:.55rem;
+}
+
+.detail-badge-active{
+  background:rgba(25,135,84,.15);
+  color:#47d18c;
+  border-color:rgba(25,135,84,.18);
+}
+
+.detail-badge-disabled{
+  background:rgba(220,53,69,.15);
+  color:#ff6b81;
+  border-color:rgba(220,53,69,.18);
+}
+
+.placeholder-box{
+  padding:1.25rem;
+  border-radius:20px;
+  background:rgba(255,255,255,.03);
+  border:1px dashed rgba(255,255,255,.14);
+  color:var(--muted);
+  text-align:center;
+}
+
+.placeholder-box i{
+  display:block;
+  font-size:1.8rem;
+  color:#1468f5;
+  margin-bottom:.5rem;
+}
+
+.media-tile-wrap{
+  position:relative;
+}
+
+.media-del{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(0,0,0,.45);
+  color:#fff;
+  border-radius:999px;
+  width:36px;
+  height:36px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:5;
+}
+
+.media-del:hover{
+  background:rgba(220,53,69,.9);
+}
+
+.file-meta{
+  min-width:0;
+  flex:1;
+}
+
+.file-cta{
+  display:flex;
+  align-items:center;
+  gap:.35rem;
+  flex-shrink:0;
+}
+
+.btn-soft.active{
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  border-color:transparent;
+  color:#fff;
+}
+
+@media(max-width:768px){
+  .product-detail-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .product-detail-title{
+    align-items:flex-start;
+  }
+
+  .product-detail-title h1{
+    font-size:1.35rem;
+  }
+
+  .product-detail-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    font-size:1.3rem;
+  }
+}
+.note-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:30px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.note-modal-header{
+  display:flex;
+  align-items:center;
+  gap:1.2rem;
+  padding:2rem;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.note-modal-header .btn-close{
+  position:absolute;
+  top:1.2rem;
+  right:1.2rem;
+}
+
+.note-modal-icon{
+  width:72px;
+  height:72px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.7rem;
+  flex-shrink:0;
+}
+
+.note-modal-title{
+  margin:0;
+  font-size:1.4rem;
+  font-weight:900;
+}
+
+.note-modal-subtitle{
+  margin-top:.35rem;
+  color:var(--text-muted);
+}
+
+.note-modal-body{
+  padding:2rem;
+}
+
+.note-editor-card{
+  padding:1.2rem;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.06);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+}
+
+.note-editor-head{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  margin-bottom:1rem;
+  font-weight:800;
+  color:var(--text);
+}
+
+.note-editor-card textarea{
+  min-height:180px;
+  resize:vertical;
+  border-radius:18px !important;
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+}
+
+.note-editor-card textarea:focus{
+  border-color:rgba(20,104,245,.4)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.12)!important;
+}
+
+.note-info-box{
+  margin-top:1rem;
+  display:flex;
+  align-items:flex-start;
+  gap:.6rem;
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,193,7,.08);
+  border:1px solid rgba(255,193,7,.14);
+  color:#ffcf66;
+  font-size:.85rem;
+}
+
+.note-modal-footer{
+  padding:0 2rem 2rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.8rem;
+}
+
+.note-btn-secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:16px;
+  padding:.95rem 1.35rem;
+  font-weight:800;
+}
+
+.note-btn-primary{
+  border:0;
+  border-radius:16px;
+  padding:.95rem 1.5rem;
+  display:inline-flex;
+  align-items:center;
+  gap:.6rem;
+  font-weight:800;
+  color:#fff;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 18px 40px rgba(20,104,245,.22);
+}
+
+@media(max-width:768px){
+
+  .note-modal-header{
+    padding:1.2rem;
+  }
+
+  .note-modal-body{
+    padding:1rem;
+  }
+
+  .note-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .note-btn-primary,
+  .note-btn-secondary{
+    width:100%;
+    justify-content:center;
+  }
+
+  .note-modal-icon{
+    width:58px;
+    height:58px;
+    font-size:1.3rem;
+  }
+}
+.status-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:30px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.status-modal-header{
+  display:flex;
+  align-items:center;
+  gap:1.2rem;
+  padding:2rem;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.status-modal-header .btn-close{
+  position:absolute;
+  top:1.2rem;
+  right:1.2rem;
+}
+
+.status-modal-icon{
+  width:74px;
+  height:74px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.8rem;
+  flex-shrink:0;
+}
+
+.status-modal-title{
+  margin:0;
+  font-size:1.4rem;
+  font-weight:900;
+}
+
+.status-modal-subtitle{
+  margin-top:.35rem;
+  color:var(--text-muted);
+}
+
+.status-modal-body{
+  padding:2rem;
+}
+
+.status-card{
+  padding:1.2rem;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.06);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.03),
+      rgba(255,255,255,.015)
+    );
+}
+
+.status-card-top{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  margin-bottom:1rem;
+}
+
+.status-card-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.10);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.15);
+  font-size:1.1rem;
+}
+
+.status-card-label{
+  font-size:.95rem;
+  font-weight:800;
+}
+
+.status-card-sub{
+  font-size:.82rem;
+  color:var(--text-muted);
+}
+
+.status-input{
+  min-height:180px;
+  resize:vertical;
+  border-radius:18px !important;
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+}
+
+.status-input:focus{
+  border-color:rgba(20,104,245,.4)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.12)!important;
+}
+
+.status-info-box{
+  margin-top:1rem;
+  display:flex;
+  align-items:flex-start;
+  gap:.6rem;
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,193,7,.08);
+  border:1px solid rgba(255,193,7,.14);
+  color:#ffcf66;
+  font-size:.84rem;
+}
+
+.status-modal-footer{
+  padding:0 2rem 2rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.9rem;
+}
+
+.status-btn-secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:16px;
+  padding:.95rem 1.35rem;
+  font-weight:800;
+}
+
+.status-btn-primary{
+  border:0;
+  border-radius:16px;
+  padding:.95rem 1.5rem;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  font-weight:800;
+  color:#fff;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 18px 40px rgba(20,104,245,.22);
+}
+
+@media(max-width:768px){
+
+  .status-modal-header{
+    padding:1.2rem;
+  }
+
+  .status-modal-body{
+    padding:1rem;
+  }
+
+  .status-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .status-btn-primary,
+  .status-btn-secondary{
+    width:100%;
+    justify-content:center;
+  }
+
+  .status-modal-icon{
+    width:58px;
+    height:58px;
+    font-size:1.4rem;
+  }
+
+  .status-modal-title{
+    font-size:1.15rem;
+  }
+}
+.workers-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:30px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.workers-modal-header{
+  display:flex;
+  align-items:center;
+  gap:1.2rem;
+  padding:2rem;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.workers-modal-header .btn-close{
+  position:absolute;
+  top:1.2rem;
+  right:1.2rem;
+}
+
+.workers-modal-icon{
+  width:74px;
+  height:74px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.8rem;
+  flex-shrink:0;
+}
+
+.workers-modal-title{
+  margin:0;
+  font-size:1.4rem;
+  font-weight:900;
+}
+
+.workers-modal-subtitle{
+  margin-top:.35rem;
+  color:var(--text-muted);
+}
+
+.workers-modal-body{
+  padding:2rem;
+}
+
+.workers-card{
+  padding:1.2rem;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.06);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+}
+
+.workers-card-top{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  margin-bottom:1rem;
+}
+
+.workers-card-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.10);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.15);
+  font-size:1.1rem;
+}
+
+.workers-card-label{
+  font-size:.95rem;
+  font-weight:800;
+  color:var(--text);
+}
+
+.workers-card-sub{
+  font-size:.82rem;
+  color:var(--text-muted);
+}
+
+.workers-select{
+  min-height:220px;
+  border-radius:18px !important;
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  box-shadow:none!important;
+}
+
+.workers-select:focus{
+  border-color:rgba(20,104,245,.4)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.12)!important;
+}
+
+.workers-select option{
+  padding:.75rem 1rem;
+}
+
+.workers-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.65rem;
+  min-height:42px;
+}
+
+.workers-chips .btn,
+.workers-chip{
+  border:1px solid rgba(20,104,245,.22)!important;
+  background:rgba(20,104,245,.10)!important;
+  color:#1468f5!important;
+  border-radius:999px!important;
+  padding:.55rem .85rem!important;
+  font-weight:800!important;
+}
+
+.workers-clear-btn{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:14px;
+  padding:.75rem 1rem;
+  font-weight:800;
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+}
+
+.workers-clear-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.workers-info-box{
+  margin-top:1rem;
+  display:flex;
+  align-items:flex-start;
+  gap:.6rem;
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,193,7,.08);
+  border:1px solid rgba(255,193,7,.14);
+  color:#ffcf66;
+  font-size:.84rem;
+}
+
+.workers-modal-footer{
+  padding:0 2rem 2rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.9rem;
+}
+
+.workers-btn-secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:16px;
+  padding:.95rem 1.35rem;
+  font-weight:800;
+}
+
+.workers-btn-primary{
+  border:0;
+  border-radius:16px;
+  padding:.95rem 1.5rem;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  font-weight:800;
+  color:#fff;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 18px 40px rgba(20,104,245,.22);
+}
+
+@media(max-width:768px){
+  .workers-modal-header{
+    padding:1.2rem;
+  }
+
+  .workers-modal-body{
+    padding:1rem;
+  }
+
+  .workers-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .workers-btn-primary,
+  .workers-btn-secondary{
+    width:100%;
+    justify-content:center;
+  }
+
+  .workers-modal-icon{
+    width:58px;
+    height:58px;
+    font-size:1.4rem;
+  }
+
+  .workers-modal-title{
+    font-size:1.15rem;
+  }
+}
+
+.delete-note-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:30px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-note-header{
+  display:flex;
+  align-items:center;
+  gap:1.2rem;
+  padding:2rem;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-note-header .btn-close{
+  position:absolute;
+  top:1.2rem;
+  right:1.2rem;
+}
+
+.delete-note-icon{
+  width:74px;
+  height:74px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.12);
+  border:1px solid rgba(220,53,69,.18);
+  color:#ff6b6b;
+  font-size:1.8rem;
+  flex-shrink:0;
+}
+
+.delete-note-title{
+  margin:0;
+  font-size:1.4rem;
+  font-weight:900;
+}
+
+.delete-note-subtitle{
+  margin-top:.35rem;
+  color:var(--text-muted);
+}
+
+.delete-note-body{
+  padding:2rem;
+}
+
+.delete-note-warning{
+  display:flex;
+  gap:.8rem;
+  align-items:flex-start;
+  padding:1rem;
+  margin-bottom:1rem;
+  border-radius:18px;
+  background:rgba(220,53,69,.08);
+  border:1px solid rgba(220,53,69,.15);
+  color:#ff8c8c;
+  font-size:.9rem;
+}
+
+.delete-note-warning i{
+  flex-shrink:0;
+  margin-top:.1rem;
+}
+
+.delete-note-preview-box{
+  padding:1.25rem;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.06);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.03),
+      rgba(255,255,255,.015)
+    );
+}
+
+.delete-note-preview-label{
+  font-size:.75rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--text-muted);
+  margin-bottom:.7rem;
+}
+
+.delete-note-preview{
+  color:var(--text);
+  font-weight:600;
+  white-space:pre-wrap;
+  line-height:1.6;
+}
+
+.delete-note-footer{
+  padding:0 2rem 2rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.9rem;
+}
+
+.delete-note-btn-secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:16px;
+  padding:.95rem 1.35rem;
+  font-weight:800;
+}
+
+.delete-note-btn-danger{
+  border:0;
+  border-radius:16px;
+  padding:.95rem 1.5rem;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  font-weight:800;
+  color:#fff;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+  box-shadow:0 18px 40px rgba(220,53,69,.25);
+}
+
+.delete-note-btn-danger:hover{
+  transform:translateY(-2px);
+}
+
+@media(max-width:768px){
+
+  .delete-note-header{
+    padding:1.2rem;
+  }
+
+  .delete-note-body{
+    padding:1rem;
+  }
+
+  .delete-note-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .delete-note-btn-secondary,
+  .delete-note-btn-danger{
+    width:100%;
+    justify-content:center;
+  }
+
+  .delete-note-icon{
+    width:58px;
+    height:58px;
+    font-size:1.4rem;
+  }
+
+  .delete-note-title{
+    font-size:1.15rem;
+  }
+}
+.delete-service-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:30px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-service-header{
+  display:flex;
+  align-items:center;
+  gap:1.2rem;
+  padding:2rem;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-service-header .btn-close{
+  position:absolute;
+  top:1.2rem;
+  right:1.2rem;
+}
+
+.delete-service-icon{
+  width:74px;
+  height:74px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.12);
+  border:1px solid rgba(220,53,69,.18);
+  color:#ff6b6b;
+  font-size:1.8rem;
+  flex-shrink:0;
+}
+
+.delete-service-title{
+  margin:0;
+  font-size:1.4rem;
+  font-weight:900;
+}
+
+.delete-service-subtitle{
+  margin-top:.35rem;
+  color:var(--text-muted);
+}
+
+.delete-service-body{
+  padding:2rem;
+}
+
+.delete-service-warning{
+  display:flex;
+  gap:.8rem;
+  align-items:flex-start;
+  padding:1rem;
+  margin-bottom:1rem;
+  border-radius:18px;
+  background:rgba(220,53,69,.08);
+  border:1px solid rgba(220,53,69,.15);
+  color:#ff8c8c;
+  font-size:.9rem;
+}
+
+.delete-service-warning i{
+  flex-shrink:0;
+  margin-top:.1rem;
+}
+
+.delete-service-preview-box{
+  padding:1.25rem;
+  border-radius:22px;
+  border:1px solid rgba(255,255,255,.06);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.03),
+      rgba(255,255,255,.015)
+    );
+}
+
+.delete-service-preview-label{
+  font-size:.75rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--text-muted);
+  margin-bottom:.7rem;
+}
+
+.delete-service-preview{
+  color:var(--text);
+  font-size:1rem;
+  font-weight:700;
+}
+
+.delete-service-footer{
+  padding:0 2rem 2rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.9rem;
+}
+
+.delete-service-btn-secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:16px;
+  padding:.95rem 1.35rem;
+  font-weight:800;
+}
+
+.delete-service-btn-secondary:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.delete-service-btn-danger{
+  border:0;
+  border-radius:16px;
+  padding:.95rem 1.5rem;
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  font-weight:800;
+  color:#fff;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+  box-shadow:0 18px 40px rgba(220,53,69,.25);
+}
+
+.delete-service-btn-danger:hover{
+  transform:translateY(-2px);
+}
+
+@media(max-width:768px){
+
+  .delete-service-header{
+    padding:1.2rem;
+  }
+
+  .delete-service-body{
+    padding:1rem;
+  }
+
+  .delete-service-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .delete-service-btn-secondary,
+  .delete-service-btn-danger{
+    width:100%;
+    justify-content:center;
+  }
+
+  .delete-service-icon{
+    width:58px;
+    height:58px;
+    font-size:1.4rem;
+  }
+
+  .delete-service-title{
+    font-size:1.15rem;
+  }
+}
+.schedule-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:30px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.schedule-modal-header{
+  display:flex;
+  align-items:center;
+  gap:1.2rem;
+  padding:2rem;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.schedule-modal-header .btn-close{
+  position:absolute;
+  top:1.2rem;
+  right:1.2rem;
+  opacity:.9;
+}
+
+.schedule-modal-icon{
+  width:74px;
+  height:74px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.8rem;
+  flex-shrink:0;
+}
+
+.schedule-modal-title{
+  margin:0;
+  font-size:1.45rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.schedule-modal-subtitle{
+  margin-top:.35rem;
+  color:var(--text-muted);
+  font-size:.92rem;
+}
+
+.schedule-modal-body{
+  padding:2rem;
+}
+
+.schedule-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+}
+
+.schedule-card{
+  padding:1.2rem;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.06);
+  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+}
+
+.schedule-card-full{
+  grid-column:1/-1;
+}
+
+.schedule-card-top{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  margin-bottom:1rem;
+}
+
+.schedule-card-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.10);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.15);
+  font-size:1.1rem;
+  flex-shrink:0;
+}
+
+.btn-danger-custom{
+  border:none;
+
+  padding:.85rem 1.2rem;
+
+  border-radius:14px;
+
+  font-weight:800;
+  color:#fff;
+
+  background:linear-gradient(
+    135deg,
+    #dc3545,
+    #ff5b6b
+  );
+
+  box-shadow:0 14px 30px rgba(220,53,69,.25);
+}
+
+.btn-danger-custom:hover{
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+.schedule-card-label{
+  font-size:.95rem;
+  font-weight:800;
+  color:var(--text);
+}
+
+.schedule-card-sub{
+  margin-top:.15rem;
+  font-size:.8rem;
+  color:var(--text-muted);
+}
+
+.schedule-input{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:54px;
+  padding:.8rem 1rem;
+  font-weight:600;
+  box-shadow:none!important;
+}
+
+.schedule-input:focus{
+  border-color:rgba(20,104,245,.4)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.12)!important;
+}
+
+.schedule-check{
+  margin-top:1rem;
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+  font-size:.9rem;
+  color:var(--text);
+  cursor:pointer;
+}
+
+.schedule-check .form-check-input{
+  width:20px;
+  height:20px;
+  border-radius:8px;
+  background-color:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+}
+
+.schedule-check .form-check-input:checked{
+  background-color:#1468f5;
+  border-color:#1468f5;
+}
+
+.schedule-input[type="datetime-local"]{
+  color-scheme: dark;
+}
+
+[data-theme="light"] .schedule-input[type="datetime-local"]{
+  color-scheme: light;
+}
+
+.schedule-hint{
+  margin-top:1rem;
+  display:flex;
+  align-items:flex-start;
+  gap:.6rem;
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,193,7,.08);
+  border:1px solid rgba(255,193,7,.14);
+  color:#ffcf66;
+  font-size:.84rem;
+}
+
+.schedule-modal-footer{
+  padding:0 2rem 2rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.9rem;
+}
+
+.schedule-btn-secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:16px;
+  padding:.95rem 1.35rem;
+  font-weight:800;
+}
+
+.schedule-btn-primary{
+  border:0;
+  border-radius:16px;
+  padding:.95rem 1.5rem;
+  display:inline-flex;
+  align-items:center;
+  gap:.6rem;
+  font-weight:800;
+  color:#fff;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 18px 40px rgba(20,104,245,.22);
+}
+
+@media(max-width:768px){
+  .schedule-modal-header{
+    padding:1.2rem;
+  }
+
+  .schedule-modal-body{
+    padding:1rem;
+  }
+
+  .schedule-grid{
+    grid-template-columns:1fr;
+  }
+
+  .schedule-card-full{
+    grid-column:auto;
+  }
+
+  .schedule-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .schedule-btn-primary,
+  .schedule-btn-secondary{
+    width:100%;
+    justify-content:center;
+  }
+
+  .schedule-modal-icon{
+    width:60px;
+    height:60px;
+    font-size:1.4rem;
+  } 
+
+  .schedule-modal-title{
+    font-size:1.15rem;
+  }
+}
+
+.btn-danger-soft{
+  border:1px solid rgba(220,53,69,.25);
+  background:rgba(220,53,69,.08);
+  color:#ff6b81;
+  border-radius:14px;
+  font-weight:800;
+  padding:.75rem 1.1rem;
+  transition:.18s ease;
+}
+
+.btn-danger-soft:hover{
+  background:rgba(220,53,69,.15);
+  border-color:rgba(220,53,69,.4);
+  color:#ff6b81;
+  transform:translateY(-1px);
+}
+
+</style>
+
+<div class="product-detail-header">
+  <div class="product-detail-title">
+    <div class="product-detail-icon">
+      {% if service.status == 'zgrania' %}
+        <i class="bi bi-download"></i>
+      {% else %}
+        <i class="bi bi-wrench-adjustable"></i>
+      {% endif %}
+    </div>
+    <div>
+      {% if service.status == 'zgrania' %}
+        <h1>Szczegóły obsługi</h1>
+      {% else %}
+        <h1>Szczegóły serwisu</h1>
+      {% endif %}
+      <div class="product-detail-sub">
+        <span class="detail-badge detail-badge-orange">
+          <i class="bi bi-hash"></i>
+          {{ service.number }}
+        </span>
+        <span class="detail-badge">
+          <i class="bi bi-buildings"></i>
+          {{ client }}
+        </span>
+        <span class="detail-badge">
+          <i class="bi bi-activity"></i>
+          {{ service.get_status_display }}
+        </span>
+        {% if service.status == 'zgrania' %}
+          <span class="detail-badge detail-badge-orange">
+            <i class="bi bi-download"></i>
+            {{ service.get_status_zgrania_display }}
+          </span>
+        {% endif %}
+        {% if service.priority == 'critical' or service.priority == 'high' %}
+          <span class="detail-badge detail-badge-disabled">
+            <i class="bi bi-exclamation-triangle"></i>
+            {{ service.get_priority_display }}
+          </span>
+        {% elif service.priority == 'normal' %}
+          <span class="detail-badge detail-badge-active">
+            <i class="bi bi-check-circle"></i>
+            {{ service.get_priority_display }}
+          </span>
+        {% else %}
+          <span class="detail-badge">
+            <i class="bi bi-arrow-down-circle"></i>
+            {{ service.get_priority_display }}
+          </span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="detail-actions">
+    <a href="{% url 'serwis_nowe' %}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>
+      Lista
+    </a>
+    {% if can_manage_services %}
+      <a href="{% url 'serwis_edit' service.pk %}" class="btn-soft">
+        <i class="bi bi-pencil-square me-1"></i>
+        Edytuj
+      </a>
+      <button
+        type="button"
+        class="btn-danger-custom"
+        data-bs-toggle="modal"
+        data-bs-target="#deleteServiceModal"
+        data-delete-url="{% url 'serwis_delete' service.pk %}"
+        data-title="{{ service.number }} – {{ service.title|escape }}">
+
+        <i class="bi bi-trash me-1"></i>
+        Usuń
+
+      </button>
+    {% endif %}
+  </div>
+</div>
+{% with addr=client.shipping_address|default:client.billing_address %}
+{% with map_query=addr|stringformat:"s" %}
+<div class="detail-grid">
+  <div>
+    <div class="detail-card mb-3">
+      <div class="detail-card-header">
+        <h2>{{ service.title }}</h2>
+        <span>Dane zgłoszenia serwisowego.</span>
+      </div>
+      <div class="detail-card-body">
+        <div class="info-list">
+          <div class="info-item">
+            <div class="info-label">Klient</div>
+            <div class="info-value">{{ client }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Numer</div>
+            <div class="info-value">{{ service.number }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Status</div>
+            <div class="info-value">{{ service.get_status_display }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Priorytet</div>
+            <div class="info-value">{{ service.get_priority_display }}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Telefon</div>
+            <div class="info-value">{% if client.phone %}{{ client.phone }}{% else %}—{% endif %}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">E-mail</div>
+            <div class="info-value">{% if client.email %}{{ client.email }}{% else %}—{% endif %}</div>
+          </div>
+          <div class="info-item" style="grid-column:1/-1;">
+            <div class="info-label">Adres</div>
+            <div class="info-value">{{ service.display_address|default:"—" }}</div>
+          </div>
+        </div>
+        <div class="detail-actions mt-3">
+          {% if client.phone %}
+            <a href="tel:{{ client.phone }}" class="btn-soft">
+              <i class="bi bi-telephone-outbound me-1"></i>
+              Zadzwoń
+            </a>
+          {% endif %}
+          {% if client.email %}
+            <a href="mailto:{{ client.email }}" class="btn-soft">
+              <i class="bi bi-envelope me-1"></i>
+              E-mail
+            </a>
+          {% endif %}
+          {% if addr %}
+            <a href="https://www.google.com/maps/search/?api=1&query={{ map_query|urlencode }}"
+               target="_blank"
+               class="btn-soft">
+              <i class="bi bi-geo-alt me-1"></i>
+              Mapy
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-tabs">
+      <ul class="nav nav-pills" role="tablist">
+        <li class="nav-item">
+          <button class="nav-link active"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-overview"
+                  type="button">
+            Przegląd
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-history"
+                  type="button">
+            Historia
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link"
+                  data-bs-toggle="pill"
+                  data-bs-target="#tab-media"
+                  type="button">
+            Załączniki
+          </button>
+        </li>
+      </ul>
+      <div class="tab-content tab-panel">
+        <div class="tab-pane fade show active" id="tab-overview">
+          <div class="detail-card mb-3">
+            <div class="detail-card-header">
+              <h2>Opis serwisu</h2>
+              <span>Opis zgłoszenia i zakres prac.</span>
+            </div>
+            <div class="detail-card-body">
+              {% if service.description %}
+                <div style="white-space:pre-wrap;color:var(--text);">{{ service.description }}</div>
+              {% else %}
+                <div class="placeholder-box"><i class="bi bi-journal-text"></i>Brak opisu.</div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="detail-card mb-3">
+            <div class="detail-card-header">
+              <h2>Plan i pracownicy</h2>
+              <span>Termin realizacji i przypisane osoby.</span>
+            </div>
+            <div class="detail-card-body">
+              <div class="info-list">
+                <div class="info-item">
+                  <div class="info-label">Planowana data od</div>
+                  <div class="info-value">
+                    {% if service.planned_start %}
+                      {{ service.planned_start|date:"d.m.Y H:i" }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Planowana data do</div>
+                  <div class="info-value">
+                    {% if service.planned_end %}
+                      {{ service.planned_end|date:"d.m.Y H:i" }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="info-item">
+                  <div class="info-label">Sposób rozliczenia</div>
+                  <div class="info-value">{{ service.get_settlement_method_display }}</div>
+                </div>
+                <div class="info-item" style="grid-column:1/-1;">
+                  <div class="info-label">Przypisani</div>
+                  <div class="info-value">
+                    {% for u in service.assigned_to.all %}
+                      <span class="detail-badge me-1 mb-1">
+                        <i class="bi bi-person"></i>
+                        {{ u.first_name }} {{ u.last_name }}
+                      </span>
+                    {% empty %}
+                      —
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {% if service.settlement_method == "hourly" %}
+            <div class="detail-card mt-3">
+              <div class="detail-card-header d-flex justify-content-between align-items-center gap-3">
+                <div>
+                  <h2>Dzienne rozliczenie</h2>
+                  <span>Godziny, osoby, dojazdy, materiały i wykonane prace.</span>
+                </div>
+                {% if can_add_work_log %}<a class="btn-orange" href="{% url 'service_work_log_add' service.pk %}"><i class="bi bi-plus-lg me-1"></i>Dodaj wpis</a>{% endif %}
+              </div>
+              <div class="detail-card-body">
+                {% if work_logs %}
+                  <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Data</th><th>Osoba</th><th>Godziny</th><th>Osoby</th><th>Dojazdy</th><th>Materiał / prace</th></tr></thead><tbody>
+                  {% for entry in work_logs %}<tr><td>{{ entry.work_date|date:"d.m.Y" }}</td><td>{{ entry.worker.get_full_name|default:entry.worker.email }}</td><td>{{ entry.hours }} h</td><td>{{ entry.workers_count }}</td><td>{{ entry.travel_count }}</td><td>{{ entry.materials|default:"—" }}{% if entry.performed_work %}<div class="small text-muted">{{ entry.performed_work }}</div>{% endif %}</td></tr>{% endfor %}
+                  </tbody></table></div>
+                {% else %}<div class="placeholder-box"><i class="bi bi-clock-history"></i>Brak dziennych wpisów.</div>{% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="tab-history">
+          <div class="detail-card">
+            <div class="detail-card-header">
+              <h2>Historia</h2>
+              <span>Aktywności, statusy, notatki i zdarzenia systemowe.</span>
+            </div>
+            <div class="detail-card-body">
+              <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
+                <div class="d-flex flex-wrap gap-2">
+                  <button class="btn-soft active" type="button" data-activity-filter="all">Wszystko</button>
+                  <button class="btn-soft" type="button" data-activity-filter="note">Notatki</button>
+                  <button class="btn-soft" type="button" data-activity-filter="status">Statusy</button>
+                  <button class="btn-soft" type="button" data-activity-filter="system">System</button>
+                  <button class="btn-soft" type="button" data-activity-filter="other">Inne</button>
+                </div>
+                <span class="detail-badge">
+                  Wpisów: {{ activities_count|default:0 }}
+                </span>
+              </div>
+              {% if activities %}
+                <div class="crm-timeline crm-timeline-scroll">
+                  {% for a in activities %}
+                    {% with day_key=a.created_at|date:"Y-m-d" %}
+                      {% ifchanged day_key %}
+                        <div class="crm-day">
+                          <div class="crm-day-pill">
+                            {% if day_key == today_key %}
+                              Dziś
+                            {% elif day_key == yesterday_key %}
+                              Wczoraj
+                            {% else %}
+                              {{ a.created_at|date:"d.m.Y" }}
+                            {% endif %}
+                          </div>
+                        </div>
+                      {% endifchanged %}
+                    {% endwith %}
+                    <div class="crm-item {% if forloop.counter > 5 %}d-none extra-activity{% endif %}"
+                         data-activity-type="{{ a.type }}">
+                      <div class="crm-dot {{ a.type }}">
+                        <i class="bi
+                          {% if a.type == 'note' %} bi-journal-text
+                          {% elif a.type == 'status' %} bi-arrow-repeat
+                          {% elif a.type == 'media' or a.type == 'file' %} bi-paperclip
+                          {% else %} bi-dot
+                          {% endif %}"></i>
+                      </div>
+                      <div class="crm-card">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+                          <div>
+                            <span class="detail-badge">{{ a.get_type_display }}</span>
+                            <div class="fw-bold mt-2">{{ a.title|default:"(bez tytułu)" }}</div>
+                            {% if a.description %}
+                              <div class="text-muted mt-1" style="white-space:pre-wrap;">
+                                {{ a.description }}
+                              </div>
+                            {% endif %}
+                          </div>
+                          <div class="text-end small text-muted">
+                            <div>{{ a.created_at|date:"H:i" }}</div>
+                            <div>
+                              {% if a.created_by %}
+                                {{ a.created_by.first_name }} {{ a.created_by.last_name }}
+                              {% else %}
+                                System
+                              {% endif %}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+                <button id="showMoreActivities"
+                        class="btn-soft mt-3 w-100">
+                  Pokaż więcej
+                </button>
+              {% else %}
+                <div class="placeholder-box">
+                  <i class="bi bi-clock-history"></i>
+                  Brak historii.
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="tab-pane fade" id="tab-media">
+          <div class="detail-card">
+            <div class="detail-card-header">
+              <h2>Załączniki</h2>
+              <span>Zdjęcia, dokumenty i pliki dodane do serwisu.</span>
+            </div>
+            <div class="detail-card-body">
+              {% with media=service.media.all %}
+                {% if media|length %}
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h6 class="fw-bold m-0">Zdjęcia</h6>
+                    <span class="small text-muted">Kliknij aby powiększyć</span>
+                  </div>
+                  <div class="media-grid">
+                    {% for m in media %}
+                      {% if m.kind == 'image' %}
+                        <div class="media-tile-wrap">
+                          <button type="button"
+                                  class="media-tile"
+                                  data-bs-toggle="modal"
+                                  data-bs-target="#imagePreviewModal"
+                                  data-src="{{ m.file.url }}"
+                                  data-caption="{{ m.caption|default:''|escape }}"
+                                  data-date="{{ m.uploaded_at|date:'d.m.Y H:i' }}">
+                            <img src="{{ m.file.url }}" alt="{{ m.caption|default:'Zdjęcie' }}">
+                            <span class="media-badge"><i class="bi bi-image"></i></span>
+                          </button>
+                          {% if can_manage_services %}
+                            <button type="button"
+                                    class="media-del"
+                                    title="Usuń"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteMediaModal"
+                                    data-delete-url="{% url 'service_media_delete' m.pk %}"
+                                    data-preview="{{ m.original_name|default:'Zdjęcie'|escape }}">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  <hr class="my-3" style="border-color:var(--border)">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <h6 class="fw-bold m-0">Pliki</h6>
+                    <span class="small text-muted">Kliknij aby otworzyć</span>
+                  </div>
+                  <div class="d-flex flex-column gap-2">
+
+                    {% for m in media %}
+                      {% if m.kind != 'image' %}
+                        <div class="file-row">
+                          <a href="{{ m.file.url }}" target="_blank" class="file-main">
+                            <div class="file-ico"><i class="bi bi-paperclip"></i></div>
+                            <div class="file-meta">
+                              <div class="file-name">{{ m.original_name|default:"Plik" }}</div>
+                              <div class="file-sub text-muted">
+                                {% if m.caption %}{{ m.caption }} • {% endif %}
+                                Dodano: {{ m.uploaded_at|date:"d.m.Y H:i" }}
+                              </div>
+                            </div>
+                          </a>
+                          <div class="file-cta">
+                            {% if can_manage_services %}
+                              <button type="button"
+                                      class="icon-btn icon-btn-danger"
+                                      data-bs-toggle="modal"
+                                      data-bs-target="#deleteMediaModal"
+                                      data-delete-url="{% url 'service_media_delete' m.pk %}"
+                                      data-preview="{{ m.original_name|default:'Plik'|escape }}">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            {% endif %}
+                            <a href="{{ m.file.url }}" target="_blank" class="icon-btn">
+                              <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                          </div>
+                        </div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                {% else %}
+                  <div class="placeholder-box">
+                    <i class="bi bi-paperclip"></i>
+                    Brak załączników.
+                  </div>
+                {% endif %}
+              {% endwith %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <aside>
+
+    {% if can_service_quick_actions %}
+      <div class="detail-card mb-3">
+        <div class="detail-card-header">
+          <h2>Szybkie akcje</h2>
+          <span>Najczęstsze operacje dla serwisu.</span>
+        </div>
+        <div class="detail-card-body">
+          <div class="d-grid gap-3">
+          {% if service.status != 'zgrania' and can_create_protocol_from_service %}
+            <a href="{% url 'protocol_from_service' service.pk %}" class="btn-orange w-100 text-center" onclick="return confirm('Czy na pewno chcesz utworzyć protokół i zakończyć ten serwis?');">
+              <i class="bi bi-plus-lg me-1"></i>
+              Utwórz protokół
+            </a>
+          {% endif %}
+          {% if service.settlement_method == 'hourly' and can_add_work_log %}
+            <a href="{% url 'service_work_log_add' service.pk %}" class="btn-soft w-100 text-center">
+              <i class="bi bi-clock-history me-1"></i>
+              Dodaj wpis
+            </a>
+          {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    {% if can_manage_services %}
+      <div class="detail-card mb-3">
+        <div class="detail-card-header">
+          <h2>Statusy</h2>
+          <span>Zmień aktualny status zgłoszenia.</span>
+        </div>
+        <div class="detail-card-body">
+          {% if service.status == "zgrania" %}
+            <div class="d-flex flex-wrap gap-2">
+              {% for val,label in service.StatusZgrania.choices %}
+                <form method="post" action="{% url 'serwis_status_zgrania_update' service.pk %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="status_zgrania" value="{{ val }}">
+                  <button type="submit"
+                          class="btn-soft {% if service.status_zgrania == val %}btn-orange{% endif %}">
+                    {{ label }}
+                  </button>
+                </form>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="d-flex flex-wrap gap-2">
+              <form method="post" action="{% url 'serwis_status_update' service.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="new">
+                <button type="submit"
+                        class="btn-soft {% if service.status == 'new' %}btn-orange{% endif %}">
+                  Nowe
+                </button>
+              </form>
+              <button type="button"
+                      class="btn-soft {% if service.status == 'in_progress' %}btn-orange{% endif %}"
+                      data-bs-toggle="modal"
+                      data-bs-target="#statusModal"
+                      data-status="in_progress">
+                W trakcie
+              </button>
+              <form method="post" action="{% url 'serwis_status_update' service.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="status" value="forgoted">
+                <button type="submit"
+                        class="btn-soft {% if service.status == 'forgoted' %}btn-orange{% endif %}">
+                  Zapomniane
+                </button>
+              </form>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if can_manage_services %}
+      <div class="detail-card mb-3">
+        <div class="detail-card-header">
+          <h2>Opcje</h2>
+          <span>Planowanie, pracownicy i priorytet.</span>
+        </div>
+        <div class="detail-card-body">
+          <div class="d-grid gap-2">
+            <button type="button"
+                    class="btn-orange"
+                    data-bs-toggle="modal"
+                    data-next="{% url 'serwis_detail' service.pk %}"
+                    data-bs-target="#scheduleModal">
+              Ustal datę
+            </button>
+            <button type="button"
+                    class="btn-orange"
+                    data-bs-toggle="modal"
+                    data-next="{% url 'serwis_detail' service.pk %}"
+                    data-bs-target="#workersModal">
+              Wyznacz serwisantów
+            </button>
+            <button type="button"
+                    class="btn-orange"
+                    data-bs-toggle="modal"
+                    data-next="{% url 'serwis_detail' service.pk %}"
+                    data-current="{{ service.priority }}"
+                    data-bs-target="#priorityModal">
+              Zmień priorytet
+            </button>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+    <div class="detail-card">
+      <div class="detail-card-header">
+        <h2>Notatki</h2>
+        <span>Wewnętrzne informacje o serwisie.</span>
+      </div>
+      <div class="detail-card-body">
+        {% if can_manage_services %}
+          <button class="btn-soft w-100 mb-3"
+                  data-bs-toggle="modal"
+                  data-bs-target="#noteModal">
+            <i class="bi bi-plus-lg me-1"></i>
+            Dodaj notatkę
+          </button>
+        {% endif %}
+        {% if notes %}
+          <div class="d-flex flex-column gap-2">
+            {% for n in notes %}
+              <div class="info-item">
+                <div class="d-flex justify-content-between gap-2">
+                  <div class="small text-muted">
+                    {{ n.created_at|date:"d.m.Y H:i" }}
+                    {% if n.author %}
+                      • {{ n.author.first_name }} {{ n.author.last_name }}
+                    {% endif %}
+                  </div>
+                  {% if can_manage_services %}
+                    <button type="button"
+                            class="btn btn-link btn-sm p-0"
+                            data-bs-toggle="modal"
+                            data-bs-target="#deleteNoteModal"
+                            data-delete-url="{% url 'service_note_delete' n.pk %}"
+                            data-note-preview="{{ n.content|striptags|truncatechars:80 }}">
+                      <i class="bi bi-trash" style="color:#ea5455;"></i>
+                    </button>
+                  {% endif %}
+                </div>
+                <div class="mt-2" style="white-space:pre-wrap;">{{ n.content }}</div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="placeholder-box">
+            <i class="bi bi-journal-plus"></i>
+            Brak notatek.
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </aside>
+</div>
+{% endwith %}
+{% endwith %}
+{% if can_manage_services %}
+<!-- Modal: notatka (SERWIS) -->
+<div class="modal fade" id="noteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content note-modal">
+
+      <form method="post" action="{% url 'service_note_add' service.pk %}">
+        {% csrf_token %}
+
+        <div class="note-modal-header">
+
+          <div class="note-modal-icon">
+            <i class="bi bi-journal-plus"></i>
+          </div>
+
+          <div class="flex-grow-1">
+            <h4 class="note-modal-title">
+              Dodaj notatkę
+            </h4>
+
+            <div class="note-modal-subtitle">
+              Serwis:
+              <strong>{{ service.number }}</strong>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal">
+          </button>
+
+        </div>
+
+        <div class="note-modal-body">
+
+          {{ note_form.non_field_errors }}
+
+          <div class="note-editor-card">
+
+            <div class="note-editor-head">
+              <i class="bi bi-pencil-square"></i>
+              Treść notatki
+            </div>
+
+            {{ note_form.content }}
+
+            {% for e in note_form.content.errors %}
+              <div class="invalid-feedback d-block mt-2">
+                {{ e }}
+              </div>
+            {% endfor %}
+
+          </div>
+
+          <div class="note-info-box">
+            <i class="bi bi-info-circle"></i>
+            Notatka zostanie dodana do historii serwisu.
+          </div>
+
+        </div>
+
+        <div class="note-modal-footer">
+
+          <button type="button"
+                  class="note-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="note-btn-primary">
+            <i class="bi bi-check2-circle"></i>
+            Zapisz notatkę
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content status-modal">
+
+      <form method="post" action="{% url 'serwis_status_update' service.pk %}">
+        {% csrf_token %}
+
+        <input type="hidden"
+               name="status"
+               id="statusModalValue"
+               value="">
+
+        <div class="status-modal-header">
+
+          <div class="status-modal-icon">
+            <i class="bi bi-arrow-repeat"></i>
+          </div>
+
+          <div class="flex-grow-1">
+            <h4 class="status-modal-title">
+              Zmień status serwisu
+            </h4>
+
+            <div class="status-modal-subtitle">
+              Serwis:
+              <strong>{{ service.number }}</strong>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal">
+          </button>
+
+        </div>
+
+        <div class="status-modal-body">
+
+          <div id="progressBox" class="d-none">
+
+            <div class="status-card">
+
+              <div class="status-card-top">
+                <div class="status-card-icon">
+                  <i class="bi bi-journal-text"></i>
+                </div>
+
+                <div>
+                  <div class="status-card-label">
+                    Postęp prac
+                  </div>
+
+                  <div class="status-card-sub">
+                    Opisz wykonane i planowane czynności
+                  </div>
+                </div>
+              </div>
+
+              <textarea
+                name="progress_note"
+                id="progressNote"
+                class="form-control status-input"
+                rows="6"
+                placeholder="Np. Wymieniono filtr, wykonano diagnostykę. Pozostało sprawdzenie szczelności instalacji..."></textarea>
+
+            </div>
+
+            <div class="status-info-box">
+              <i class="bi bi-info-circle"></i>
+
+              Dla statusu „W trakcie” wymagane jest podanie informacji o postępie prac.
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="status-modal-footer">
+
+          <button type="button"
+                  class="status-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="status-btn-primary">
+            <i class="bi bi-check2-circle"></i>
+            Zapisz status
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+<script>
+  (function(){
+    const modalEl = document.getElementById('statusModal');
+    if(!modalEl) return;
+  
+    const statusInput = document.getElementById('statusModalValue');
+    const box = document.getElementById('progressBox');
+    const note = document.getElementById('progressNote');
+  
+    modalEl.addEventListener('show.bs.modal', (event) => {
+      const btn = event.relatedTarget;
+      const status = btn?.getAttribute('data-status') || '';
+  
+      if(statusInput) statusInput.value = status;
+  
+      const isProgress = (status === 'in_progress');
+      if(box) box.classList.toggle('d-none', !isProgress);
+  
+      if(note){
+        if(!isProgress) note.value = '';
+        // autofocus na telefonie
+        setTimeout(()=>{ if(isProgress) note.focus(); }, 150);
+      }
+    });
+  })();
+  </script>
+{% endif %}
+
+<script>
+(function(){
+  const root = document.documentElement;
+  const key = 'dashboard-theme';
+  const saved = localStorage.getItem(key) || 'dark';
+  root.setAttribute('data-theme', saved);
+
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+
+  const setIcon = () => {
+    btn.innerHTML = root.getAttribute('data-theme') === 'light'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  };
+  setIcon();
+
+  btn.addEventListener('click', ()=>{
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem(key, next);
+    setIcon();
+    if (typeof renderPL === 'function') {
+      renderPL(document.querySelector('[data-range].active')?.getAttribute('data-range') || 'mtd');
+    }
+  });
+})();
+</script>
+
+{% if can_manage_services %}
+<div class="modal fade" id="workersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content workers-modal">
+
+      <form method="post" action="{% url 'serwis_assign_workers' service.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" id="workersNext" value="">
+
+        <div class="workers-modal-header">
+          <div class="workers-modal-icon">
+            <i class="bi bi-people"></i>
+          </div>
+
+          <div class="flex-grow-1">
+            <h4 class="workers-modal-title">Wyznacz serwisantów</h4>
+            <div class="workers-modal-subtitle">
+              Serwis: <strong>{{ service.number }}</strong>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal">
+          </button>
+        </div>
+
+        <div class="workers-modal-body">
+          <div class="workers-card">
+
+            <div class="workers-card-top">
+              <div class="workers-card-icon">
+                <i class="bi bi-person-check"></i>
+              </div>
+
+              <div>
+                <div class="workers-card-label">Pracownicy</div>
+                <div class="workers-card-sub">Wybierz maksymalnie 3 osoby</div>
+              </div>
+            </div>
+
+            <select name="workers"
+                    id="workersSelect"
+                    class="form-select workers-select"
+                    multiple
+                    size="6"
+                    data-max="3">
+              {% for u in workers %}
+                <option value="{{ u.pk }}" {% if u in service.assigned_to.all %}selected{% endif %}>
+                  {{ u.first_name }} {{ u.last_name }}
+                </option>
+              {% endfor %}
+            </select>
+
+          </div>
+
+          <div class="workers-card mt-3">
+            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+              <div>
+                <div class="workers-card-label">Przypisani</div>
+                <div class="workers-card-sub">
+                  Wybrano: <strong><span id="assignedCount">0</span>/3</strong>
+                </div>
+              </div>
+
+              <button type="button"
+                      class="workers-clear-btn"
+                      id="assignedClear">
+                <i class="bi bi-x-circle"></i>
+                Wyczyść
+              </button>
+            </div>
+
+            <div id="assignedChips" class="workers-chips mt-3"></div>
+          </div>
+
+          <div class="workers-info-box">
+            <i class="bi bi-info-circle"></i>
+            Kliknij chip ✕, aby usunąć przypisaną osobę.
+          </div>
+        </div>
+
+        <div class="workers-modal-footer">
+          <button type="button"
+                  class="workers-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="workers-btn-primary">
+            <i class="bi bi-check2-circle"></i>
+            Zapisz przypisania
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const modal = document.getElementById('workersModal');
+  const sel = document.getElementById('workersSelect');
+  if(!modal || !sel) return;
+
+  const max = parseInt(sel.getAttribute('data-max') || '3', 10);
+  const chipsWrap = document.getElementById('assignedChips');
+  const countEl = document.getElementById('assignedCount');
+  const clearBtn = document.getElementById('assignedClear');
+  const nextEl = document.getElementById('workersNext');
+
+  modal.addEventListener('show.bs.modal', (ev)=>{
+    const btn = ev.relatedTarget;
+    const next = btn?.getAttribute('data-next') || window.location.pathname + window.location.search;
+
+    if(nextEl) nextEl.value = next;
+    render();
+  });
+
+  function selectedOptions(){
+    return [...sel.options].filter(o => o.selected);
+  }
+
+  function enforceMax(){
+    const selected = selectedOptions();
+    if(selected.length <= max) return;
+    selected.slice(max).forEach(o => o.selected = false);
+  }
+
+  function render(){
+    const selected = selectedOptions();
+
+    if(countEl) countEl.textContent = String(selected.length);
+
+    if(chipsWrap){
+      chipsWrap.innerHTML = '';
+
+      selected.forEach(opt => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'btn btn-sm btn-outline-secondary rounded-pill d-inline-flex align-items-center gap-2';
+        chip.innerHTML = `<span>${opt.text}</span><span class="fw-bold">✕</span>`;
+
+        chip.addEventListener('click', () => {
+          opt.selected = false;
+          sel.dispatchEvent(new Event('change', { bubbles:true }));
+        });
+
+        chipsWrap.appendChild(chip);
+      });
+    }
+
+    const limitReached = selected.length >= max;
+
+    [...sel.options].forEach(opt => {
+      if(!opt.selected) opt.disabled = limitReached;
+    });
+  }
+
+  sel.addEventListener('change', () => {
+    [...sel.options].forEach(o => o.disabled = false);
+    enforceMax();
+    render();
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    [...sel.options].forEach(o => {
+      o.selected = false;
+      o.disabled = false;
+    });
+
+    render();
+  });
+
+  render();
+})();
+</script>
+{% endif %}
+
+{% if can_manage_services %}
+<!-- Modal: potwierdzenie usunięcia notatki -->
+<div class="modal fade" id="deleteNoteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-note-modal">
+
+      <div class="delete-note-header">
+
+        <div class="delete-note-icon">
+          <i class="bi bi-trash3"></i>
+        </div>
+
+        <div class="flex-grow-1">
+          <h4 class="delete-note-title">
+            Usunąć notatkę?
+          </h4>
+
+          <div class="delete-note-subtitle">
+            Ta operacja jest nieodwracalna.
+          </div>
+        </div>
+
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal">
+        </button>
+
+      </div>
+
+      <div class="delete-note-body">
+
+        <div class="delete-note-warning">
+          <i class="bi bi-exclamation-triangle"></i>
+
+          <div>
+            Notatka zostanie trwale usunięta z systemu i historii serwisu.
+          </div>
+        </div>
+
+        <div class="delete-note-preview-box">
+
+          <div class="delete-note-preview-label">
+            Podgląd notatki
+          </div>
+
+          <div id="deleteNotePreview"
+               class="delete-note-preview">
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="delete-note-footer">
+
+        <button type="button"
+                class="delete-note-btn-secondary"
+                data-bs-dismiss="modal">
+          Anuluj
+        </button>
+
+        <form id="deleteNoteForm"
+              method="post"
+              action="">
+          {% csrf_token %}
+
+          <button type="submit"
+                  class="delete-note-btn-danger">
+            <i class="bi bi-trash"></i>
+            Usuń notatkę
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+<!-- Modal: potwierdzenie usunięcia serwisu -->
+<div class="modal fade" id="deleteServiceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-service-modal">
+
+      <div class="delete-service-header">
+
+        <div class="delete-service-icon">
+          <i class="bi bi-trash3"></i>
+        </div>
+
+        <div class="flex-grow-1">
+          <h4 class="delete-service-title">
+            Usunąć serwis?
+          </h4>
+
+          <div class="delete-service-subtitle">
+            Ta operacja jest nieodwracalna.
+          </div>
+        </div>
+
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal">
+        </button>
+
+      </div>
+
+      <div class="delete-service-body">
+
+        <div class="delete-service-warning">
+          <i class="bi bi-exclamation-triangle"></i>
+
+          <div>
+            Serwis oraz wszystkie powiązane dane zostaną trwale usunięte.
+          </div>
+        </div>
+
+        <div class="delete-service-preview-box">
+
+          <div class="delete-service-preview-label">
+            Usuwany serwis
+          </div>
+
+          <div id="deleteServicePreview"
+               class="delete-service-preview">
+            —
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="delete-service-footer">
+
+        <button type="button"
+                class="delete-service-btn-secondary"
+                data-bs-dismiss="modal">
+          Anuluj
+        </button>
+
+        <form id="deleteServiceForm"
+              method="post"
+              action="">
+          {% csrf_token %}
+
+          <button type="submit"
+                  class="delete-service-btn-danger">
+            <i class="bi bi-trash"></i>
+            Usuń serwis
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content schedule-modal">
+
+      <form method="post" action="{% url 'serwis_schedule_update' service.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" id="scheduleNext" value="">
+
+        <div class="schedule-modal-header">
+
+          <div class="schedule-modal-icon">
+            <i class="bi bi-calendar2-week"></i>
+          </div>
+
+          <div class="flex-grow-1">
+            <h4 class="schedule-modal-title">
+              Ustal datę serwisu
+            </h4>
+
+            <div class="schedule-modal-subtitle">
+              Serwis:
+              <strong>{{ service.number }}</strong>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal">
+          </button>
+
+        </div>
+
+        <div class="schedule-modal-body">
+
+          <div class="schedule-grid">
+
+            <div class="schedule-card">
+              <div class="schedule-card-top">
+
+                <div class="schedule-card-icon">
+                  <i class="bi bi-play-circle"></i>
+                </div>
+
+                <div>
+                  <div class="schedule-card-label">
+                    Rozpoczęcie
+                  </div>
+
+                  <div class="schedule-card-sub">
+                    Data rozpoczęcia serwisu
+                  </div>
+                </div>
+
+              </div>
+
+              <input type="datetime-local"
+                     name="planned_start"
+                     id="plannedStart"
+                     class="form-control schedule-input" data-workday-start="{{ workday_start_time }}" data-workday-end="{{ workday_end_time }}"
+                     value="{% if service.planned_start %}{{ service.planned_start|date:'Y-m-d\\TH:i' }}{% endif %}">
+            </div>
+
+            <div class="schedule-card">
+
+              <div class="schedule-card-top">
+
+                <div class="schedule-card-icon">
+                  <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                  <div class="schedule-card-label">
+                    Czas trwania
+                  </div>
+
+                  <div class="schedule-card-sub">
+                    Automatyczne wyliczenie końca
+                  </div>
+                </div>
+
+              </div>
+
+              <select name="duration_min"
+                      id="durationMin"
+                      class="form-select schedule-input">
+
+                <option value="">— wybierz —</option>
+                <option value="15">15 min</option>
+                <option value="30">30 min</option>
+                <option value="45">45 min</option>
+                <option value="60">1 godzina</option>
+                <option value="90">1h 30m</option>
+                <option value="120">2 godziny</option>
+                <option value="180">3 godziny</option>
+                <option value="240">4 godziny</option>
+
+              </select>
+
+              <label class="schedule-check">
+
+                <input class="form-check-input"
+                       type="checkbox"
+                       id="autoEnd"
+                       name="auto_end"
+                       value="1"
+                       checked>
+
+                <span>
+                  Wylicz zakończenie automatycznie
+                </span>
+
+              </label>
+
+            </div>
+
+            <div class="schedule-card schedule-card-full">
+
+              <div class="schedule-card-top">
+
+                <div class="schedule-card-icon">
+                  <i class="bi bi-stop-circle"></i>
+                </div>
+
+                <div>
+                  <div class="schedule-card-label">
+                    Zakończenie
+                  </div>
+
+                  <div class="schedule-card-sub">
+                    Możesz ustawić ręcznie
+                  </div>
+                </div>
+
+              </div>
+
+              <input type="datetime-local"
+                     name="planned_end"
+                     id="plannedEnd"
+                     class="form-control schedule-input" data-workday-start="{{ workday_start_time }}" data-workday-end="{{ workday_end_time }}"
+                     value="{% if service.planned_end %}{{ service.planned_end|date:'Y-m-d\\TH:i' }}{% endif %}">
+
+              <div class="schedule-hint">
+                <i class="bi bi-info-circle"></i>
+
+                <span>
+                  Odznacz automatyczne wyliczanie, aby samodzielnie ustawić godzinę zakończenia.
+                </span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="schedule-modal-footer">
+
+          <button type="button"
+                  class="schedule-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="schedule-btn-primary">
+            <i class="bi bi-check2-circle"></i>
+            Zapisz termin
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal = document.getElementById('scheduleModal');
+  if(!modal) return;
+
+  const startEl = document.getElementById('plannedStart');
+  const endEl   = document.getElementById('plannedEnd');
+  const durEl   = document.getElementById('durationMin');
+  const autoEl  = document.getElementById('autoEnd');
+  const nextEl = document.getElementById('scheduleNext');
+
+  modal.addEventListener('show.bs.modal', (ev)=>{
+    const btn = ev.relatedTarget;
+    const next = btn?.getAttribute('data-next') || window.location.pathname + window.location.search;
+
+    if(nextEl) nextEl.value = next;
+  });
+
+  if(!startEl || !endEl || !durEl || !autoEl) return;
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+
+  function calcEnd(){
+    if(!autoEl.checked) return;
+
+    const mins = parseInt(durEl.value || '0', 10);
+    if(!startEl.value || !mins) return;
+
+    const s = new Date(startEl.value);
+    s.setMinutes(s.getMinutes() + mins);
+
+    endEl.value = `${s.getFullYear()}-${pad(s.getMonth()+1)}-${pad(s.getDate())}T${pad(s.getHours())}:${pad(s.getMinutes())}`;
+  }
+
+  function setMode(){
+    const isAuto = autoEl.checked;
+    endEl.readOnly = isAuto;
+
+    if(!isAuto){
+      durEl.value = '';
+      durEl.disabled = true;
+    }else{
+      durEl.disabled = false;
+      calcEnd();
+    }
+  }
+
+  endEl.addEventListener('input', () => {
+    if(autoEl.checked){
+      autoEl.checked = false;
+      setMode();
+    }
+  });
+
+  autoEl.addEventListener('change', setMode);
+  startEl.addEventListener('change', calcEnd);
+  durEl.addEventListener('change', calcEnd);
+
+  setMode();
+})();
+</script>
+
+<script>
+(function(){
+  const modalEl = document.getElementById('deleteServiceModal');
+  if (!modalEl) return;
+
+  const form = document.getElementById('deleteServiceForm');
+  const previewEl = document.getElementById('deleteServicePreview');
+
+  modalEl.addEventListener('show.bs.modal', (event) => {
+    const btn = event.relatedTarget;
+    const url = btn?.getAttribute('data-delete-url') || '';
+    const preview = btn?.getAttribute('data-title') || '—';
+
+    if (form) form.action = url;
+    if (previewEl) previewEl.textContent = preview;
+  });
+})();
+</script>
+
+<script>
+  (function(){
+    const modalEl = document.getElementById('deleteNoteModal');
+    if (!modalEl) return;
+  
+    const form = document.getElementById('deleteNoteForm');
+    const previewEl = document.getElementById('deleteNotePreview');
+  
+    modalEl.addEventListener('show.bs.modal', (event) => {
+      const btn = event.relatedTarget;
+      const url = btn?.getAttribute('data-delete-url') || '';
+      const preview = btn?.getAttribute('data-note-preview') || '—';
+  
+      if (form) form.action = url;
+      if (previewEl) previewEl.textContent = preview;
+    });
+  })();
+  </script>
+{% endif %}
+  <script>
+    (function(){
+      const tab = document.getElementById('tab-history');
+      if (!tab) return;
+    
+      const buttons = tab.querySelectorAll('[data-activity-filter]');
+      const items = tab.querySelectorAll('.crm-item');
+    
+      if (!buttons.length || !items.length) return;
+    
+      function setActive(btn){
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const type = btn.getAttribute('data-activity-filter');
+          setActive(btn);
+    
+          items.forEach(it => {
+            const itType = it.getAttribute('data-activity-type');
+            const show = (type === 'all') || (itType === type);
+            it.style.display = show ? '' : 'none';
+          });
+    
+          // Ukryj "pille dni", jeśli pod danym dniem nie ma już żadnych widocznych wpisów
+          const days = tab.querySelectorAll('.crm-day');
+          days.forEach(day => {
+            // szukamy elementów po dniu aż do następnego .crm-day
+            let node = day.nextElementSibling;
+            let hasVisible = false;
+            while (node && !node.classList.contains('crm-day')) {
+              if (node.classList.contains('crm-item') && node.style.display !== 'none') {
+                hasVisible = true;
+                break;
+              }
+              node = node.nextElementSibling;
+            }
+            day.style.display = hasVisible ? '' : 'none';
+          });
+        });
+      });
+    })();
+    </script>
+    <script>
+      (function(){
+        const btn = document.getElementById('showMoreActivities');
+        if(!btn) return;
+      
+        btn.addEventListener('click', ()=>{
+          document
+            .querySelectorAll('.extra-activity')
+            .forEach(el => el.classList.remove('d-none'));
+      
+          btn.remove();
+        });
+      })();
+      </script>
+
+      <div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content" style="background:var(--card);color:var(--text);border:1px solid var(--border)">
+            <div class="modal-header">
+              <div>
+                <h5 class="modal-title mb-0">Podgląd zdjęcia</h5>
+                <div class="small text-muted" id="imgMeta">—</div>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+      
+            <div class="modal-body">
+              <img id="imgPreview" src="" alt="Podgląd" class="img-fluid rounded border" style="border-color:var(--border)">
+              <div class="small text-muted mt-2" id="imgCaption"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <script>
+      (function(){
+        const modal = document.getElementById('imagePreviewModal');
+        if(!modal) return;
+      
+        const img = document.getElementById('imgPreview');
+        const cap = document.getElementById('imgCaption');
+        const meta = document.getElementById('imgMeta');
+      
+        modal.addEventListener('show.bs.modal', (ev)=>{
+          const btn = ev.relatedTarget;
+          const src = btn?.getAttribute('data-src') || '';
+          const caption = btn?.getAttribute('data-caption') || '';
+          const date = btn?.getAttribute('data-date') || '';
+      
+          if(img) img.src = src;
+          if(cap) cap.textContent = caption || '';
+          if(meta) meta.textContent = date ? `Dodano: ${date}` : '—';
+        });
+      
+        modal.addEventListener('hidden.bs.modal', ()=>{
+          if(img) img.src = '';
+        });
+      })();
+      </script>
+
+      {% if can_manage_services %}
+      <div class="modal fade" id="deleteMediaModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content delete-media-modal">
+
+      <div class="delete-media-top">
+        <button type="button"
+                class="btn-close btn-close-white delete-media-close"
+                data-bs-dismiss="modal"
+                aria-label="Zamknij">
+        </button>
+
+        <div class="delete-media-icon">
+          <i class="bi bi-trash3"></i>
+        </div>
+
+        <h4 class="delete-media-title">Usunąć plik?</h4>
+
+        <div class="delete-media-subtitle">
+          Ta operacja jest nieodwracalna.
+        </div>
+      </div>
+
+      <div class="delete-media-body">
+
+        <div class="delete-media-preview-box">
+          <div class="delete-media-preview-label">
+            Wybrany plik
+          </div>
+
+          <div class="delete-media-preview" id="deleteMediaPreview">
+            —
+          </div>
+        </div>
+
+        <div class="delete-media-warning">
+          <i class="bi bi-exclamation-triangle"></i>
+          Plik zostanie trwale usunięty z serwera.
+        </div>
+
+      </div>
+
+      <div class="delete-media-footer">
+
+        <button type="button"
+                class="delete-media-btn-secondary"
+                data-bs-dismiss="modal">
+          Anuluj
+        </button>
+
+        <form id="deleteMediaForm" method="post" action="">
+          {% csrf_token %}
+
+          <button type="submit" class="delete-media-btn-danger">
+            <i class="bi bi-trash"></i>
+            Usuń plik
+          </button>
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+      
+      <script>
+      (function(){
+        const modalEl = document.getElementById('deleteMediaModal');
+        if(!modalEl) return;
+      
+        const form = document.getElementById('deleteMediaForm');
+        const previewEl = document.getElementById('deleteMediaPreview');
+      
+        modalEl.addEventListener('show.bs.modal', (event)=>{
+          const btn = event.relatedTarget;
+          const url = btn?.getAttribute('data-delete-url') || '';
+          const preview = btn?.getAttribute('data-preview') || '—';
+      
+          if(form) form.action = url;
+          if(previewEl) previewEl.textContent = preview;
+        });
+      })();
+      </script>
+
+      <div class="modal fade" id="priorityModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content priority-modal">
+
+      <form method="post" action="{% url 'serwis_priority_update' service.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" id="priorityNext" value="">
+
+        <div class="priority-modal-header">
+          <div class="priority-modal-icon">
+            <i class="bi bi-flag"></i>
+          </div>
+
+          <div>
+            <h4 class="priority-modal-title">Zmień priorytet</h4>
+            <div class="priority-modal-subtitle">
+              Serwis: <strong>{{ service.number }}</strong>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij">
+          </button>
+        </div>
+
+        <div class="priority-modal-body">
+          <div class="priority-section-title">Wybierz nowy priorytet</div>
+
+          <div class="priority-options">
+            <label class="priority-option priority-critical">
+              <input type="radio" name="priority" value="critical">
+              <span class="priority-dot"></span>
+              <span>
+                <strong>Krytyczny</strong>
+                <small>Najpilniejsze zgłoszenie</small>
+              </span>
+            </label>
+
+            <label class="priority-option priority-high">
+              <input type="radio" name="priority" value="high">
+              <span class="priority-dot"></span>
+              <span>
+                <strong>Wysoki</strong>
+                <small>Wymaga szybkiej reakcji</small>
+              </span>
+            </label>
+
+            <label class="priority-option priority-normal">
+              <input type="radio" name="priority" value="normal">
+              <span class="priority-dot"></span>
+              <span>
+                <strong>Normalny</strong>
+                <small>Standardowa obsługa</small>
+              </span>
+            </label>
+
+            <label class="priority-option priority-low">
+              <input type="radio" name="priority" value="low">
+              <span class="priority-dot"></span>
+              <span>
+                <strong>Niski</strong>
+                <small>Może poczekać</small>
+              </span>
+            </label>
+          </div>
+
+          <div class="priority-help">
+            <i class="bi bi-info-circle"></i>
+            Zmiana zapisze się w historii serwisu.
+          </div>
+        </div>
+
+        <div class="priority-modal-footer">
+          <button type="button"
+                  class="priority-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="priority-btn-primary">
+            <i class="bi bi-check2-circle"></i>
+            Zapisz priorytet
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+      <script>
+        (function(){
+          const modal = document.getElementById('priorityModal');
+          if(!modal) return;
+        
+          const nextEl = document.getElementById('priorityNext');
+          const sel = document.getElementById('prioritySelect');
+        
+          modal.addEventListener('show.bs.modal', (ev)=>{
+            const btn = ev.relatedTarget;
+        
+            const next = btn?.getAttribute('data-next') || (window.location.pathname + window.location.search);
+            const current = btn?.getAttribute('data-current') || 'normal';
+        
+            if(nextEl) nextEl.value = next;
+            if(sel) sel.value = current;
+          });
+        })();
+        </script>
+      {% endif %}
+<script>
+document.addEventListener('DOMContentLoaded',()=>{const modal=document.getElementById('scheduleServiceModal');if(!modal)return;const start=document.getElementById('plannedStart'),end=document.getElementById('plannedEnd');const check=()=>{const a=start.value.slice(11,16),b=end.value.slice(11,16),lo=start.dataset.workdayStart,hi=start.dataset.workdayEnd;if((a&&(a<lo||a>hi))||(b&&(b<lo||b>hi))){start.setCustomValidity(`Godzina musi mieścić się w zakresie ${lo}–${hi}.`);return false}start.setCustomValidity('');return true};[start,end].forEach(x=>x.addEventListener('change',check));modal.querySelector('form').addEventListener('submit',e=>{if(!check()){e.preventDefault();alert(start.validationMessage)}})});
+</script>
+{% endblock %}

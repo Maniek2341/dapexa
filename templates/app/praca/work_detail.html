@@ -1,0 +1,2577 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.work-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.work-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.work-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.work-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.work-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.work-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+@media(max-width:768px){
+  .work-page-head{
+    flex-direction:column;
+  }
+
+  .work-actions,
+  .work-actions .btn-soft{
+    width:100%;
+  }
+
+  .work-title-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .work-title{
+    font-size:1.3rem;
+  }
+}
+
+.side-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.side-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.25rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 42%),
+    rgba(255,255,255,.02);
+}
+
+.side-card-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.side-card-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.side-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.84rem;
+}
+
+.side-card-body{
+  padding:1.25rem;
+}
+
+.side-actions{
+  display:grid;
+  gap:.75rem;
+}
+
+.side-action-btn{
+  width:100%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:18px;
+  padding:.9rem 1rem;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  text-align:left;
+}
+
+.side-action-btn:hover{
+  background:rgba(255,255,255,.07);
+  border-color:rgba(20,104,245,.28);
+}
+
+.side-action-icon{
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  flex-shrink:0;
+}
+
+@media(max-width:768px){
+  .side-card-header{
+    padding:1rem;
+  }
+
+  .side-card-body{
+    padding:1rem;
+  }
+}
+.work-detail-card,
+.overview-card,
+.overview-stat-card,
+.overview-description,
+.variant-modern-card,
+.history-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.work-detail-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.35rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.14), transparent 42%),
+    rgba(255,255,255,.02);
+}
+
+.work-detail-icon,
+.overview-card-icon,
+.overview-stat-icon,
+.variant-icon,
+.variants-empty-icon,
+.history-empty-icon{
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.35rem;
+  flex-shrink:0;
+}
+
+.work-detail-header h2{
+  margin:0;
+  color:var(--text);
+  font-size:1.35rem;
+  font-weight:950;
+}
+
+.work-detail-meta{
+  margin-top:.45rem;
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:.55rem;
+}
+
+.work-detail-meta span{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  color:var(--muted);
+  font-size:.84rem;
+  font-weight:700;
+}
+
+.work-detail-badges{
+  margin-top:.6rem;
+}
+
+.work-status{
+  display:inline-flex;
+  align-items:center;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:900;
+}
+
+.status-new{
+  color:#adb5bd;
+  background:rgba(108,117,125,.15);
+  border:1px solid rgba(108,117,125,.25);
+}
+
+.status-progress{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.15);
+  border:1px solid rgba(13,110,253,.25);
+}
+
+.status-done{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border:1px solid rgba(25,135,84,.25);
+}
+
+.status-cancelled{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.14);
+  border:1px solid rgba(220,53,69,.25);
+}
+
+.work-contact-actions{
+  display:flex;
+  gap:.6rem;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+
+.work-contact-actions .btn-soft{
+  width:48px;
+  height:48px;
+  padding:0;
+  flex:0 0 48px;
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.work-tabs-modern{
+  display:flex;
+  gap:.65rem;
+  list-style:none;
+  margin:0;
+  padding:1rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;
+  flex-wrap:nowrap;
+}
+
+.work-tabs-modern li{
+  flex-shrink:0;
+}
+
+.work-tabs-modern button{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:999px;
+  padding:.65rem 1rem;
+  font-weight:900;
+  font-size:.86rem;
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  white-space:nowrap;
+}
+
+.work-tabs-modern button:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.work-tabs-modern button.active{
+  color:#fff;
+  border-color:transparent;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 10px 26px rgba(20,104,245,.20);
+}
+
+.work-tab-body{
+  padding:1.5rem;
+}
+
+.overview-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1rem;
+}
+
+.overview-card{
+  border-radius:22px;
+  box-shadow:none;
+}
+
+.overview-card-head{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.15rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,.02);
+}
+
+.overview-card-head h4,
+.variant-title-row h4,
+.variant-section-head h5,
+.history-empty h4,
+.variants-empty h4{
+  margin:0;
+  color:var(--text);
+  font-size:1rem;
+  font-weight:900;
+}
+
+.overview-card-head p,
+.variant-modern-header p,
+.variant-section-head p,
+.history-empty p,
+.variants-empty p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.84rem;
+}
+
+.overview-card-body{
+  padding:1.15rem;
+}
+
+.overview-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding:.72rem 0;
+  border-bottom:1px solid var(--border);
+}
+
+.overview-row:last-child{
+  border-bottom:0;
+}
+
+.overview-row span,
+.overview-label{
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:800;
+}
+
+.overview-row strong,
+.overview-value{
+  color:var(--text);
+  font-weight:900;
+  text-align:right;
+}
+
+.overview-workers{
+  margin-top:1rem;
+}
+
+.overview-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:.5rem;
+}
+
+.overview-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .7rem;
+  border-radius:999px;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.22);
+  color:#ff9f43;
+  font-size:.76rem;
+  font-weight:900;
+}
+
+.overview-muted{
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.overview-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1rem;
+}
+
+.overview-stat-card{
+  border-radius:22px;
+  box-shadow:none;
+  padding:1rem;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.overview-stat-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  font-size:1.2rem;
+}
+
+.overview-value{
+  font-size:1.05rem;
+}
+
+.overview-description{
+  border-radius:22px;
+  box-shadow:none;
+}
+
+.overview-description-body{
+  padding:1.15rem;
+  color:var(--text);
+  line-height:1.6;
+}
+
+.variants-list{
+  display:grid;
+  gap:1rem;
+}
+
+.variant-modern-card{
+  border-radius:24px;
+  box-shadow:none;
+}
+
+.variant-selected{
+  border-color:rgba(25,135,84,.35);
+}
+
+.variant-modern-header{
+  padding:1.35rem;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 42%),
+    rgba(255,255,255,.015);
+}
+
+.variant-title-wrap{
+  display:flex;
+  gap:1rem;
+  align-items:flex-start;
+}
+
+.variant-title-row{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:.6rem;
+}
+
+.variant-badge-selected{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.38rem .7rem;
+  border-radius:999px;
+  background:rgba(25,135,84,.15);
+  border:1px solid rgba(25,135,84,.25);
+  color:#47d18c;
+  font-size:.74rem;
+  font-weight:900;
+}
+
+.variant-stats{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:1rem;
+  padding:1.35rem;
+}
+
+.variant-stat{
+  padding:1rem;
+  border-radius:20px;
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+}
+
+.variant-stat.profit{background:rgba(25,135,84,.10);border-color:rgba(25,135,84,.22)}
+.variant-stat.profit strong{color:#47d18c}
+
+.variant-stat small{
+  display:block;
+  color:var(--muted);
+  font-size:.76rem;
+  font-weight:900;
+  margin-bottom:.35rem;
+}
+
+.variant-stat strong{
+  color:var(--text);
+  font-weight:950;
+}
+
+.variant-section{
+  padding:0 1.35rem 1.35rem;
+}
+
+.variant-section-head{
+  margin-bottom:.75rem;
+}
+
+.variant-table-wrap{
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.variant-table{
+  color:var(--text);
+}
+
+.variant-table thead th{
+  color:var(--muted);
+  font-size:.76rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  background:rgba(255,255,255,.025);
+  padding:.9rem;
+}
+
+.variant-table tbody td{
+  border-color:var(--border);
+  padding:.9rem;
+  vertical-align:middle;
+}
+
+.variant-item-main{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+}
+
+.variant-item-icon{
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  flex-shrink:0;
+}
+
+.variant-item-name{
+  color:var(--text);
+  font-weight:900;
+}
+
+.variant-item-sub{
+  color:var(--muted);
+  font-size:.8rem;
+}
+
+.variant-type-badge{display:inline-flex;align-items:center;padding:.38rem .7rem;border-radius:999px;color:#ff9f43;background:rgba(20,104,245,.12);border:1px solid rgba(20,104,245,.22);font-size:.74rem;font-weight:900;white-space:nowrap}
+.variant-files-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem}
+.variant-file-card{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.9rem;border:1px solid var(--border);border-radius:20px;background:rgba(255,255,255,.025)}
+.variant-file-main{display:flex;align-items:center;gap:.8rem;min-width:0;color:var(--text);text-decoration:none;flex:1}
+.variant-file-icon{width:46px;height:46px;border-radius:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#ff6b6b;background:rgba(220,53,69,.12);border:1px solid rgba(220,53,69,.22);font-size:1.2rem}
+.variant-file-content{min-width:0}.variant-file-name{color:var(--text);font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.variant-file-date{color:var(--muted);font-size:.78rem;margin-top:.15rem}
+.variant-file-open{width:38px;height:38px;border-radius:13px;border:1px solid var(--border);background:rgba(255,255,255,.035);color:var(--text);display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
+
+.variants-empty,
+.history-empty{
+  text-align:center;
+  padding:3rem 1rem;
+  color:var(--muted);
+}
+
+.variants-empty-icon,
+.history-empty-icon{
+  margin:0 auto 1rem;
+}
+
+.history-timeline{
+  display:grid;
+  gap:1rem;
+  position:relative;
+}
+
+.history-item{
+  display:grid;
+  grid-template-columns:42px 1fr;
+  gap:.75rem;
+}
+
+.history-dot{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+}
+
+.history-card{
+  border-radius:20px;
+  box-shadow:none;
+  padding:1rem;
+}
+
+.history-card-top{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  flex-wrap:wrap;
+}
+
+.history-type{
+  display:inline-flex;
+  padding:.35rem .65rem;
+  border-radius:999px;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.2);
+  color:#ff9f43;
+  font-size:.74rem;
+  font-weight:900;
+}
+
+.history-date,
+.history-author{
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.history-title{
+  margin-top:.7rem;
+  color:var(--text);
+  font-weight:900;
+}
+
+.history-description{
+  margin-top:.35rem;
+  color:var(--muted);
+  white-space:pre-wrap;
+}
+
+.history-author{
+  margin-top:.75rem;
+  display:flex;
+  align-items:center;
+  gap:.35rem;
+}
+
+@media(max-width:992px){
+  .overview-grid,
+  .overview-stats-grid,
+  .variant-stats{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .variant-files-grid{grid-template-columns:1fr}
+}
+
+@media(max-width:768px){
+  .work-detail-header{
+    flex-direction:column;
+    align-items:flex-start;
+    padding:1rem;
+  }
+
+  .work-contact-actions{width:100%;justify-content:flex-start}
+
+  .work-tabs-modern{
+    padding:.9rem 1rem;
+  }
+
+  .work-tab-body{
+    padding:1rem;
+  }
+
+  .overview-card-head{
+    align-items:flex-start;
+  }
+
+  .overview-row{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:.25rem;
+  }
+
+  .overview-row strong{
+    text-align:left;
+  }
+
+  .history-item{
+    grid-template-columns:34px 1fr;
+  }
+
+  .history-dot{
+    width:34px;
+    height:34px;
+  }
+
+  .variant-table,
+  .variant-table thead,
+  .variant-table tbody,
+  .variant-table tr,
+  .variant-table th,
+  .variant-table td{
+    display:block;
+    width:100%;
+  }
+
+  .variant-table thead{
+    display:none;
+  }
+
+  .variant-table tbody tr{
+    padding:1rem;
+    border-bottom:1px solid var(--border);
+  }
+
+  .variant-table tbody td{
+    border:0;
+    padding:.45rem 0;
+    display:flex;
+    justify-content:space-between;
+    gap:1rem;
+  }
+
+  .variant-table tbody td:first-child{
+    display:block;
+  }
+
+  .variant-table tbody td::before{
+    content:attr(data-label);
+    color:var(--muted);
+    font-size:.75rem;
+    font-weight:900;
+  }
+
+  .variant-table tbody td:first-child::before{
+    display:none;
+  }
+}
+.side-action-btn.active{
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+    border-color:transparent;
+    color:#fff;
+    box-shadow:0 12px 28px rgba(20,104,245,.25);
+}
+
+.side-action-btn.active .side-action-icon{
+    background:rgba(255,255,255,.18);
+    color:#fff;
+}
+
+.side-info-list{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.side-info-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--border);
+}
+
+.side-info-item:last-child{
+    border-bottom:0;
+    padding-bottom:0;
+}
+
+.side-info-item span{
+    color:var(--muted);
+    font-size:.82rem;
+    font-weight:600;
+}
+
+.side-info-item strong{
+    color:var(--text);
+    text-align:right;
+    font-weight:700;
+}
+/* =========================
+   SCHEDULE MODAL
+========================= */
+
+.work-schedule-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.work-schedule-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.work-schedule-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.work-schedule-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.work-schedule-header h4{
+  margin:0;
+  color:var(--text);
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.work-schedule-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.work-schedule-body{
+  padding:1.5rem;
+}
+
+.work-schedule-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:1rem;
+}
+
+.work-schedule-card{
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1.1rem;
+  background:rgba(255,255,255,.025);
+}
+
+.work-schedule-card-full{
+  grid-column:1 / -1;
+}
+
+.work-schedule-card-head{
+  display:flex;
+  align-items:center;
+  gap:.85rem;
+  margin-bottom:1rem;
+}
+
+.work-schedule-card-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.15rem;
+  flex-shrink:0;
+}
+
+.work-schedule-card-head strong{
+  display:block;
+  color:var(--text);
+  font-weight:900;
+}
+
+.work-schedule-card-head span{
+  display:block;
+  margin-top:.15rem;
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.work-schedule-card .form-control,
+.work-schedule-card .form-select{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+
+.work-schedule-card .form-control:focus,
+.work-schedule-card .form-select:focus{
+  border-color:rgba(20,104,245,.55)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.work-schedule-check{
+  display:flex;
+  align-items:center;
+  gap:.6rem;
+  margin-top:1rem;
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:800;
+}
+
+.work-schedule-hint{
+  margin-top:1rem;
+  display:flex;
+  gap:.7rem;
+  align-items:flex-start;
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(20,104,245,.08);
+  border:1px solid rgba(20,104,245,.16);
+  color:var(--muted);
+  font-size:.86rem;
+}
+
+.work-schedule-hint i{
+  color:#1468f5;
+  margin-top:.1rem;
+}
+
+.work-schedule-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+@media(max-width:768px){
+  .work-schedule-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .work-schedule-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .work-schedule-body{
+    padding:1rem;
+  }
+
+  .work-schedule-grid{
+    grid-template-columns:1fr;
+  }
+
+  .work-schedule-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .work-schedule-footer .btn-soft,
+  .work-schedule-footer .btn-orange{
+    width:100%;
+    justify-content:center;
+  }
+}
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.equipment-modal{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:28px;
+    overflow:hidden;
+}
+
+.equipment-modal-header{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    padding:1.5rem;
+    position:relative;
+    border-bottom:1px solid var(--border);
+    background:
+        radial-gradient(circle at top left,
+        rgba(20,104,245,.18),
+        transparent 45%);
+}
+
+.equipment-modal-header .btn-close{
+    position:absolute;
+    top:1rem;
+    right:1rem;
+}
+
+.equipment-modal-icon{
+    width:64px;
+    height:64px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(20,104,245,.12);
+    color:#1468f5;
+    font-size:1.6rem;
+}
+
+.equipment-modal-header h4{
+    margin:0;
+    font-weight:800;
+}
+
+.equipment-modal-header p{
+    margin-top:.25rem;
+    color:var(--muted);
+}
+
+.equipment-modal-body{
+    padding:1.5rem;
+}
+
+.equipment-card{
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:1rem;
+    background:rgba(255,255,255,.02);
+}
+
+.equipment-card-top{
+    display:flex;
+    gap:.9rem;
+    margin-bottom:1rem;
+}
+
+.equipment-card-icon{
+    width:46px;
+    height:46px;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(20,104,245,.12);
+    color:#1468f5;
+}
+
+.equipment-card-top strong{
+    display:block;
+}
+
+.equipment-card-top span{
+    display:block;
+    color:var(--muted);
+    font-size:.85rem;
+}
+
+.equipment-input{
+    min-height:52px;
+    border-radius:16px!important;
+}
+
+.equipment-modal-footer{
+    padding:0 1.5rem 1.5rem;
+    display:flex;
+    justify-content:flex-end;
+    gap:.8rem;
+}
+
+.workers-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.workers-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.workers-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.workers-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.workers-modal-header h4{
+  margin:0;
+  color:var(--text);
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.workers-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+  padding-right:2rem;
+}
+
+.workers-modal-body{
+  padding:1.5rem;
+}
+
+.workers-label{
+  display:block;
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:900;
+  margin-bottom:.45rem;
+}
+
+.workers-modal .form-select{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:190px;
+  box-shadow:none!important;
+  padding:.75rem!important;
+}
+
+.workers-modal .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.workers-modal .form-select option{
+
+  color:var(--text);
+  padding:.5rem;
+}
+
+.workers-selected-box{
+  margin-top:1rem;
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid rgba(20,104,245,.18);
+  background:rgba(20,104,245,.08);
+}
+
+.workers-selected-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:900;
+  margin-bottom:.75rem;
+}
+
+.workers-selected-head strong{
+  color:#1468f5;
+  font-size:.95rem;
+}
+
+.workers-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  min-height:32px;
+}
+
+.workers-chips .btn,
+.workers-chips button,
+.workers-chip{
+  border:1px solid rgba(20,104,245,.22);
+  background:rgba(20,104,245,.12);
+  color:#ff9f43;
+  border-radius:999px;
+  padding:.42rem .75rem;
+  font-size:.78rem;
+  font-weight:900;
+}
+
+.workers-clear-btn{
+  margin-top:1rem;
+  width:100%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:16px;
+  padding:.85rem 1rem;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+}
+
+.workers-clear-btn:hover{
+  background:rgba(255,255,255,.07);
+  border-color:rgba(20,104,245,.28);
+}
+
+.workers-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+@media(max-width:768px){
+  .workers-modal-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .workers-modal-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .workers-modal-body{
+    padding:1rem;
+  }
+
+  .workers-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .workers-modal-footer .btn-soft,
+  .workers-modal-footer .btn-orange{
+    width:100%;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="work-page-head">
+  <div class="work-title-wrap">
+    <div class="work-title-icon">
+      <i class="bi bi-briefcase"></i>
+    </div>
+
+    <div>
+      <h1 class="work-title">Szczegóły pracy</h1>
+      <div class="work-subtitle">
+        Informacje o pracy, harmonogramie i realizacji.
+      </div>
+    </div>
+  </div>
+
+  <div class="work-actions">
+    <a href="{% url 'workorder_list' %}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>
+      Wróć
+    </a>
+  </div>
+</div>
+
+
+<div class="row g-4" style="direction:ltr;">
+
+<div class="col-12 col-lg-8">
+
+<div class="work-detail-card">
+
+  <div class="work-detail-header">
+    <div class="work-detail-icon">
+      <i class="bi bi-tools"></i>
+    </div>
+
+    <div class="flex-grow-1">
+      <h2>{{ work.title }}</h2>
+
+      <div class="work-detail-meta">
+        <span>
+          <i class="bi bi-buildings"></i>
+          {{ work.client }}
+        </span>
+
+        <span>
+          <i class="bi bi-hash"></i>
+          {{ work.number }}
+        </span>
+
+        {% if work.location %}
+          <span>
+            <i class="bi bi-geo-alt"></i>
+            {{ work.location }}
+          </span>
+        {% endif %}
+      </div>
+
+      <div class="work-detail-badges">
+        {% if work.status == "new" %}
+          <span class="work-status status-new">Nowe</span>
+        {% elif work.status == "in_progress" %}
+          <span class="work-status status-progress">W realizacji</span>
+        {% elif work.status == "done" %}
+          <span class="work-status status-done">Zakończone</span>
+        {% else %}
+          <span class="work-status status-cancelled">Anulowane</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="work-contact-actions">
+      {% if work.client.phone %}
+        <a href="tel:{{ work.client.phone }}" class="btn-soft" aria-label="Zadzwoń do klienta" title="Zadzwoń do klienta">
+          <i class="bi bi-telephone-outbound"></i>
+        </a>
+      {% endif %}
+
+      {% if work.client.email %}
+        <a href="mailto:{{ work.client.email }}" class="btn-soft" aria-label="Wyślij e-mail" title="Wyślij e-mail">
+          <i class="bi bi-envelope"></i>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <ul class="work-tabs-modern" role="tablist">
+    <li>
+      <button class="active" data-bs-toggle="tab" data-bs-target="#tab-overview">
+        <i class="bi bi-grid"></i>
+        Przegląd
+      </button>
+    </li>
+
+    {% if can_view_work_offer %}<li>
+      <button data-bs-toggle="tab" data-bs-target="#tab-variants">
+        <i class="bi bi-layers"></i>
+        Warianty
+      </button>
+    </li>{% endif %}
+
+    <li>
+      <button data-bs-toggle="tab" data-bs-target="#tab-history">
+        <i class="bi bi-clock-history"></i>
+        Historia
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content work-tab-body">
+
+    <div class="tab-pane fade show active" id="tab-overview">
+
+      <div class="overview-grid">
+
+        <div class="overview-card">
+          <div class="overview-card-head">
+            <div class="overview-card-icon">
+              <i class="bi bi-buildings"></i>
+            </div>
+
+            <div>
+              <h4>Dane klienta</h4>
+              <p>Kontakt i podstawowe informacje.</p>
+            </div>
+          </div>
+
+          <div class="overview-card-body">
+            <div class="overview-row">
+              <span>Klient</span>
+              <strong>{{ work.client }}</strong>
+            </div>
+
+            {% if work.client.phone %}
+              <div class="overview-row">
+                <span>Telefon</span>
+                <strong>{{ work.client.phone }}</strong>
+              </div>
+            {% endif %}
+
+            {% if work.client.email %}
+              <div class="overview-row">
+                <span>E-mail</span>
+                <strong>{{ work.client.email }}</strong>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="overview-card">
+          <div class="overview-card-head">
+            <div class="overview-card-icon">
+              <i class="bi bi-calendar2-week"></i>
+            </div>
+
+            <div>
+              <h4>Plan i realizacja</h4>
+              <p>Terminy, czas pracy i przypisani pracownicy.</p>
+            </div>
+          </div>
+
+          <div class="overview-card-body">
+            <div class="overview-row">
+    <span>Start</span>
+    <strong>
+        {% if work.planned_start %}
+            {{ work.planned_start|date:"d.m.Y H:i" }}
+        {% else %}
+            —
+        {% endif %}
+    </strong>
+</div>
+
+<div class="overview-row">
+    <span>Koniec</span>
+    <strong>
+        {% if work.planned_end %}
+            {{ work.planned_end|date:"d.m.Y H:i" }}
+        {% else %}
+            —
+        {% endif %}
+    </strong>
+</div>
+
+            <div class="overview-row">
+              <span>Pracowników</span>
+              <strong>{{ work.employees_count|default:"0" }}</strong>
+            </div>
+
+            <div class="overview-row">
+              <span>Roboczogodziny</span>
+              <strong>{{ work.labor_hours|default:"0" }}</strong>
+            </div>
+
+            <div class="overview-workers">
+              <div class="overview-label">Przypisani</div>
+
+              <div class="overview-chips">
+                {% for u in work.assigned_employees.all %}
+                  <span class="overview-chip">
+                    <i class="bi bi-person"></i>
+                    {{ u.first_name }} {{ u.last_name }}
+                  </span>
+                {% empty %}
+                  <span class="overview-muted">Brak pracowników</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="overview-stats-grid mt-3">
+        {% if can_view_work_prices %}
+          <div class="overview-stat-card">
+            <div class="overview-stat-icon"><i class="bi bi-cash"></i></div>
+            <div><div class="overview-label">Netto</div><div class="overview-value">{{ work.total_netto }}</div></div>
+          </div>
+          <div class="overview-stat-card">
+            <div class="overview-stat-icon"><i class="bi bi-receipt"></i></div>
+            <div><div class="overview-label">Brutto</div><div class="overview-value">{{ work.total_brutto }}</div></div>
+          </div>
+        {% endif %}
+
+        {% if can_view_work_offer %}<div class="overview-stat-card">
+          <div class="overview-stat-icon"><i class="bi bi-file-earmark-text"></i></div>
+          <div>
+            <div class="overview-label">Oferta źródłowa</div>
+            <div class="overview-value">{% if work.offer %}{{ work.offer.number }}{% else %}—{% endif %}</div>
+          </div>
+        </div>{% endif %}
+      </div>
+
+      <div class="overview-description mt-3">
+        <div class="overview-card-head">
+          <div class="overview-card-icon">
+            <i class="bi bi-card-text"></i>
+          </div>
+
+          <div>
+            <h4>Opis pracy</h4>
+            <p>Zakres prac i dodatkowe informacje.</p>
+          </div>
+        </div>
+
+        <div class="overview-description-body {% if not work.description %}text-muted{% endif %}">
+          {{ work.description|default:"Brak opisu."|linebreaksbr }}
+        </div>
+      </div>
+
+    </div>
+
+    {% if can_view_work_offer %}<div class="tab-pane fade" id="tab-variants">
+      {% if selected_variants %}
+        <div class="variants-list">
+          {% for variant in selected_variants %}
+            <div class="variant-modern-card variant-selected">
+              <div class="variant-modern-header">
+                <div class="variant-title-wrap">
+                  <div class="variant-icon">
+                    <i class="bi bi-layers"></i>
+                  </div>
+
+                  <div>
+                    <div class="variant-title-row">
+                      <h4>{{ variant.name }}</h4>
+                      <span class="variant-badge-selected">
+                        <i class="bi bi-check2-circle"></i>
+                        Wybrany
+                      </span>
+                    </div>
+
+                    <p>{{ variant.description|default:"Brak opisu wariantu." }}</p>
+                  </div>
+                </div>
+              </div>
+
+              {% if can_view_work_prices %}<div class="variant-stats">
+                <div class="variant-stat">
+                  <small>Cena oferty</small>
+                  <strong>{{ variant.total_netto }}</strong>
+                </div>
+                <div class="variant-stat">
+                  <small>Materiały</small>
+                  <strong>{{ variant.materials_netto }}</strong>
+                </div>
+
+                <div class="variant-stat">
+                  <small>Akcesoria</small>
+                  <strong>{{ variant.accessories_netto }}</strong>
+                </div>
+
+                <div class="variant-stat">
+                  <small>Usługi</small>
+                  <strong>{{ variant.services_netto }}</strong>
+                </div>
+
+                <div class="variant-stat profit">
+                  <small>Zysk</small>
+                  <strong>{{ variant.profit|floatformat:2 }} zł</strong>
+                </div>
+              </div>{% endif %}
+
+              {% if variant.items.all %}
+                <div class="variant-section">
+                  <div class="variant-section-head">
+                    <div>
+                      <h5>Pozycje wariantu</h5>
+                      <p>{% if can_view_work_prices %}Produkty, usługi, ilości i wartości netto/brutto.{% else %}Lista produktów, usług i ilości.{% endif %}</p>
+                    </div>
+                  </div>
+
+                  <div class="variant-table-wrap">
+                    <table class="table variant-table align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th>Pozycja</th>
+                          <th>Typ</th>
+                          <th>Ilość</th>
+                          <th>Jm.</th>
+                          {% if can_view_work_prices %}<th>Cena netto</th><th>Netto</th><th>Brutto</th>{% endif %}
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {% for item in variant.items.all %}
+                          <tr>
+                            <td>
+                              <div class="variant-item-main">
+                                <div class="variant-item-icon">
+                                  <i class="bi bi-box-seam"></i>
+                                </div>
+
+                                <div>
+                                  <div class="variant-item-name">{{ item.name }}</div>
+                                  {% if item.product %}
+                                    <div class="variant-item-sub">{{ item.product }}</div>
+                                  {% endif %}
+                                </div>
+                              </div>
+                            </td>
+
+                            <td data-label="Typ"><span class="variant-type-badge">{{ item.get_item_type_display }}</span></td>
+                            <td data-label="Ilość">{{ item.quantity }}</td>
+                            <td data-label="Jm.">{{ item.unit }}</td>
+                            {% if can_view_work_prices %}<td data-label="Cena netto">{{ item.unit_price_netto }}</td><td data-label="Netto"><strong>{{ item.total_netto }}</strong></td><td data-label="Brutto"><strong>{{ item.total_brutto }}</strong></td>{% endif %}
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              {% endif %}
+
+              {% if can_view_work_attachments and variant.files.all %}
+                <div class="variant-section">
+                  <div class="variant-section-head"><div><h5>Pliki wariantu</h5><p>Dokumenty i załączniki przypisane do wariantu.</p></div></div>
+                  <div class="variant-files-grid">
+                    {% for file in variant.files.all %}
+                      <div class="variant-file-card"><a href="{{ file.file.url }}" target="_blank" class="variant-file-main"><div class="variant-file-icon"><i class="bi bi-file-earmark"></i></div><div class="variant-file-content"><div class="variant-file-name">{{ file.title|default:"Załącznik" }}</div><div class="variant-file-date">Dodano: {{ file.uploaded_at|date:"d.m.Y H:i" }}</div></div></a><a href="{{ file.file.url }}" target="_blank" class="variant-file-open" title="Otwórz"><i class="bi bi-box-arrow-up-right"></i></a></div>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="variants-empty">
+          <div class="variants-empty-icon">
+            <i class="bi bi-layers"></i>
+          </div>
+          <h4>Brak wybranych wariantów</h4>
+          <p>Do tej pracy nie przypisano wybranych wariantów.</p>
+        </div>
+      {% endif %}
+    </div>{% endif %}
+
+    <div class="tab-pane fade" id="tab-history">
+      {% if work.activities.all %}
+        <div class="history-timeline">
+          {% for a in work.activities.all %}
+            <div class="history-item">
+              <div class="history-dot">
+                <i class="bi bi-dot"></i>
+              </div>
+
+              <div class="history-card">
+                <div class="history-card-top">
+                  <span class="history-type">{{ a.get_type_display }}</span>
+                  <div class="history-date">{{ a.created_at|date:"d.m.Y H:i" }}</div>
+                </div>
+
+                <div class="history-title">{{ a.title }}</div>
+
+                {% if a.description %}
+                  <div class="history-description">{{ a.description }}</div>
+                {% endif %}
+
+                <div class="history-author">
+                  <i class="bi bi-person-circle"></i>
+                  {% if a.created_by %}
+                    {{ a.created_by.first_name }} {{ a.created_by.last_name }}
+                  {% else %}
+                    System
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="history-empty">
+          <div class="history-empty-icon">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <h4>Brak historii</h4>
+          <p>Dla tej pracy nie zapisano jeszcze żadnych aktywności.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+ </div>
+<div class="col-12 col-lg-4">
+
+  {% if can_work_actions %}
+  <div class="side-card mb-3">
+    <div class="side-card-header">
+      <div class="side-card-icon">
+        <i class="bi bi-lightning-charge"></i>
+      </div>
+
+      <div>
+        <h3>Akcje</h3>
+        <p>Szybkie zarządzanie pracą.</p>
+      </div>
+    </div>
+
+    <div class="side-card-body">
+      <div class="side-actions">
+
+        <button type="button"
+              class="side-action-btn"
+              data-bs-toggle="modal"
+              data-bs-target="#scheduleWorkModal"
+              data-action-url="{% url 'work_schedule_update' work.pk %}"
+              data-start="{% if work.planned_start %}{{ work.planned_start|date:'Y-m-d' }}T{{ work.planned_start|date:'H:i' }}{% endif %}"
+              data-end="{% if work.planned_end %}{{ work.planned_end|date:'Y-m-d' }}T{{ work.planned_end|date:'H:i' }}{% endif %}"
+              data-title="{{ work.number }} – {{ work.title|escape }}">
+          <span class="side-action-icon">
+            <i class="bi bi-calendar2-event"></i>
+          </span>
+          <span>Ustal termin</span>
+        </button>
+
+        <button type="button"
+                class="side-action-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#assignWorkersModal"
+                data-action-url="{% url 'work_assign_workers' work.pk %}"
+                data-title="{{ work.number }} – {{ work.title|escape }}"
+                data-selected="{% for u in work.assigned_employees.all %}{{ u.pk }}{% if not forloop.last %},{% endif %}{% endfor %}">
+          <span class="side-action-icon">
+            <i class="bi bi-people"></i>
+          </span>
+          <span>Wyznacz pracowników</span>
+        </button>
+
+        <button type="button"
+                class="side-action-btn"
+                data-bs-toggle="modal"
+                data-bs-target="#orderedEquipmentModal"
+                data-action-url="{% url 'work_mark_ordered' work.pk %}"
+                data-title="{{ work.number }} – {{ work.title|escape }}"
+                data-order-number="{{ work.order_number|default:'' }}">
+          <span class="side-action-icon">
+            <i class="bi bi-cart-check"></i>
+          </span>
+          <span>Zamówiono sprzęt</span>
+        </button>
+
+      </div>
+    </div>
+  </div>
+  {% endif %}
+ {% if work.status != "done" %}
+
+<div class="side-card mb-3">
+
+    <div class="side-card-header">
+        <div class="side-card-icon">
+            <i class="bi bi-arrow-repeat"></i>
+        </div>
+
+        <div>
+            <h3>Status pracy</h3>
+            <p>Zmień aktualny etap realizacji.</p>
+        </div>
+    </div>
+
+    <div class="side-card-body">
+
+        <div class="side-actions">
+
+            {% for val,label in work.Status.choices %}
+
+                {% if request.user.role != request.user.Role.EMPLOYEE and request.user.role != request.user.Role.PODWYKONAWCA or val == "in_progress" or val == "done" %}
+
+                
+                {% if val == "done" %}
+
+                    <a href="{% url 'protocol_from_work' work.pk %}"
+                       class="side-action-btn {% if work.status == val %}active{% endif %}">
+                        <span class="side-action-icon">
+                            <i class="bi bi-check2-circle"></i>
+                        </span>
+
+                        <span>{{ label }}</span>
+                    </a>
+
+                {% else %}
+
+                    <form method="post"
+                          action="{% url 'work_status_update' work.pk %}"
+                          class="w-100">
+
+                        {% csrf_token %}
+                        <input type="hidden" name="status" value="{{ val }}">
+
+                        <button type="submit"
+                                class="side-action-btn {% if work.status == val %}active{% endif %}">
+
+                            {% if val == "new" %}
+                                <span class="side-action-icon">
+                                    <i class="bi bi-plus-circle"></i>
+                                </span>
+
+                            {% elif val == "in_progress" %}
+                                <span class="side-action-icon">
+                                    <i class="bi bi-tools"></i>
+                                </span>
+
+                            {% elif val == "cancelled" %}
+                                <span class="side-action-icon">
+                                    <i class="bi bi-x-circle"></i>
+                                </span>
+
+                            {% else %}
+                                <span class="side-action-icon">
+                                    <i class="bi bi-arrow-repeat"></i>
+                                </span>
+                            {% endif %}
+
+                            <span>{{ label }}</span>
+
+                        </button>
+
+                    </form>
+
+                {% endif %}
+
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endif %}
+
+    <div class="side-card mb-3">
+
+    <div class="side-card-header">
+        <div class="side-card-icon">
+            <i class="bi bi-bar-chart"></i>
+        </div>
+
+        <div>
+            <h3>Podsumowanie</h3>
+            <p>Najważniejsze informacje o pracy.</p>
+        </div>
+    </div>
+
+    <div class="side-card-body">
+
+        <div class="side-info-list">
+
+            <div class="side-info-item">
+                <span>Numer</span>
+                <strong>{{ work.number }}</strong>
+            </div>
+
+            <div class="side-info-item">
+                <span>Klient</span>
+                <strong>{{ work.client }}</strong>
+            </div>
+
+            <div class="side-info-item">
+                <span>Status</span>
+                <strong>{{ work.get_status_display }}</strong>
+            </div>
+
+            <div class="side-info-item">
+                <span>Pracowników</span>
+                <strong>{{ work.assigned_employees.count }}</strong>
+            </div>
+
+            {% if can_view_work_prices %}
+              <div class="side-info-item"><span>Netto</span><strong>{{ work.total_netto }}</strong></div>
+              <div class="side-info-item"><span>Brutto</span><strong>{{ work.total_brutto }}</strong></div>
+            {% endif %}
+
+            <div class="side-info-item">
+                <span>Sprzęt</span>
+
+                <strong>
+                    {% if work.is_ordered %}
+                        <span class="badge bg-success">
+                            Zamówiono
+                            {% if work.order_number %}
+                                #{{ work.order_number }}
+                            {% endif %}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-secondary">
+                            Nie zamówiono
+                        </span>
+                    {% endif %}
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+    {% if can_view_work_offer and work.offer %}
+<div class="side-card">
+
+    <div class="side-card-header">
+        <div class="side-card-icon">
+            <i class="bi bi-file-earmark-text"></i>
+        </div>
+
+        <div>
+            <h3>Oferta</h3>
+            <p>Oferta, z której została utworzona praca.</p>
+        </div>
+    </div>
+
+    <div class="side-card-body">
+
+        <div class="side-info-list">
+
+            <div class="side-info-item">
+                <span>Numer</span>
+                <strong>{{ work.offer.number }}</strong>
+            </div>
+
+            <div class="side-info-item">
+                <span>Tytuł</span>
+                <strong>{{ work.offer.title }}</strong>
+            </div>
+
+        </div>
+
+        <a href="{% url 'offer_detail' work.offer.pk %}"
+           class="side-action-btn mt-3">
+
+            <span class="side-action-icon">
+                <i class="bi bi-box-arrow-up-right"></i>
+            </span>
+
+            <span>Otwórz ofertę</span>
+
+        </a>
+
+    </div>
+
+</div>
+{% endif %}
+
+  </div>
+</div>
+<div class="modal fade" id="scheduleWorkModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content work-schedule-modal">
+
+      <form method="post" id="scheduleWorkForm" action="">
+        {% csrf_token %}
+
+        <div class="work-schedule-header">
+          <div class="work-schedule-icon">
+            <i class="bi bi-calendar2-week"></i>
+          </div>
+
+          <div>
+            <h4>Ustal termin pracy</h4>
+            <p id="scheduleWorkTitle">Praca: —</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="work-schedule-body">
+          <div class="work-schedule-grid">
+
+            <div class="work-schedule-card">
+              <div class="work-schedule-card-head">
+                <div class="work-schedule-card-icon">
+                  <i class="bi bi-play-circle"></i>
+                </div>
+
+                <div>
+                  <strong>Rozpoczęcie</strong>
+                  <span>Data i godzina startu</span>
+                </div>
+              </div>
+
+              <input type="datetime-local"
+                     name="planned_start"
+                     id="workPlannedStart"
+                     class="form-control" data-workday-start="{{ workday_start_time }}" data-workday-end="{{ workday_end_time }}">
+            </div>
+
+            <div class="work-schedule-card">
+              <div class="work-schedule-card-head">
+                <div class="work-schedule-card-icon">
+                  <i class="bi bi-hourglass-split"></i>
+                </div>
+
+                <div>
+                  <strong>Czas trwania</strong>
+                  <span>Automatycznie wyliczy koniec</span>
+                </div>
+              </div>
+
+              <select id="workDurationMin" class="form-select">
+                <option value="">— wybierz —</option>
+                <option value="60">1 godzina</option>
+                <option value="120">2 godziny</option>
+                <option value="180">3 godziny</option>
+                <option value="240">4 godziny</option>
+                <option value="300">5 godzin</option>
+                <option value="360">6 godzin</option>
+                <option value="420">7 godzin</option>
+                <option value="480">8 godzin</option>
+              </select>
+
+              <label class="work-schedule-check">
+                <input type="checkbox"
+                       class="form-check-input"
+                       id="workAutoEnd"
+                       checked>
+                <span>Wylicz zakończenie automatycznie</span>
+              </label>
+            </div>
+
+            <div class="work-schedule-card work-schedule-card-full">
+              <div class="work-schedule-card-head">
+                <div class="work-schedule-card-icon">
+                  <i class="bi bi-stop-circle"></i>
+                </div>
+
+                <div>
+                  <strong>Zakończenie</strong>
+                  <span>Możesz ustawić ręcznie</span>
+                </div>
+              </div>
+
+              <input type="datetime-local"
+                     name="planned_end"
+                     id="workPlannedEnd"
+                     class="form-control" data-workday-start="{{ workday_start_time }}" data-workday-end="{{ workday_end_time }}">
+
+              <div class="work-schedule-hint">
+                <i class="bi bi-info-circle"></i>
+                <span>
+                  Wybierz datę rozpoczęcia i czas trwania, a zakończenie zostanie uzupełnione automatycznie.
+                </span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="work-schedule-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-orange">
+            <i class="bi bi-check2-circle me-1"></i>
+            Zapisz termin
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const modal = document.getElementById("scheduleWorkModal");
+  if (!modal) return;
+
+  const form = document.getElementById("scheduleWorkForm");
+  const title = document.getElementById("scheduleWorkTitle");
+  const startEl = document.getElementById("workPlannedStart");
+  const endEl = document.getElementById("workPlannedEnd");
+  const durationEl = document.getElementById("workDurationMin");
+  const autoEl = document.getElementById("workAutoEnd");
+
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function parseLocal(value) {
+    if (!value) return null;
+
+    const [datePart, timePart = "08:00"] = value.split("T");
+    const [year, month, day] = datePart.split("-").map(Number);
+    const [hour, minute] = timePart.split(":").map(Number);
+
+    return new Date(year, month - 1, day, hour, minute);
+  }
+
+  function formatLocal(date) {
+    return (
+      date.getFullYear() + "-" +
+      pad(date.getMonth() + 1) + "-" +
+      pad(date.getDate()) + "T" +
+      pad(date.getHours()) + ":" +
+      pad(date.getMinutes())
+    );
+  }
+
+  function normalize(value, defaultTime) {
+    if (!value) return "";
+
+    if (value.includes("T")) {
+      return value.slice(0, 16);
+    }
+
+    return value + "T" + defaultTime;
+  }
+
+  function calcEnd() {
+    if (!autoEl.checked) return;
+    if (!startEl.value || !durationEl.value) return;
+
+    const date = parseLocal(startEl.value);
+    if (!date) return;
+
+    date.setMinutes(date.getMinutes() + parseInt(durationEl.value, 10));
+    endEl.value = formatLocal(date);
+  }
+
+  function setAutoMode() {
+    endEl.readOnly = autoEl.checked;
+    durationEl.disabled = !autoEl.checked;
+
+    if (autoEl.checked) {
+      calcEnd();
+    }
+  }
+
+  modal.addEventListener("show.bs.modal", function (event) {
+    const btn = event.relatedTarget;
+
+    form.action = btn.getAttribute("data-action-url") || "";
+
+    title.textContent = "Praca: " + (btn.getAttribute("data-title") || "—");
+
+    startEl.value = normalize(btn.getAttribute("data-start") || "", "08:00");
+    endEl.value = normalize(btn.getAttribute("data-end") || "", "16:00");
+
+    autoEl.checked = true;
+    durationEl.disabled = false;
+
+    if (!durationEl.value) {
+      durationEl.value = "480";
+    }
+
+    calcEnd();
+    setAutoMode();
+  });
+
+  startEl.addEventListener("change", calcEnd);
+  durationEl.addEventListener("change", calcEnd);
+
+  autoEl.addEventListener("change", function () {
+    setAutoMode();
+  });
+
+  endEl.addEventListener("input", function () {
+    if (autoEl.checked) {
+      autoEl.checked = false;
+      setAutoMode();
+    }
+  });
+});
+</script>
+
+<div class="modal fade" id="assignWorkersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content workers-modal">
+
+      <form method="post" id="assignWorkersForm" action="">
+        {% csrf_token %}
+
+        <div class="workers-modal-header">
+          <div class="workers-modal-icon">
+            <i class="bi bi-people-fill"></i>
+          </div>
+
+          <div>
+            <h4>Wyznacz pracowników</h4>
+            <p id="assignWorkersTitle">Wybierz maksymalnie 3 osoby odpowiedzialne za pracę.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="workers-modal-body">
+          <label class="workers-label">
+            Pracownicy / serwisanci
+          </label>
+
+          <select name="workers"
+                  id="workersSelect"
+                  class="form-select"
+                  multiple
+                  size="6"
+                  data-max="3">
+            {% for u in workers %}
+              <option value="{{ u.pk }}">
+                {{ u.first_name }} {{ u.last_name }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <div class="workers-selected-box">
+            <div class="workers-selected-head">
+              <span>Wybrani</span>
+
+              <strong>
+                <span id="assignedCount">0</span>/3
+              </strong>
+            </div>
+
+            <div id="assignedChips" class="workers-chips"></div>
+          </div>
+
+          <button type="button"
+                  class="workers-clear-btn"
+                  id="assignedClear">
+            <i class="bi bi-x-circle"></i>
+            Wyczyść wybór
+          </button>
+        </div>
+
+        <div class="workers-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-orange">
+            <i class="bi bi-save me-1"></i>
+            Zapisz
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade"
+     id="orderedEquipmentModal"
+     tabindex="-1"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content equipment-modal">
+
+            <form method="post"
+                  id="orderedEquipmentForm"
+                  action="">
+
+                {% csrf_token %}
+
+                <div class="equipment-modal-header">
+
+                    <div class="equipment-modal-icon">
+                        <i class="bi bi-cart-check-fill"></i>
+                    </div>
+
+                    <div>
+
+                        <h4>Zamówiono sprzęt</h4>
+
+                        <p id="orderedEquipmentTitle">
+                            Praca
+                        </p>
+
+                    </div>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
+
+                </div>
+
+                <div class="equipment-modal-body">
+
+                    <div class="equipment-card">
+
+                        <div class="equipment-card-top">
+
+                            <div class="equipment-card-icon">
+                                <i class="bi bi-upc-scan"></i>
+                            </div>
+
+                            <div>
+
+                                <strong>Numer zamówienia</strong>
+
+                                <span>
+                                    Numer z hurtowni lub magazynu.
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <input type="text"
+                               id="orderedEquipmentNumber"
+                               name="order_number"
+                               maxlength="100"
+                               class="form-control equipment-input"
+                               placeholder="np. FV/2026/125"
+                               required>
+
+                    </div>
+
+                </div>
+
+                <div class="equipment-modal-footer">
+
+                    <button type="button"
+                            class="btn-soft"
+                            data-bs-dismiss="modal">
+
+                        Anuluj
+
+                    </button>
+
+                    <button type="submit"
+                            class="btn-orange">
+
+                        <i class="bi bi-check2-circle me-1"></i>
+
+                        Zapisz
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+(function(){
+  const scheduleModal = document.getElementById('scheduleWorkModal');
+  if(scheduleModal){
+    const form = document.getElementById('scheduleWorkForm');
+    const title = document.getElementById('scheduleWorkTitle');
+    const start = document.getElementById('workPlannedStart');
+    const end = document.getElementById('workPlannedEnd');
+
+    scheduleModal.addEventListener('show.bs.modal', (ev)=>{
+      const btn = ev.relatedTarget;
+      form.action = btn?.getAttribute('data-action-url') || '';
+      title.textContent = btn?.getAttribute('data-title') || '—';
+      start.value = btn?.getAttribute('data-start') || '';
+      end.value = btn?.getAttribute('data-end') || '';
+    });
+  }
+
+  const orderedModal = document.getElementById('orderedEquipmentModal');
+  if(orderedModal){
+    const form = document.getElementById('orderedEquipmentForm');
+    const title = document.getElementById('orderedEquipmentTitle');
+    const number = document.getElementById('orderedEquipmentNumber');
+
+    orderedModal.addEventListener('show.bs.modal', (ev)=>{
+      const btn = ev.relatedTarget;
+      form.action = btn?.getAttribute('data-action-url') || '';
+      title.textContent = btn?.getAttribute('data-title') || '—';
+      number.value = btn?.getAttribute('data-order-number') || '';
+    });
+  }
+
+  const workersModal = document.getElementById('assignWorkersModal');
+  if(!workersModal) return;
+
+  const form = document.getElementById('assignWorkersForm');
+  const title = document.getElementById('assignWorkersTitle');
+  const sel = document.getElementById('workersSelect');
+  const chips = document.getElementById('assignedChips');
+  const count = document.getElementById('assignedCount');
+  const clear = document.getElementById('assignedClear');
+  const max = parseInt(sel?.dataset.max || '3', 10);
+
+  function selectedOptions(){
+    return [...sel.options].filter(o => o.selected);
+  }
+
+  function render(){
+    const selected = selectedOptions();
+    count.textContent = selected.length;
+    chips.innerHTML = '';
+
+    selected.forEach(opt => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'btn btn-sm btn-outline-secondary rounded-pill';
+      chip.textContent = opt.text + ' ✕';
+      chip.onclick = () => {
+        opt.selected = false;
+        sel.dispatchEvent(new Event('change', {bubbles:true}));
+      };
+      chips.appendChild(chip);
+    });
+
+    const limit = selected.length >= max;
+    [...sel.options].forEach(opt => {
+      if(!opt.selected) opt.disabled = limit;
+    });
+  }
+
+  function applySelected(csv){
+    const ids = (csv || '').split(',').map(x => x.trim()).filter(Boolean);
+    [...sel.options].forEach(o => {
+      o.selected = ids.includes(String(o.value));
+      o.disabled = false;
+    });
+    render();
+  }
+
+  sel.addEventListener('change', ()=>{
+    [...sel.options].forEach(o => o.disabled = false);
+    const selected = selectedOptions();
+    if(selected.length > max){
+      selected.slice(max).forEach(o => o.selected = false);
+    }
+    render();
+  });
+
+  clear?.addEventListener('click', ()=>{
+    [...sel.options].forEach(o => {
+      o.selected = false;
+      o.disabled = false;
+    });
+    render();
+  });
+
+  workersModal.addEventListener('show.bs.modal', (ev)=>{
+    const btn = ev.relatedTarget;
+    form.action = btn?.getAttribute('data-action-url') || '';
+    title.textContent = btn?.getAttribute('data-title') || '—';
+    applySelected(btn?.getAttribute('data-selected') || '');
+  });
+})();
+</script>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{const modal=document.getElementById('scheduleWorkModal');if(!modal)return;const start=document.getElementById('workPlannedStart'),end=document.getElementById('workPlannedEnd');const check=()=>{const a=start.value.slice(11,16),b=end.value.slice(11,16),lo=start.dataset.workdayStart,hi=start.dataset.workdayEnd;if((a&& (a<lo||a>hi))||(b&&(b<lo||b>hi))){start.setCustomValidity(`Godzina musi mieścić się w zakresie ${lo}–${hi}.`);return false}start.setCustomValidity('');return true};[start,end].forEach(x=>x.addEventListener('change',check));modal.querySelector('form').addEventListener('submit',e=>{if(!check()){e.preventDefault();alert(start.validationMessage)}})});
+</script>
+{% endblock %}

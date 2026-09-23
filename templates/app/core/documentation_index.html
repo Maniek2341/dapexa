@@ -1,0 +1,14 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+<style>
+.module-index{max-width:1450px;margin:0 auto}.module-index-head{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem}.module-index-icon{width:62px;height:62px;display:grid;place-items:center;border-radius:20px;color:#1468f5;background:rgba(20,104,245,.14);border:1px solid rgba(20,104,245,.28);font-size:1.5rem}.module-index h1{margin:0;color:var(--text);font-size:1.55rem;font-weight:900}.module-index-head p{margin:.25rem 0 0;color:var(--muted);font-size:.9rem}.module-index-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.module-index-card{display:flex;flex-direction:column;min-width:0;padding:1.15rem;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 14px 35px rgba(0,0,0,.1)}.module-index-card:hover{border-color:rgba(20,104,245,.38);transform:translateY(-2px);transition:.18s}.module-index-card-head{display:flex;align-items:center;gap:.7rem}.module-index-card-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;color:#1468f5;background:rgba(20,104,245,.12);font-size:1.1rem}.module-index-card h2{margin:0;color:var(--text);font-size:.98rem;font-weight:900}.module-index-card p{margin:.75rem 0 1rem;color:var(--muted);font-size:.82rem;line-height:1.5;flex:1}.module-index-link{display:inline-flex;align-items:center;gap:.4rem;align-self:flex-start;padding:.58rem .8rem;border-radius:11px;color:#fff;background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);font-size:.78rem;font-weight:850;text-decoration:none}.module-index-link:hover{color:#fff;filter:brightness(1.06)}@media(max-width:1100px){.module-index-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.module-index-grid{grid-template-columns:1fr}.module-index h1{font-size:1.3rem}}
+</style>
+<div class="module-index">
+  <div class="module-index-head"><div class="module-index-icon"><i class="bi bi-journal-text"></i></div><div><h1>Dokumentacja modułów</h1><p>Wybierz moduł, aby przeczytać szczegółową instrukcję jego obsługi.</p></div></div>
+  <div class="module-index-grid">
+    {% for item in documentation_modules %}
+      <article class="module-index-card"><div class="module-index-card-head"><div class="module-index-card-icon"><i class="bi {{ item.icon }}"></i></div><h2>{{ item.name }}</h2></div><p>{{ item.summary }}</p><a class="module-index-link" href="{% url 'documentation_module' item.slug %}">Otwórz dokumentację <i class="bi bi-arrow-right"></i></a></article>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

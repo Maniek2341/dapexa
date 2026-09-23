@@ -1,0 +1,880 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+
+<style>
+.rcp-requests-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.rcp-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.rcp-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.rcp-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.rcp-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.rcp-filter-card,
+.rcp-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.rcp-filter-card{
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+}
+
+.rcp-filter-card .form-control,
+.rcp-filter-card .form-select{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.rcp-filter-card .form-control:focus,
+.rcp-filter-card .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.rcp-list-card{
+  overflow:hidden;
+}
+
+.rcp-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.rcp-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.rcp-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.rcp-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.rcp-table{
+  color:var(--text);
+  margin:0;
+}
+
+.rcp-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+  white-space:nowrap;
+}
+
+.rcp-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.rcp-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.employee-main{
+  font-weight:900;
+  color:var(--text);
+}
+
+.employee-sub{
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.reason-box{
+  min-width:240px;
+  color:var(--text);
+}
+
+.reason-reject{
+  margin-top:.75rem;
+  padding:.75rem;
+  border-radius:14px;
+  background:rgba(220,53,69,.08);
+  border:1px solid rgba(220,53,69,.18);
+  color:#ff6b6b;
+  font-size:.82rem;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+}
+
+.badge-pending{
+  color:#ffc857;
+  background:rgba(255,193,7,.16);
+  border-color:rgba(255,193,7,.25);
+}
+
+.badge-approved{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.badge-rejected{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+}
+
+.badge-type{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.15);
+  border-color:rgba(13,110,253,.25);
+}
+
+.action-group{
+  display:flex;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+
+.btn-approve{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:12px;
+  padding:.55rem .85rem;
+  background:linear-gradient(135deg,#198754,#47d18c);
+}
+
+.btn-reject{
+  border:1px solid rgba(220,53,69,.28);
+  background:rgba(220,53,69,.08);
+  color:#ff6b6b;
+  font-weight:800;
+  border-radius:12px;
+  padding:.55rem .85rem;
+}
+
+.btn-reject:hover{
+  background:rgba(220,53,69,.14);
+  color:#ff6b6b;
+}
+
+.empty-state{
+  min-height:200px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  color:var(--muted);
+  text-align:center;
+}
+
+.empty-state i{
+  font-size:2rem;
+  color:#1468f5;
+}
+
+/* MOBILE */
+.rcp-mobile-list{
+  display:none;
+}
+
+.rcp-request-mobile-card{
+  background:
+    radial-gradient(circle at top right, rgba(20,104,245,.10), transparent 35%),
+    var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:1rem;
+  box-shadow:0 16px 40px rgba(0,0,0,.16);
+}
+
+.rcp-request-mobile-card + .rcp-request-mobile-card{
+  margin-top:1rem;
+}
+
+.mobile-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1rem;
+}
+
+.mobile-name{
+  color:var(--text);
+  font-weight:900;
+  font-size:1rem;
+}
+
+.mobile-email{
+  color:var(--muted);
+  font-size:.8rem;
+  margin-top:.15rem;
+}
+
+.mobile-box{
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--border);
+  margin-bottom:1rem;
+}
+
+.mobile-label{
+  color:var(--muted);
+  font-size:.74rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:.3rem;
+}
+
+.mobile-value{
+  color:var(--text);
+  font-weight:800;
+}
+
+.mobile-bottom{
+  padding-top:.9rem;
+  border-top:1px solid var(--border);
+}
+
+/* MODAL */
+.rcp-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.rcp-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.rcp-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.rcp-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.13);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ff6b6b;
+  font-size:1.55rem;
+}
+
+.rcp-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.rcp-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.rcp-modal-body{
+  padding:1.5rem;
+}
+
+.rcp-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.rcp-modal textarea{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:130px;
+  box-shadow:none!important;
+}
+
+.rcp-modal textarea:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:768px){
+  .rcp-requests-head{
+    flex-direction:column;
+  }
+
+  .rcp-title{
+    font-size:1.35rem;
+  }
+
+  .rcp-title-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+  }
+
+  .rcp-filter-card{
+    padding:1rem;
+  }
+
+  .rcp-filter-card .btn-soft,
+  .rcp-filter-card .btn-orange{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+
+  .desktop-table{
+    display:none;
+  }
+
+  .rcp-mobile-list{
+    display:block;
+    padding:1rem;
+  }
+
+  .rcp-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .rcp-modal-footer{
+    flex-direction:column;
+  }
+
+  .rcp-modal-footer .btn-soft,
+  .rcp-modal-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="rcp-requests-head">
+  <div class="rcp-title-wrap">
+    <div class="rcp-title-icon">
+      <i class="bi bi-inbox"></i>
+    </div>
+
+    <div>
+      <h1 class="rcp-title">Wnioski RCP</h1>
+      <div class="rcp-subtitle">
+        Panel HR / Biuro / Manager — akceptacja i odrzucanie wniosków.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="rcp-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md">
+        <select name="status" class="form-select">
+          <option value="">Wszystkie statusy</option>
+          {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if active_status == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="request_type" class="form-select">
+          <option value="">Wszystkie typy</option>
+          {% for value, label in type_choices %}
+            <option value="{{ value }}" {% if active_request_type == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="user" class="form-select">
+          <option value="">Wszyscy pracownicy</option>
+          {% for employee in employees %}
+            <option value="{{ employee.id }}" {% if active_user_id == employee.id|stringformat:"s" %}selected{% endif %}>
+              {{ employee.first_name }} {{ employee.last_name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-auto">
+        <button class="btn-orange w-100">
+          <i class="bi bi-search me-1"></i>
+          Filtruj
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="rcp-list-card">
+  <div class="rcp-list-header">
+    <div class="rcp-list-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista wniosków</h3>
+      <p>Pracownik, typ wniosku, proponowane godziny, powód i decyzja.</p>
+    </div>
+  </div>
+
+  <div class="desktop-table">
+    <div class="table-responsive">
+      <table class="table rcp-table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Pracownik</th>
+            <th>Typ</th>
+            <th>Data / wpis</th>
+            <th>Proponowane godziny</th>
+            <th>Powód</th>
+            <th>Status</th>
+            <th>Decyzja</th>
+            <th>Akcje</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for req in requests %}
+            <tr>
+              <td>
+                <div class="employee-main">
+                  {{ req.user.first_name }} {{ req.user.last_name }}
+                </div>
+                <div class="employee-sub">
+                  {{ req.user.email }}
+                </div>
+              </td>
+
+              <td>
+                <span class="badge-soft badge-type">
+                  {{ req.get_request_type_display }}
+                </span>
+              </td>
+
+              <td>
+                {% if req.request_type == "edit" and req.entry %}
+                  <div class="fw-bold">{{ req.entry.date|date:"d.m.Y" }}</div>
+                  <div class="small text-muted">
+                    {{ req.entry.start_time|time:"H:i" }} – {{ req.entry.end_time|time:"H:i" }}
+                  </div>
+                {% else %}
+                  <div class="fw-bold">{{ req.date|date:"d.m.Y" }}</div>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if req.new_start_time and req.new_end_time %}
+                  <strong>{{ req.new_start_time|time:"H:i" }} – {{ req.new_end_time|time:"H:i" }}</strong>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="reason-box">
+                  {{ req.reason|linebreaksbr }}
+
+                  {% if req.rejection_reason %}
+                    <div class="reason-reject">
+                      <strong>Powód odrzucenia:</strong><br>
+                      {{ req.rejection_reason|linebreaksbr }}
+                    </div>
+                  {% endif %}
+                </div>
+              </td>
+
+              <td>
+                {% if req.status == "pending" %}
+                  <span class="badge-soft badge-pending">
+                    <i class="bi bi-hourglass-split"></i>
+                    Oczekujący
+                  </span>
+                {% elif req.status == "approved" %}
+                  <span class="badge-soft badge-approved">
+                    <i class="bi bi-check-circle"></i>
+                    Zatwierdzony
+                  </span>
+                {% elif req.status == "rejected" %}
+                  <span class="badge-soft badge-rejected">
+                    <i class="bi bi-x-circle"></i>
+                    Odrzucony
+                  </span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if req.decided_by %}
+                  <div class="fw-bold">
+                    {{ req.decided_by.first_name }} {{ req.decided_by.last_name }}
+                  </div>
+                  <div class="small text-muted">
+                    {{ req.decided_at|date:"d.m.Y H:i" }}
+                  </div>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if req.status == "pending" %}
+                  <div class="action-group">
+                    <form method="post" action="{% url 'time_entry_request_approve' req.id %}">
+                      {% csrf_token %}
+                      <button class="btn-approve">
+                        <i class="bi bi-check-lg me-1"></i>
+                        Zatwierdź
+                      </button>
+                    </form>
+
+                    <button class="btn-reject"
+                            type="button"
+                            data-bs-toggle="modal"
+                            data-bs-target="#rejectRequestModal"
+                            data-request-id="{{ req.id }}">
+                      <i class="bi bi-x-lg me-1"></i>
+                      Odrzuć
+                    </button>
+                  </div>
+                {% else %}
+                  <span class="text-muted small">Rozpatrzony</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8">
+                <div class="empty-state">
+                  <i class="bi bi-inbox"></i>
+                  <strong>Brak wniosków</strong>
+                  <span>Nie znaleziono żadnych wniosków RCP.</span>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="rcp-mobile-list">
+    {% for req in requests %}
+      <div class="rcp-request-mobile-card">
+        <div class="mobile-top">
+          <div>
+            <div class="mobile-name">
+              {{ req.user.first_name }} {{ req.user.last_name }}
+            </div>
+            <div class="mobile-email">
+              {{ req.user.email }}
+            </div>
+          </div>
+
+          {% if req.status == "pending" %}
+            <span class="badge-soft badge-pending">Oczekujący</span>
+          {% elif req.status == "approved" %}
+            <span class="badge-soft badge-approved">Zatwierdzony</span>
+          {% elif req.status == "rejected" %}
+            <span class="badge-soft badge-rejected">Odrzucony</span>
+          {% endif %}
+        </div>
+
+        <div class="mobile-box">
+          <div class="mobile-label">Typ</div>
+          <div class="mobile-value">{{ req.get_request_type_display }}</div>
+        </div>
+
+        <div class="mobile-box">
+          <div class="mobile-label">Data / wpis</div>
+          <div class="mobile-value">
+            {% if req.request_type == "edit" and req.entry %}
+              {{ req.entry.date|date:"d.m.Y" }}
+              <div class="small text-muted">
+                {{ req.entry.start_time|time:"H:i" }} – {{ req.entry.end_time|time:"H:i" }}
+              </div>
+            {% else %}
+              {{ req.date|date:"d.m.Y" }}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mobile-box">
+          <div class="mobile-label">Proponowane godziny</div>
+          <div class="mobile-value">
+            {% if req.new_start_time and req.new_end_time %}
+              {{ req.new_start_time|time:"H:i" }} – {{ req.new_end_time|time:"H:i" }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mobile-box">
+          <div class="mobile-label">Powód</div>
+          <div class="mobile-value">
+            {{ req.reason|linebreaksbr }}
+
+            {% if req.rejection_reason %}
+              <div class="reason-reject">
+                <strong>Powód odrzucenia:</strong><br>
+                {{ req.rejection_reason|linebreaksbr }}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mobile-bottom">
+          {% if req.status == "pending" %}
+            <div class="action-group">
+              <form method="post" action="{% url 'time_entry_request_approve' req.id %}">
+                {% csrf_token %}
+                <button class="btn-approve">
+                  <i class="bi bi-check-lg me-1"></i>
+                  Zatwierdź
+                </button>
+              </form>
+
+              <button class="btn-reject"
+                      type="button"
+                      data-bs-toggle="modal"
+                      data-bs-target="#rejectRequestModal"
+                      data-request-id="{{ req.id }}">
+                <i class="bi bi-x-lg me-1"></i>
+                Odrzuć
+              </button>
+            </div>
+          {% else %}
+            <span class="text-muted small">Wniosek rozpatrzony</span>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <strong>Brak wniosków</strong>
+        <span>Nie znaleziono żadnych wniosków RCP.</span>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="modal fade" id="rejectRequestModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rcp-modal">
+
+      <form method="post" id="rejectRequestForm">
+        {% csrf_token %}
+
+        <div class="rcp-modal-header">
+          <div class="rcp-modal-icon">
+            <i class="bi bi-x-circle"></i>
+          </div>
+
+          <div>
+            <h4>Odrzuć wniosek</h4>
+            <p>Podaj powód odrzucenia wniosku RCP.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="rcp-modal-body">
+          <label class="form-label fw-semibold">
+            Powód odrzucenia
+          </label>
+
+          <textarea name="reason"
+                    class="form-control"
+                    rows="5"
+                    required
+                    placeholder="Opisz powód odrzucenia..."></textarea>
+        </div>
+
+        <div class="rcp-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-x-circle"></i>
+            Odrzuć wniosek
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div id="rejectRequestUrlTemplate"
+     data-url-template="{% url 'time_entry_request_reject' 999999 %}"
+     class="d-none"></div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const rejectModal = document.getElementById("rejectRequestModal");
+
+  if (rejectModal) {
+    rejectModal.addEventListener("show.bs.modal", function (event) {
+      const button = event.relatedTarget;
+      const requestId = button.getAttribute("data-request-id");
+      const template = document
+        .getElementById("rejectRequestUrlTemplate")
+        .getAttribute("data-url-template");
+
+      document.getElementById("rejectRequestForm").action =
+        template.replace("999999", requestId);
+    });
+  }
+});
+</script>
+
+{% endblock %}

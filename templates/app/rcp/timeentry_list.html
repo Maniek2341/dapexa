@@ -1,0 +1,1776 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+{% load time_extras %}
+{% block content %}
+
+<style>
+.rcp-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.rcp-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.rcp-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.rcp-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.rcp-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-request-edit{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.35rem;
+  padding:.55rem .85rem;
+  white-space:nowrap;
+  font-size:.8rem;
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.rcp-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.rcp-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1rem;
+  margin-bottom:1.5rem;
+}
+
+.rcp-stat-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1.2rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.rcp-stat-label{
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:700;
+}
+
+.rcp-stat-value{
+  margin-top:.35rem;
+  color:var(--text);
+  font-size:1.8rem;
+  font-weight:900;
+}
+
+.rcp-stat-sub{
+  margin-top:.35rem;
+  color:var(--muted);
+  font-size:.78rem;
+}
+
+.rcp-filter-card,
+.rcp-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.rcp-filter-card{
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+}
+
+.rcp-filter-card .form-control,
+.rcp-filter-card .form-select{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.rcp-filter-card .form-control:focus,
+.rcp-filter-card .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.rcp-list-card{
+  overflow:hidden;
+}
+
+.rcp-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.rcp-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.rcp-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.rcp-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.rcp-table{
+  color:var(--text);
+  margin:0;
+}
+
+.rcp-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+  background:rgba(255,255,255,.025);
+  white-space:nowrap;
+}
+
+.rcp-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.rcp-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.rcp-date-link{
+  color:var(--text);
+  font-weight:900;
+  text-decoration:none;
+}
+
+.rcp-date-link:hover{
+  color:#1468f5;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+}
+
+.badge-office{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.15);
+  border-color:rgba(13,110,253,.25);
+}
+
+.badge-remote{
+  color:#5bd6ff;
+  background:rgba(13,202,240,.13);
+  border-color:rgba(13,202,240,.22);
+}
+
+.badge-field{
+  color:#ffc857;
+  background:rgba(255,193,7,.16);
+  border-color:rgba(255,193,7,.25);
+}
+
+.badge-delegacja{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-green{
+  color:#00ff2a;
+  border-color:rgba(0,255,42,.18);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+
+.rcp-mobile-card{
+  border:1px solid var(--border);
+  border-radius:22px;
+  background:var(--card);
+  padding:1rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.rcp-mobile-card + .rcp-mobile-card{
+  margin-top:1rem;
+}
+
+.rcp-mobile-hours-badge{
+  min-width:78px;
+  text-align:center;
+  padding:.8rem;
+  border-radius:16px;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.rcp-mobile-hours-badge-value{
+  color:#1468f5;
+  font-weight:900;
+}
+
+.rcp-mobile-meta-box{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+  padding:1rem;
+}
+
+.rcp-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.rcp-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.rcp-modal-header.danger{
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.rcp-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.rcp-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+}
+
+.rcp-modal-icon.danger{
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+  color:#ff6b6b;
+}
+
+.rcp-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.rcp-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.rcp-modal-body{
+  padding:1.5rem;
+}
+
+.rcp-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.rcp-modal .form-control,
+.rcp-modal .form-select,
+.rcp-modal textarea{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+
+.rcp-modal textarea{
+  min-height:120px;
+}
+
+.rcp-modal .form-control:focus,
+.rcp-modal .form-select:focus,
+.rcp-modal textarea:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.rcp-preview{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:991px){
+  .rcp-stats-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:768px){
+  .rcp-page-head{
+    flex-direction:column;
+  }
+
+  .rcp-actions,
+  .rcp-actions .btn-orange,
+  .rcp-actions .btn-soft{
+    width:100%;
+  }
+
+  .rcp-actions a,
+  .rcp-actions button{
+    justify-content:center;
+  }
+
+  .rcp-stats-grid{
+    grid-template-columns:1fr;
+  }
+
+  .rcp-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .rcp-modal-footer{
+    flex-direction:column;
+  }
+
+  .rcp-modal-footer .btn-soft,
+  .rcp-modal-footer .btn-orange,
+  .rcp-modal-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+.rcp-mobile-list{
+  padding:1rem;
+}
+
+.rcp-mobile-card{
+  background:
+    radial-gradient(circle at top right, rgba(20,104,245,.10), transparent 35%),
+    var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:1rem;
+  box-shadow:0 16px 40px rgba(0,0,0,.16);
+}
+
+.rcp-mobile-card + .rcp-mobile-card{
+  margin-top:1rem;
+}
+
+.rcp-mobile-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1rem;
+}
+
+.rcp-mobile-date{
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.rcp-mobile-day{
+  margin-top:.15rem;
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.rcp-mobile-time-total{
+  min-width:82px;
+  padding:.75rem .8rem;
+  border-radius:18px;
+  text-align:center;
+  color:#1468f5;
+  font-weight:900;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.20);
+}
+
+.rcp-mobile-box{
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--border);
+  margin-bottom:1rem;
+}
+
+.rcp-mobile-label{
+  color:var(--muted);
+  font-size:.74rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:.3rem;
+}
+
+.rcp-mobile-value{
+  color:var(--text);
+  font-size:1rem;
+  font-weight:900;
+}
+
+.rcp-mobile-bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding-top:.9rem;
+  border-top:1px solid var(--border);
+}
+
+.rcp-mobile-empty{
+  text-align:center;
+  color:var(--muted);
+  border:1px dashed var(--border);
+  border-radius:22px;
+  padding:2rem 1rem;
+  background:rgba(255,255,255,.02);
+}
+
+.month-picker{
+  position:relative;
+}
+
+.month-picker-input{
+  min-height:54px;
+  border-radius:16px !important;
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  font-weight:700;
+  cursor:pointer;
+  padding-right:52px;
+}
+
+.month-picker-input:focus{
+  border-color:rgba(20,104,245,.45)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.12)!important;
+}
+
+.month-picker-trigger{
+  position:absolute;
+  right:14px;
+  top:50%;
+  transform:translateY(-50%);
+  border:0;
+  background:none;
+  color:#1468f5;
+  font-size:1.1rem;
+}
+
+.month-picker-dropdown{
+  position:absolute;
+  top:calc(100% + 10px);
+  left:0;
+  width:100%;
+  min-width:320px;
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(20,104,245,.14),
+      transparent 35%),
+    var(--card);
+
+  border:1px solid var(--border);
+  border-radius:24px;
+
+  padding:1rem;
+  z-index:999;
+
+  box-shadow:
+    0 25px 60px rgba(0,0,0,.35);
+}
+
+.month-picker-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:1rem;
+}
+
+.month-picker-year{
+  font-size:1.15rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.month-nav-btn{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  transition:.2s;
+}
+
+.month-nav-btn:hover{
+  background:rgba(20,104,245,.12);
+  border-color:rgba(20,104,245,.25);
+  color:#1468f5;
+}
+
+.month-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:.65rem;
+}
+
+.month-item{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+
+  border-radius:14px;
+  min-height:50px;
+
+  font-weight:700;
+  transition:.2s;
+}
+
+.month-item:hover{
+  background:rgba(20,104,245,.08);
+  border-color:rgba(20,104,245,.18);
+  color:#1468f5;
+}
+
+.month-item.active{
+  background:
+    linear-gradient(
+      135deg,
+      #1468f5,
+      #ff9f43
+    );
+
+  color:#fff;
+  border-color:transparent;
+
+  box-shadow:
+    0 10px 25px rgba(20,104,245,.35);
+}
+</style>
+
+<div class="rcp-page-head">
+  <div class="rcp-title-wrap">
+    <div class="rcp-title-icon">
+      <i class="bi bi-clock-history"></i>
+    </div>
+
+    <div>
+      <h1 class="rcp-title">Rejestracja czasu pracy</h1>
+      <div class="rcp-subtitle">
+        {% if viewed_user.id == request.user.id %}
+          Podgląd Twoich wpisów RCP i statystyk miesięcznych.
+        {% else %}
+          Podgląd wpisów RCP użytkownika:
+          <strong>{{ viewed_user.first_name }} {{ viewed_user.last_name }}</strong>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="rcp-actions">
+    <a class="btn-orange" href="{% url 'time_entry_create' %}">
+      <i class="bi bi-plus-lg me-1"></i>
+      Nowy wpis
+    </a>
+
+    {% if request.user.role == request.user.Role.EMPLOYEE %}
+      <button type="button"
+              class="btn-soft d-none d-md-inline-flex"
+              data-bs-toggle="modal"
+              data-bs-target="#missingHoursModal">
+        <i class="bi bi-exclamation-triangle me-1"></i>
+        Zaległe godziny
+      </button>
+
+      <button type="button"
+              class="btn-soft d-none d-md-inline-flex"
+              data-bs-toggle="modal"
+              data-bs-target="#editHoursRequestModal">
+        <i class="bi bi-pencil-square me-1"></i>
+        Wniosek o edycję
+      </button>
+    {% endif %}
+  </div>
+</div>
+
+<div class="rcp-stats-grid">
+  <div class="rcp-stat-card">
+    <div class="rcp-stat-label">Suma godzin</div>
+    <div class="rcp-stat-value">{{ total_hours|decimal_hours_to_hm }} h</div>
+    <div class="rcp-stat-sub">Po aktualnych filtrach</div>
+  </div>
+
+  <div class="rcp-stat-card">
+    <div class="rcp-stat-label">Dni pracy</div>
+    <div class="rcp-stat-value">{{ work_days_count }}</div>
+    <div class="rcp-stat-sub">Unikalne dni z wpisami</div>
+  </div>
+
+  <div class="rcp-stat-card">
+    <div class="rcp-stat-label">Średnio dziennie</div>
+    <div class="rcp-stat-value">{{ avg_daily_hours|decimal_hours_to_hm }}</div>
+    <div class="rcp-stat-sub">Średnia z dni z wpisami</div>
+  </div>
+
+  <div class="rcp-stat-card">
+    <div class="rcp-stat-label">Nadgodziny</div>
+    <div class="rcp-stat-value">{{ overtime_hours|decimal_hours_to_hm }} h</div>
+    <div class="rcp-stat-sub">Czas powyżej 8:00 dziennie</div>
+  </div>
+</div>
+
+
+
+<div class="rcp-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+      {% if can_choose_employee %}
+        <div class="col-12 col-md">
+          <select name="user" class="form-select">
+            <option value="">Moje godziny</option>
+            {% for employee in employees %}
+              <option value="{{ employee.id }}" {% if selected_user_id == employee.id|stringformat:"s" %}selected{% endif %}>
+                {{ employee.first_name }} {{ employee.last_name }}{% if not employee.first_name and not employee.last_name %}{{ employee.email }}{% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
+
+      <div class="col-12 col-md">
+              <div class="month-picker">
+                <input
+                  type="text"
+                  id="monthPickerDisplay"
+                  class="form-control month-picker-input"
+                  readonly
+                  value="{{ active_month_label|default:'' }}"
+                  placeholder="Wybierz miesiąc"
+                >
+
+                <input type="hidden" name="year" id="monthPickerYear" value="{{ active_year }}">
+                <input type="hidden" name="month_num" id="monthPickerMonth" value="{{ active_month_num }}">
+
+                <button type="button" class="month-picker-trigger" id="monthPickerTrigger" aria-label="Wybierz miesiąc">
+                  <i class="bi bi-calendar3"></i>
+                </button>
+
+                <div class="month-picker-dropdown d-none" id="monthPickerDropdown">
+                  <div class="month-picker-header">
+                    <button type="button" class="month-nav-btn" id="prevYearBtn">
+                      <i class="bi bi-chevron-left"></i>
+                    </button>
+
+                    <div class="month-picker-year" id="monthPickerCurrentYear">2026</div>
+
+                    <button type="button" class="month-nav-btn" id="nextYearBtn">
+                      <i class="bi bi-chevron-right"></i>
+                    </button>
+                  </div>
+
+                  <div class="month-grid" id="monthGrid"></div>
+                </div>
+                
+              </div>
+      </div>
+
+      <div class="col-12 col-md-auto d-flex gap-2">
+        <button class="btn-orange">
+          <i class="bi bi-search me-1"></i>
+          Filtruj
+        </button>
+
+        <a href="{% url 'time_entry_pdf' %}?year={{ active_year }}&month_num={{ active_month_num }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}"
+           class="btn-soft">
+          <i class="bi bi-file-earmark-pdf me-1"></i>
+          PDF
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="rcp-list-card">
+  <div class="rcp-list-header">
+    <div class="rcp-list-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista wpisów RCP</h3>
+      <p>Data, godziny pracy, tryb, suma godzin i szybkie akcje.</p>
+    </div>
+  </div>
+
+  <div class="table-responsive d-none d-md-block">
+          <table class="table rcp-table align-middle mb-0">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Godziny</th>
+                <th>Tryb pracy</th>
+                <th>Godzin</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in entries %}
+              <tr>
+                <td>
+                  <a href="" class="fw-bold rcp-date-link">
+                    {{ entry.date|date:"d.m.Y" }}
+                  </a>
+                </td>
+
+                <td>
+                  {{ entry.start_time|time:"H:i" }} – {{ entry.end_time|time:"H:i" }}
+                </td>
+
+                <td>
+                  {% if entry.work_mode == "office" %}
+                    <span class="badge-soft badge-office">Stacjonarna</span>
+                  {% elif entry.work_mode == "remote" %}
+                    <span class="badge-soft badge-remote">Zdalna</span>
+                  {% elif entry.work_mode == "field" %}
+                    <span class="badge-soft badge-field">Teren</span>
+                  {% elif entry.work_mode == "delegacja" %}
+                    <span class="badge-soft badge-delegacja">Delegacja</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <span class="rcp-hours">{{ entry.duration_hours|decimal_hours_to_hm }}</span>
+                </td>
+
+                <td>
+                {% if can_edit_delete_directly %}
+                 <a href="{% url 'time_entry_update' entry.id %}" class="icon-btn icon-btn-green">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+
+                <button type="button"
+                        class="icon-btn icon-btn-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteEntryModal"
+                        data-delete-url="{% url 'time_entry_delete' entry.id %}"
+                        data-entry-date="{{ entry.date|date:'d.m.Y' }}"
+                        data-entry-time="{{ entry.start_time|time:'H:i' }} – {{ entry.end_time|time:'H:i' }}">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+
+                {% elif should_request_edit %}
+                  <button
+                    type="button"
+                    class="btn-orange btn-request-edit"
+                    data-bs-toggle="modal"
+                    data-bs-target="#editSingleEntryModal"
+                    data-entry-id="{{ entry.id }}"
+                    data-entry-date="{{ entry.date|date:'d.m.Y' }}"
+                    data-entry-time="{{ entry.start_time|time:'H:i' }} – {{ entry.end_time|time:'H:i' }}"
+                  >
+                    <i class="bi bi-pencil-square me-1"></i>Prośba o edycję
+                  </button>
+                {% else %}
+                  <span class="text-muted small">Brak akcji</span>
+                {% endif %}
+              </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="text-center text-muted py-4">
+                  Brak wpisów RCP
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <div class="rcp-mobile-list d-md-none">
+  {% for entry in entries %}
+    <div class="rcp-mobile-card">
+
+      <div class="rcp-mobile-top">
+        <div>
+          <div class="rcp-mobile-date">
+            {{ entry.date|date:"d.m.Y" }}
+          </div>
+          <div class="rcp-mobile-day">
+            {{ entry.date|date:"l" }}
+          </div>
+        </div>
+
+        <div class="rcp-mobile-time-total">
+          {{ entry.duration_hours|decimal_hours_to_hm }}
+        </div>
+      </div>
+
+      <div class="rcp-mobile-box">
+        <div class="rcp-mobile-label">Godziny pracy</div>
+        <div class="rcp-mobile-value">
+          {{ entry.start_time|time:"H:i" }} – {{ entry.end_time|time:"H:i" }}
+        </div>
+      </div>
+
+      <div class="rcp-mobile-bottom">
+        <div>
+          {% if entry.work_mode == "office" %}
+            <span class="badge-soft badge-office">Stacjonarna</span>
+          {% elif entry.work_mode == "remote" %}
+            <span class="badge-soft badge-remote">Zdalna</span>
+          {% elif entry.work_mode == "field" %}
+            <span class="badge-soft badge-field">Teren</span>
+          {% elif entry.work_mode == "delegacja" %}
+            <span class="badge-soft badge-delegacja">Delegacja</span>
+          {% endif %}
+        </div>
+
+        <div class="d-flex gap-2">
+          {% if can_edit_delete_directly %}
+            <a href="{% url 'time_entry_update' entry.id %}" class="icon-btn icon-btn-green">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+
+            <button type="button"
+                    class="icon-btn icon-btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteEntryModal"
+                    data-delete-url="{% url 'time_entry_delete' entry.id %}"
+                    data-entry-date="{{ entry.date|date:'d.m.Y' }}"
+                    data-entry-time="{{ entry.start_time|time:'H:i' }} – {{ entry.end_time|time:'H:i' }}">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  {% empty %}
+    <div class="rcp-mobile-empty">
+      Brak wpisów RCP
+    </div>
+  {% endfor %}
+</div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const displayInput = document.getElementById("monthPickerDisplay");
+    const triggerBtn = document.getElementById("monthPickerTrigger");
+    const dropdown = document.getElementById("monthPickerDropdown");
+    const currentYearEl = document.getElementById("monthPickerCurrentYear");
+    const prevYearBtn = document.getElementById("prevYearBtn");
+    const nextYearBtn = document.getElementById("nextYearBtn");
+    const monthGrid = document.getElementById("monthGrid");
+    const hiddenYear = document.getElementById("monthPickerYear");
+    const hiddenMonth = document.getElementById("monthPickerMonth");
+
+    const months = [
+      { value: 1, label: "sty" },
+      { value: 2, label: "lut" },
+      { value: 3, label: "mar" },
+      { value: 4, label: "kwi" },
+      { value: 5, label: "maj" },
+      { value: 6, label: "cze" },
+      { value: 7, label: "lip" },
+      { value: 8, label: "sie" },
+      { value: 9, label: "wrz" },
+      { value: 10, label: "paź" },
+      { value: 11, label: "lis" },
+      { value: 12, label: "gru" }
+    ];
+
+    let selectedYear = parseInt(hiddenYear.value || new Date().getFullYear(), 10);
+    let selectedMonth = parseInt(hiddenMonth.value || (new Date().getMonth() + 1), 10);
+    let browsingYear = selectedYear;
+
+    function updateDisplay() {
+      const month = months.find(m => m.value === selectedMonth);
+      displayInput.value = month ? `${month.label} ${selectedYear}` : "";
+    }
+
+    function renderMonths() {
+      currentYearEl.textContent = browsingYear;
+      monthGrid.innerHTML = "";
+
+      months.forEach(month => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "month-item";
+
+        if (month.value === selectedMonth && browsingYear === selectedYear) {
+          btn.classList.add("active");
+        }
+
+        btn.textContent = month.label;
+
+        btn.addEventListener("click", function () {
+          selectedYear = browsingYear;
+          selectedMonth = month.value;
+
+          hiddenYear.value = String(selectedYear);
+          hiddenMonth.value = String(selectedMonth);
+
+          updateDisplay();
+          renderMonths();
+          dropdown.classList.add("d-none");
+        });
+
+        monthGrid.appendChild(btn);
+      });
+    }
+
+    function toggleDropdown() {
+      dropdown.classList.toggle("d-none");
+      if (!dropdown.classList.contains("d-none")) {
+        browsingYear = selectedYear;
+        renderMonths();
+      }
+    }
+
+    displayInput.addEventListener("click", toggleDropdown);
+    triggerBtn.addEventListener("click", toggleDropdown);
+
+    prevYearBtn.addEventListener("click", function () {
+      browsingYear -= 1;
+      renderMonths();
+    });
+
+    nextYearBtn.addEventListener("click", function () {
+      browsingYear += 1;
+      renderMonths();
+    });
+
+    document.addEventListener("click", function (event) {
+      const picker = document.querySelector(".month-picker");
+      if (picker && !picker.contains(event.target)) {
+        dropdown.classList.add("d-none");
+      }
+    });
+
+    updateDisplay();
+    renderMonths();
+  });
+</script>
+
+<script>
+  (function(){
+    const root = document.documentElement;
+    const key = 'dashboard-theme';
+    const saved = localStorage.getItem(key) || 'dark';
+    root.setAttribute('data-theme', saved);
+
+    const btn = document.getElementById('themeToggle');
+
+    if (btn) {
+      const setIcon = () => {
+        btn.innerHTML = root.getAttribute('data-theme') === 'light'
+          ? '<i class="bi bi-sun"></i>'
+          : '<i class="bi bi-moon-stars"></i>';
+      };
+
+      setIcon();
+
+      btn.addEventListener('click', ()=>{
+        const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        root.setAttribute('data-theme', next);
+        localStorage.setItem(key, next);
+        setIcon();
+
+        if (typeof renderPL === "function") {
+          renderPL(document.querySelector('[data-range].active')?.getAttribute('data-range') || 'mtd');
+        }
+      });
+    }
+  })();
+</script>
+<!-- Modal: usuwanie wpisu -->
+<div class="modal fade" id="deleteEntryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rcp-modal">
+
+      <form method="post" id="deleteEntryForm">
+        {% csrf_token %}
+
+        <div class="rcp-modal-header danger">
+          <div class="rcp-modal-icon danger">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć wpis?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="rcp-modal-body">
+          <div class="rcp-preview">
+            <div class="small text-muted mb-2">Usuwasz wpis:</div>
+
+            <div class="fw-bold">
+              <i class="bi bi-calendar-event me-1" style="color:#1468f5;"></i>
+              <span id="deleteEntryDate">—</span>
+            </div>
+
+            <div class="small text-muted mt-1">
+              <i class="bi bi-clock me-1"></i>
+              <span id="deleteEntryTime">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="rcp-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-trash"></i>
+            Usuń wpis
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="missingHoursModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rcp-modal">
+      <form method="post" action="{% url 'time_entry_request_missing' %}">
+        {% csrf_token %}
+
+        <div class="rcp-modal-header">
+          <div class="rcp-modal-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+          </div>
+
+          <div>
+            <h4>Uzupełnij zaległe godziny</h4>
+            <p>Wyślij prośbę o dodanie brakującego wpisu RCP.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="rcp-modal-body">
+
+          <div class="rcp-preview mb-4">
+            <div class="fw-bold mb-1">
+              <i class="bi bi-info-circle me-2 text-warning"></i>
+              Zaległy wpis RCP
+            </div>
+
+            <div class="small text-muted">
+              Wniosek zostanie przekazany do administratora lub przełożonego do akceptacji.
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              Data
+            </label>
+
+            <input type="date"
+                   name="date"
+                   class="form-control"
+                   required>
+          </div>
+
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                Godzina od
+              </label>
+
+              <input
+                id="missingHoursStartTime"
+                type="time"
+                name="new_start_time"
+                class="form-control"
+                value="07:00"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                Godzina do
+              </label>
+
+              <input
+                id="missingHoursEndTime"
+                type="time"
+                name="new_end_time"
+                class="form-control"
+                value="15:00"
+                required
+              >
+            </div>
+
+          </div>
+
+          <div class="mt-4">
+
+            <label class="form-label fw-semibold">
+              Powód
+            </label>
+
+            <textarea
+              name="reason"
+              class="form-control"
+              rows="5"
+              required
+              placeholder="Opisz dlaczego wpis nie został dodany wcześniej..."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+        <div class="rcp-modal-footer">
+
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-orange">
+            <i class="bi bi-send me-1"></i>
+            Wyślij prośbę
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editHoursRequestModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rcp-modal">
+
+      <form method="post" action="{% url 'time_entry_request_edit' %}">
+        {% csrf_token %}
+
+        <div class="rcp-modal-header">
+          <div class="rcp-modal-icon">
+            <i class="bi bi-pencil-square"></i>
+          </div>
+
+          <div>
+            <h4>Wniosek o edycję godzin</h4>
+            <p>Wyślij prośbę o zmianę istniejącego wpisu RCP.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="rcp-modal-body">
+
+          <div class="rcp-preview mb-4">
+            <div class="fw-bold mb-1">
+              <i class="bi bi-info-circle me-2 text-warning"></i>
+              Wniosek wymaga akceptacji
+            </div>
+
+            <div class="small text-muted">
+              Administrator lub przełożony musi zaakceptować zmianę godzin pracy.
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold">
+              Wpis do edycji
+            </label>
+
+            <select name="entry"
+                    class="form-select"
+                    required>
+
+              <option value="">
+                Wybierz wpis
+              </option>
+
+              {% for entry in entries %}
+                {% if entry.user_id == request.user.id %}
+                  <option value="{{ entry.id }}">
+                    {{ entry.date|date:"d.m.Y" }}
+                    |
+                    {{ entry.start_time|time:"H:i" }}
+                    –
+                    {{ entry.end_time|time:"H:i" }}
+                  </option>
+                {% endif %}
+              {% endfor %}
+
+            </select>
+          </div>
+
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                Nowa godzina od
+              </label>
+
+              <input
+                id="editRequestStartTime"
+                type="time"
+                name="new_start_time"
+                class="form-control"
+                value="07:00"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                Nowa godzina do
+              </label>
+
+              <input
+                id="editRequestEndTime"
+                type="time"
+                name="new_end_time"
+                class="form-control"
+                value="15:00"
+                required
+              >
+            </div>
+
+          </div>
+
+          <div class="mt-4">
+
+            <label class="form-label fw-semibold">
+              Powód edycji
+            </label>
+
+            <textarea
+              name="reason"
+              class="form-control"
+              rows="5"
+              required
+              placeholder="Opisz dokładnie co ma zostać zmienione..."
+            ></textarea>
+
+          </div>
+
+        </div>
+
+        <div class="rcp-modal-footer">
+
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-orange">
+            <i class="bi bi-send me-1"></i>
+            Wyślij wniosek
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editSingleEntryModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rcp-modal">
+
+      <form method="post" id="editSingleEntryForm">
+        {% csrf_token %}
+
+        <div class="rcp-modal-header">
+          <div class="rcp-modal-icon">
+            <i class="bi bi-pencil-square"></i>
+          </div>
+
+          <div>
+            <h4>Prośba o edycję wpisu</h4>
+            <p>Wyślij wniosek o zmianę wybranego wpisu RCP.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="rcp-modal-body">
+
+          <div class="rcp-preview mb-4">
+            <div class="small text-muted mb-2">Edytowany wpis:</div>
+
+            <div class="fw-bold">
+              <i class="bi bi-calendar-event me-1" style="color:#1468f5;"></i>
+              <span id="editSingleEntryDate">—</span>
+            </div>
+
+            <div class="small text-muted mt-1">
+              <i class="bi bi-clock me-1"></i>
+              <span id="editSingleEntryTime">—</span>
+            </div>
+          </div>
+
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                Nowa godzina od
+              </label>
+
+              <input
+                id="singleEditStartTime"
+                type="time"
+                name="new_start_time"
+                class="form-control"
+                value="07:00"
+                required
+              >
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">
+                Nowa godzina do
+              </label>
+
+              <input
+                id="singleEditEndTime"
+                type="time"
+                name="new_end_time"
+                class="form-control"
+                value="15:00"
+                required
+              >
+            </div>
+
+          </div>
+
+          <div class="mt-4">
+            <label class="form-label fw-semibold">
+              Powód edycji
+            </label>
+
+            <textarea
+              name="reason"
+              class="form-control"
+              rows="5"
+              required
+              placeholder="Opisz dokładnie co ma zostać zmienione..."
+            ></textarea>
+          </div>
+
+        </div>
+
+        <div class="rcp-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-orange">
+            <i class="bi bi-send me-1"></i>
+            Wyślij prośbę
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div id="editSingleEntryUrlTemplate"
+     data-url-template="{% url 'time_entry_request_edit_single' 999999 %}"
+     class="d-none"></div>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteModal = document.getElementById("deleteEntryModal");
+    if (deleteModal) {
+      deleteModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        const deleteUrl = button.getAttribute("data-delete-url");
+        const entryDate = button.getAttribute("data-entry-date");
+        const entryTime = button.getAttribute("data-entry-time");
+
+        document.getElementById("deleteEntryForm").action = deleteUrl;
+        document.getElementById("deleteEntryDate").textContent = entryDate || "—";
+        document.getElementById("deleteEntryTime").textContent = entryTime || "—";
+      });
+    }
+
+    const editSingleModal = document.getElementById("editSingleEntryModal");
+    if (editSingleModal) {
+      editSingleModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        const entryId = button.getAttribute("data-entry-id");
+        const entryDate = button.getAttribute("data-entry-date");
+        const entryTime = button.getAttribute("data-entry-time");
+
+        const form = document.getElementById("editSingleEntryForm");
+        form.action = `/rcp/request/edit/${entryId}/`;
+
+        document.getElementById("editSingleEntryDate").textContent = entryDate || "—";
+        document.getElementById("editSingleEntryTime").textContent = entryTime || "—";
+      });
+    }
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteModal = document.getElementById("deleteEntryModal");
+    if (deleteModal) {
+      deleteModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        const deleteUrl = button.getAttribute("data-delete-url");
+        const entryDate = button.getAttribute("data-entry-date");
+        const entryTime = button.getAttribute("data-entry-time");
+
+        document.getElementById("deleteEntryForm").action = deleteUrl;
+        document.getElementById("deleteEntryDate").textContent = entryDate || "—";
+        document.getElementById("deleteEntryTime").textContent = entryTime || "—";
+      });
+    }
+
+    const editSingleModal = document.getElementById("editSingleEntryModal");
+    if (editSingleModal) {
+      editSingleModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        const entryId = button.getAttribute("data-entry-id");
+        const entryDate = button.getAttribute("data-entry-date");
+        const entryTime = button.getAttribute("data-entry-time");
+
+        const form = document.getElementById("editSingleEntryForm");
+        const template = document.getElementById("editSingleEntryUrlTemplate").getAttribute("data-url-template");
+
+        form.action = template.replace("999999", entryId);
+
+        document.getElementById("editSingleEntryDate").textContent = entryDate || "—";
+        document.getElementById("editSingleEntryTime").textContent = entryTime || "—";
+
+        const startInput = document.getElementById("singleEditStartTime");
+        const endInput = document.getElementById("singleEditEndTime");
+        const reasonInput = form.querySelector('textarea[name="reason"]');
+
+        if (startInput) startInput.value = "07:00";
+        if (endInput) endInput.value = "15:00";
+        if (reasonInput) reasonInput.value = "";
+      });
+    }
+
+    function initTimePair(startSelector, endSelector) {
+      const startInput = document.querySelector(startSelector);
+      const endInput = document.querySelector(endSelector);
+
+      if (!startInput || !endInput || typeof flatpickr === "undefined") {
+        return;
+      }
+
+      let startPicker;
+      let endPicker;
+
+      startPicker = flatpickr(startInput, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 10,
+        defaultHour: 7,
+        allowInput: true,
+        clickOpens: true,
+        onChange: function(selectedDates, dateStr) {
+          if (!dateStr || !endPicker) return;
+          endPicker.set("minTime", dateStr);
+
+          if (endInput.value && endInput.value <= dateStr) {
+            endInput.value = "";
+          }
+        }
+      });
+
+      endPicker = flatpickr(endInput, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 10,
+        defaultHour: 15,
+        allowInput: true,
+        clickOpens: true,
+        onChange: function(selectedDates, dateStr) {
+          if (!dateStr || !startPicker) return;
+          startPicker.set("maxTime", dateStr);
+
+          if (startInput.value && startInput.value >= dateStr) {
+            startInput.value = "";
+          }
+        }
+      });
+
+      if (startInput.value) {
+        endPicker.set("minTime", startInput.value);
+      }
+
+      if (endInput.value) {
+        startPicker.set("maxTime", endInput.value);
+      }
+    }
+
+    initTimePair("#editRequestStartTime", "#editRequestEndTime");
+    initTimePair("#singleEditStartTime", "#singleEditEndTime");
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    function initTimePair(startSelector, endSelector) {
+      const startInput = document.querySelector(startSelector);
+      const endInput = document.querySelector(endSelector);
+
+      if (!startInput || !endInput || typeof flatpickr === "undefined") {
+        return;
+      }
+
+      let startPicker;
+      let endPicker;
+
+      startPicker = flatpickr(startInput, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 10,
+        defaultHour: 7,
+        allowInput: true,
+        clickOpens: true,
+        onChange: function(selectedDates, dateStr) {
+          if (!dateStr || !endPicker) return;
+          endPicker.set("minTime", dateStr);
+
+          if (endInput.value && endInput.value <= dateStr) {
+            endInput.value = "";
+          }
+        }
+      });
+
+      endPicker = flatpickr(endInput, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 10,
+        defaultHour: 15,
+        allowInput: true,
+        clickOpens: true,
+        onChange: function(selectedDates, dateStr) {
+          if (!dateStr || !startPicker) return;
+          startPicker.set("maxTime", dateStr);
+
+          if (startInput.value && startInput.value >= dateStr) {
+            startInput.value = "";
+          }
+        }
+      });
+
+      if (startInput.value) {
+        endPicker.set("minTime", startInput.value);
+      }
+
+      if (endInput.value) {
+        startPicker.set("maxTime", endInput.value);
+      }
+    }
+
+    initTimePair("#missingHoursStartTime", "#missingHoursEndTime");
+  });
+</script>
+
+{% endblock %}

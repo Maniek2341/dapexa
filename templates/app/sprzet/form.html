@@ -1,0 +1,367 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+.tool-form-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap;}
+.tool-form-title-wrap{display:flex;align-items:center;gap:1rem;}
+.tool-form-title-icon{width:62px;height:62px;border-radius:20px;display:flex;align-items:center;justify-content:center;color:#1468f5;font-size:1.6rem;background:radial-gradient(circle at top left,rgba(20,104,245,.35),transparent 55%),linear-gradient(135deg,rgba(20,104,245,.20),rgba(20,104,245,.08));border:1px solid rgba(20,104,245,.18);}
+.tool-form-title{margin:0;font-size:1.6rem;font-weight:900;color:var(--text);}
+.tool-form-subtitle{margin-top:.25rem;color:var(--muted);font-size:.92rem;}
+.tool-form-head .btn-soft{padding:.78rem 1.15rem;}
+.tool-form-page{width:100%;max-width:none;margin:0;padding-left:0;padding-right:0;}
+.tool-form-page .card{background:var(--card);border:1px solid var(--border)!important;border-radius:24px;overflow:hidden;box-shadow:0 18px 55px rgba(0,0,0,.14)!important;}
+.tool-form-page .card-header{padding:1.1rem 1.25rem;background:linear-gradient(120deg,rgba(20,104,245,.12),rgba(255,255,255,.02))!important;border-bottom:1px solid var(--border);color:var(--text);font-weight:900;}
+.tool-form-page .card-body{padding:1.25rem;}
+.tool-form-page .form-label{color:var(--muted);font-size:.82rem;font-weight:800;margin-bottom:.45rem;}
+.tool-form-page .form-control,.tool-form-page .form-select{background:rgba(255,255,255,.035);border:1px solid var(--border);color:var(--text);border-radius:13px;padding:.7rem .85rem;}
+.tool-form-page .form-control:focus,.tool-form-page .form-select:focus{border-color:rgba(20,104,245,.7);box-shadow:0 0 0 .2rem rgba(20,104,245,.12);}
+.tool-form-page .btn-brand{background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);border:0;color:#fff;border-radius:14px;font-weight:900;}
+.tool-form-page .btn-brand:hover{color:#fff;filter:brightness(1.06);}
+.tool-form-page .btn-soft{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:14px;font-weight:800;}
+.tool-form-page .btn-soft:hover{background:rgba(255,255,255,.08);color:var(--text);}
+.tool-form-page .btn-secondary{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:14px;font-weight:800;}
+.tool-image-preview{
+  width:100%;
+  height:240px;
+  border-radius:18px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.tool-image-preview img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.tool-placeholder{
+  text-align:center;
+  color:var(--muted);
+}
+
+.tool-placeholder i{
+  font-size:3rem;
+  opacity:.6;
+}
+
+@media (max-width:768px){
+  .card-body{
+    padding:1rem!important;
+  }
+
+  .btn{
+    font-size:.85rem;
+  }
+
+  .tool-image-preview{
+    height:200px;
+  }
+}
+
+  .btn-soft {
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:12px;
+  }
+
+  .btn-soft:hover {
+    background:rgba(255,255,255,.07);
+    color:var(--text);
+  }
+</style>
+
+<div class="container-fluid tool-form-page">
+
+  <div class="tool-form-head">
+    <div class="tool-form-title-wrap">
+      <div class="tool-form-title-icon"><i class="bi bi-tools"></i></div>
+    <div>
+      <h1 class="tool-form-title">
+        {% if is_edit %}Edytuj sprzęt{% else %}Dodaj sprzęt{% endif %}
+      </h1>
+      <div class="tool-form-subtitle">
+        {% if is_edit %}
+          Aktualizuj dane elektronarzędzia lub wyposażenia firmowego
+        {% else %}
+          Dodaj elektronarzędzie lub wyposażenie firmowe
+        {% endif %}
+      </div>
+    </div>
+    </div>
+
+    <a href="{% url 'tool_list' %}" class="btn btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+      Wróć
+    </a>
+  </div>
+
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+
+    <div class="row g-4">
+
+      <!-- LEWA KOLUMNA -->
+      <div class="col-lg-8">
+
+        <!-- PODSTAWOWE -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-transparent">
+            <strong>Podstawowe informacje</strong>
+          </div>
+
+          <div class="card-body">
+
+            <div class="row g-3">
+
+              <div class="col-md-8">
+                <label class="form-label">Nazwa</label>
+                {{ form.name }}
+                {{ form.name.errors }}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Kategoria</label>
+                {{ form.category }}
+                {{ form.category.errors }}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Status</label>
+                {{ form.status }}
+                {{ form.status.errors }}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Producent</label>
+                {{ form.manufacturer }}
+                {{ form.manufacturer.errors }}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Model</label>
+                {{ form.model }}
+                {{ form.model.errors }}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Numer seryjny</label>
+                {{ form.serial_number }}
+                {{ form.serial_number.errors }}
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Numer ewidencyjny</label>
+                {{ form.inventory_number }}
+                {{ form.inventory_number.errors }}
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ZAKUP -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-transparent">
+            <strong>Zakup i gwarancja</strong>
+          </div>
+
+          <div class="card-body">
+
+            <div class="row g-3">
+
+              <div class="col-md-4">
+                <label class="form-label">Data zakupu</label>
+                {{ form.purchase_date }}
+                {{ form.purchase_date.errors }}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Gwarancja do</label>
+                {{ form.warranty_until }}
+                {{ form.warranty_until.errors }}
+              </div>
+
+              <div class="col-md-4">
+                <label class="form-label">Cena zakupu netto</label>
+                {{ form.purchase_price_net }}
+                {{ form.purchase_price_net.errors }}
+              </div>
+
+            </div>
+
+          </div>
+          
+        </div>
+        <!-- PRZEGLĄDY -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-transparent">
+            <strong>Przeglądy</strong>
+          </div>
+
+          <div class="card-body">
+            <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label">
+                Ostatni przegląd
+              </label>
+
+              {{ form.last_inspection_date }}
+              {{ form.last_inspection_date.errors }}    
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">
+                Następny przegląd
+              </label>
+
+              {{ form.next_inspection_date }}
+              {{ form.next_inspection_date.errors }}
+            </div>
+
+          </div>
+        </div>
+    </div>
+
+
+      </div>
+
+      <!-- PRAWA KOLUMNA -->
+      <div class="col-lg-4">
+
+        <!-- ZDJĘCIE -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-transparent">
+            <strong>Zdjęcie sprzętu</strong>
+          </div>
+
+          <div class="card-body">
+
+            <div class="mb-3">
+              <label class="form-label">Zdjęcie</label>
+              {{ form.image }}
+              {{ form.image.errors }}
+            </div>
+
+            <div class="tool-image-preview">
+
+              {% if form.instance.image %}
+                <img
+                  id="toolImagePreview"
+                  src="{{ form.instance.image.url }}"
+                  alt="Podgląd zdjęcia"
+                >
+
+                <div id="toolImagePlaceholder" class="tool-placeholder d-none">
+                  <i class="bi bi-tools"></i>
+                  <div class="small mt-2">Brak zdjęcia</div>
+                </div>
+              {% else %}
+                <img
+                  id="toolImagePreview"
+                  src=""
+                  alt="Podgląd zdjęcia"
+                  class="d-none"
+                >
+
+                <div id="toolImagePlaceholder" class="tool-placeholder">
+                  <i class="bi bi-tools"></i>
+                  <div class="small mt-2">Brak zdjęcia</div>
+                </div>
+              {% endif %}
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PRZYPISANIE -->
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-transparent">
+            <strong>Przypisanie</strong>
+          </div>
+
+          <div class="card-body">
+
+            <div class="mb-3">
+              <label class="form-label">
+                Aktualnie u pracownika
+              </label>
+
+              {{ form.current_holder }}
+              {{ form.current_holder.errors }}
+            </div>
+
+            <div>
+              <label class="form-label">
+                Miejsce przechowywania
+              </label>
+
+              {{ form.storage_place }}
+              {{ form.storage_place.errors }}
+            </div>
+
+          </div>
+        </div>
+
+        
+        <!-- AKCJE -->
+        <div class="d-grid gap-2">
+
+          <button type="submit" class="btn btn-brand btn-lg">
+            <i class="bi bi-check-lg"></i>
+            {% if is_edit %}Zapisz zmiany{% else %}Zapisz sprzęt{% endif %}
+          </button>
+
+          <a href="{% url 'tool_list' %}" class="btn btn-soft">
+            Anuluj
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </form>
+
+</div>
+
+<script>
+(function(){
+
+  const input = document.getElementById('id_image');
+  const preview = document.getElementById('toolImagePreview');
+  const placeholder = document.getElementById('toolImagePlaceholder');
+
+  if(!input || !preview || !placeholder) return;
+
+  input.addEventListener('change', () => {
+
+    const file = input.files && input.files[0];
+
+    if(!file){
+      preview.src = '';
+      preview.classList.add('d-none');
+      placeholder.classList.remove('d-none');
+      return;
+    }
+
+    preview.src = URL.createObjectURL(file);
+
+    preview.classList.remove('d-none');
+    placeholder.classList.add('d-none');
+
+  });
+
+})();
+</script>
+
+{% endblock %}

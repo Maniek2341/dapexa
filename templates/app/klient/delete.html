@@ -1,0 +1,105 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+  <div>
+    <h1 class="h3 mb-1 fw-bold">Usuń klienta</h1>
+    <div class="text-muted" style="color:var(--muted)!important">
+      Potwierdź usunięcie klienta. Tej operacji nie da się cofnąć.
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- GŁÓWNA KARTA -->
+  <div class="col-12 col-xl-8">
+    <div class="card border border-danger">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-start justify-content-between">
+          <div>
+            <h5 class="fw-bold mb-1">
+              Czy na pewno chcesz usunąć tego klienta?
+            </h5>
+            <div class="text-muted" style="color:var(--muted)!important">
+              Usunięcie skasuje również powiązane osoby kontaktowe. Adresy zostaną usunięte tylko jeśli nie są używane przez innych klientów.
+            </div>
+          </div>
+          <div class="ms-3">
+            <span class="badge text-bg-danger">NIEODWRACALNE</span>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="small text-white-50">Klient</div>
+            <div class="fw-bold">
+              {% if client.client_type == 'company' %}
+                {{ client.name|default:"—" }}
+              {% else %}
+                {{ client.first_name|default:"" }} {{ client.last_name|default:"" }}
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="small text-white-50">E-mail</div>
+            <div class="fw-bold">{{ client.email|default:"—" }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="small text-white-50">Telefon</div>
+            <div class="fw-bold">{{ client.phone|default:"—" }}</div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="small text-white-50">NIP</div>
+            <div class="fw-bold">{{ client.nip|default:"—" }}</div>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <form method="post" action="{% url 'klient_delete' client.pk %}">
+          {% csrf_token %}
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'klient' %}" class="btn btn-outline-secondary">
+              Anuluj
+            </a>
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-trash me-2"></i>Usuń klienta
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL BOCZNY -->
+  <div class="col-12 col-xl-4">
+    <div class="card mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Co zostanie usunięte?</h5>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            • Dane klienta
+          </li>
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            • Osoby kontaktowe (jeśli istnieją)
+          </li>
+          <li class="list-group-item bg-transparent text-white-50 border-0">
+            • Adresy (tylko jeśli nie są używane przez innych klientów)
+          </li>
+        </ul>
+
+        <hr class="my-3">
+
+        <div class="small text-muted" style="color:var(--muted)!important">
+          Jeśli klient ma powiązane zlecenia/faktury/serwisy i masz FK z PROTECT, usunięcie może się nie udać — wtedy trzeba zrobić soft-delete (is_active=False).
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

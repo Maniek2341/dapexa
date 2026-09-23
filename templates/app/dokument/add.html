@@ -1,0 +1,141 @@
+{% extends "app/core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+  <div>
+    <h1 class="mb-1">
+      {% if object %}Edytuj dokument{% else %}Dodaj dokument{% endif %}
+    </h1>
+
+    <div class="text-muted">
+      {% if object %}
+        Zmień nazwę dokumentu lub podmień plik.
+      {% else %}
+        Wgraj dokument do firmowego magazynu plików.
+      {% endif %}
+    </div>
+  </div>
+
+  <a href="{% url 'documents_list' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left"></i>
+    Wróć
+  </a>
+</div>
+
+<div class="card"
+     style="background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:22px;overflow:hidden;">
+  <div class="card-body p-4 p-lg-5">
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Nazwa dokumentu</label>
+        {{ form.name }}
+
+        {% for error in form.name.errors %}
+          <div class="text-danger small mt-1">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      {% if object and object.file %}
+        <div class="mb-4 p-3 rounded-4"
+             style="background:rgba(255,255,255,.03);border:1px solid var(--border);">
+          <div class="small text-muted mb-1">Aktualny plik</div>
+
+          <a href="{{ object.file.url }}"
+             target="_blank"
+             class="fw-semibold text-decoration-none">
+            <i class="bi bi-paperclip me-1"></i>
+            {{ object.file.name }}
+          </a>
+        </div>
+      {% endif %}
+
+      <div class="mb-4">
+        <label class="form-label fw-semibold">
+          {% if object %}Podmień plik{% else %}Plik{% endif %}
+        </label>
+
+        <div class="upload-box p-4 text-center rounded-4">
+          <div class="upload-icon mb-3">
+            <i class="bi bi-cloud-arrow-up"></i>
+          </div>
+
+          {{ form.file }}
+
+          <div class="small text-muted mt-3">
+            {% if object %}
+              Zostaw puste, jeśli nie chcesz zmieniać pliku.
+            {% else %}
+              Obsługiwane: PDF, DOCX, XLSX, JPG, PNG itd.
+            {% endif %}
+          </div>
+        </div>
+
+        {% for error in form.file.errors %}
+          <div class="text-danger small mt-2">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 pt-2">
+        <a href="{% url 'documents_list' %}" class="btn btn-light px-4">
+          Anuluj
+        </a>
+
+        <button type="submit" class="btn btn-primary px-4">
+        {% if object %}
+            <i class="bi bi-save me-1"></i>
+            Zapisz zmiany
+        {% else %}
+            <i class="bi bi-upload me-1"></i>
+            Dodaj dokument
+        {% endif %}
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
+
+<style>
+  .upload-box{
+    border:2px dashed rgba(20,104,245,.25);
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.10), transparent 45%),
+      rgba(255,255,255,.02);
+    transition:.2s ease;
+  }
+
+  .upload-box:hover{
+    border-color:rgba(20,104,245,.5);
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.14), transparent 45%),
+      rgba(255,255,255,.03);
+  }
+
+  .upload-icon{
+    width:72px;
+    height:72px;
+    margin:auto;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:2rem;
+    color:#1468f5;
+    background:linear-gradient(135deg, rgba(20,104,245,.18), rgba(20,104,245,.08));
+    border:1px solid rgba(20,104,245,.2);
+  }
+
+  .upload-box input[type="file"]{
+    max-width:420px;
+    margin:auto;
+  }
+</style>
+
+
+{% endblock %}

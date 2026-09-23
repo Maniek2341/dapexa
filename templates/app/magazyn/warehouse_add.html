@@ -1,0 +1,58 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+<style>
+.warehouse-form{width:100%;max-width:none;margin:0;}
+.stock-modal{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:28px;overflow:hidden;box-shadow:0 35px 90px rgba(0,0,0,.35);}
+.stock-modal-header{display:flex;align-items:center;gap:1rem;padding:1.5rem;border-bottom:1px solid var(--border);background:radial-gradient(circle at top left,rgba(20,104,245,.18),transparent 45%),linear-gradient(180deg,rgba(255,255,255,.03),transparent);}
+.stock-modal-icon{width:64px;height:64px;border-radius:22px;display:grid;place-items:center;background:rgba(20,104,245,.12);border:1px solid rgba(20,104,245,.18);color:#1468f5;font-size:1.55rem;flex-shrink:0;}
+.stock-modal-header h4{margin:0;font-size:1.25rem;font-weight:900;}.stock-modal-header p{margin:.25rem 0 0;color:var(--muted);font-size:.9rem;}
+.stock-modal-body{padding:1.5rem;}.stock-label{display:block;color:var(--text);font-size:.82rem;font-weight:800;margin-bottom:.45rem;}
+.stock-modal .form-control{background:rgba(255,255,255,.04)!important;border:1px solid var(--border)!important;color:var(--text)!important;border-radius:16px!important;min-height:52px;box-shadow:none!important;}
+.stock-modal .form-control:focus{border-color:rgba(20,104,245,.5)!important;box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;}
+.stock-modal-footer{padding:0 1.5rem 1.5rem;display:flex;justify-content:flex-end;gap:.75rem;}
+.warehouse-form .btn-save-warehouse{border:0;border-radius:14px;padding:.78rem 1.15rem;font-weight:800;color:#fff;background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);box-shadow:0 14px 32px rgba(20,104,245,.22);display:inline-flex;align-items:center;gap:.45rem;}
+.warehouse-form .btn-save-warehouse:hover{color:#fff;filter:brightness(1.06);}
+.warehouse-form .btn-cancel-warehouse{border:1px solid var(--border);border-radius:14px;padding:.78rem 1.15rem;font-weight:800;color:var(--text);background:rgba(255,255,255,.04);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;}
+.warehouse-form .btn-cancel-warehouse:hover{color:var(--text);background:rgba(255,255,255,.08);}
+.warehouse-head{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.5rem;}
+.warehouse-icon{width:62px;height:62px;border-radius:20px;display:grid;place-items:center;color:#1468f5;font-size:1.55rem;background:radial-gradient(circle at top left,rgba(20,104,245,.35),transparent 55%),linear-gradient(135deg,rgba(20,104,245,.2),rgba(20,104,245,.08));border:1px solid rgba(20,104,245,.18);}
+.warehouse-head h1{margin:0;color:var(--text);font-size:1.55rem;font-weight:900;}
+.warehouse-head p{margin:.25rem 0 0;color:var(--muted);font-size:.9rem;}
+.warehouse-card{background:var(--card);border:1px solid var(--border);border-radius:26px;overflow:hidden;box-shadow:0 18px 55px rgba(0,0,0,.14);}
+.warehouse-card-head{display:flex;align-items:center;gap:.8rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);background:radial-gradient(circle at top left,rgba(20,104,245,.12),transparent 42%),rgba(255,255,255,.02);color:var(--text);font-weight:900;}
+.warehouse-card-body{padding:1.5rem;}
+.warehouse-card .form-label{color:var(--muted);font-size:.82rem;font-weight:800;}
+.warehouse-card .form-control{background:rgba(255,255,255,.035);border:1px solid var(--border);color:var(--text);border-radius:14px;padding:.75rem .9rem;}
+.warehouse-card .form-control:focus{border-color:rgba(20,104,245,.65);box-shadow:0 0 0 .2rem rgba(20,104,245,.12);}
+.warehouse-actions{display:flex;justify-content:flex-end;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;}
+@media(max-width:576px){.stock-modal-header{padding:1rem}.stock-modal-body{padding:1rem}.stock-modal-footer{padding:0 1rem 1rem;display:grid}.stock-modal-footer a,.stock-modal-footer button{width:100%;}}
+</style>
+<div class="warehouse-form">
+  <div class="stock-modal">
+    <div class="stock-modal-header">
+      <div class="stock-modal-icon"><i class="bi bi-building-add"></i></div>
+      <div><h4>Dodaj magazyn</h4><p>Utwórz nową lokalizację dla stanów magazynowych.</p></div>
+    </div>
+    <div class="stock-modal-body">
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="mb-3">
+        {% if field.field.widget.input_type == "checkbox" %}
+          <div class="form-check">{{ field }} <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>
+        {% else %}
+          <label class="stock-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+        {% endif %}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+    <div class="stock-modal-footer">
+      <a href="{% url 'stock_list' %}" class="btn-cancel-warehouse"><i class="bi bi-x-lg me-1"></i>Anuluj</a>
+      <button class="btn-save-warehouse" type="submit"><i class="bi bi-check-lg"></i>Zapisz magazyn</button>
+    </div>
+  </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

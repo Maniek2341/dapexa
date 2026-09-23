@@ -1,0 +1,666 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.offer-form-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.offer-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.offer-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.offer-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.offer-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.offer-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.offer-form-card,
+.offer-preview-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.offer-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.offer-card-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.offer-card-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.offer-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.offer-card-body{
+  padding:1.5rem;
+}
+
+.offer-label{
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:900;
+  margin-bottom:.45rem;
+}
+
+.offer-form-card .form-control,
+.offer-form-card .form-select,
+.offer-form-card textarea,
+.offer-form-card select,
+.offer-form-card input:not([type="checkbox"]):not([type="file"]){
+  background:rgba(255,255,255,.04)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+
+.offer-form-card input[type="file"]{
+  background:rgba(255,255,255,.04)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:16px!important;
+  padding:.9rem!important;
+  box-shadow:none!important;
+}
+
+.offer-form-card textarea{
+  min-height:140px;
+}
+
+.offer-form-card .form-control:focus,
+.offer-form-card .form-select:focus,
+.offer-form-card textarea:focus,
+.offer-form-card select:focus,
+.offer-form-card input:not([type="checkbox"]):focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.invalid-feedback{
+  color:#ff6b6b;
+  font-weight:700;
+  margin-top:.4rem;
+}
+
+.offer-form-actions{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.upload-preview-img{
+  width:86px;
+  height:86px;
+  object-fit:cover;
+  border-radius:16px;
+  border:1px solid var(--border);
+  box-shadow:0 10px 25px rgba(0,0,0,.16);
+}
+
+.preview-row{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  margin-bottom:.85rem;
+}
+
+.preview-label{
+  color:var(--muted);
+  font-size:.76rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:.25rem;
+}
+
+.preview-value{
+  color:var(--text);
+  font-weight:800;
+  word-break:break-word;
+}
+
+.preview-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid rgba(20,104,245,.22);
+  background:rgba(20,104,245,.12);
+  color:#ff9f43;
+}
+
+@media(max-width:768px){
+  .offer-form-head{
+    flex-direction:column;
+  }
+
+  .offer-actions,
+  .offer-actions .btn-soft,
+  .offer-actions .btn-orange{
+    width:100%;
+  }
+
+  .offer-actions a,
+  .offer-actions button{
+    justify-content:center;
+    display:flex;
+  }
+
+  .offer-title{
+    font-size:1.35rem;
+  }
+
+  .offer-title-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+  }
+
+  .offer-card-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .offer-card-body{
+    padding:1rem;
+  }
+
+  .offer-form-actions{
+    padding:0 1rem 1rem;
+    flex-direction:column-reverse;
+  }
+
+  .offer-form-actions .btn-soft,
+  .offer-form-actions .btn-orange{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+}
+</style>
+
+<div class="offer-form-head">
+  <div class="offer-title-wrap">
+    <div class="offer-title-icon">
+      <i class="bi bi-file-earmark-plus"></i>
+    </div>
+
+    <div>
+      <h1 class="offer-title">Dodaj nową ofertę</h1>
+      <div class="offer-subtitle">
+        Uzupełnij dane oferty, wybierz klienta, lokalizację i dodaj zdjęcia.
+      </div>
+    </div>
+  </div>
+
+  <div class="offer-actions">
+    <a href="{% url 'offer_list' %}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>
+      Wróć
+    </a>
+
+    <button form="offerForm" class="btn-orange">
+      <i class="bi bi-save me-1"></i>
+      Zapisz
+    </button>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-8">
+    <div class="offer-form-card">
+
+      <div class="offer-card-header">
+        <div class="offer-card-icon">
+          <i class="bi bi-pencil-square"></i>
+        </div>
+
+        <div>
+          <h3>Dane oferty</h3>
+          <p>Tytuł, klient, lokalizacja, opis oraz zdjęcia do oferty.</p>
+        </div>
+      </div>
+
+      <div class="offer-card-body">
+        <form id="offerForm"
+              method="post"
+              enctype="multipart/form-data"
+              class="needs-validation"
+              novalidate>
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+              {{ form.non_field_errors }}
+            </div>
+          {% endif %}
+
+          <div class="row g-3">
+
+            <div class="col-md-6">
+              <label class="form-label offer-label" for="{{ form.title.id_for_label }}">
+                Tytuł oferty
+              </label>
+              {{ form.title }}
+
+              {% if form.title.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.title.errors|striptags }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label offer-label" for="{{ form.client.id_for_label }}">
+                Klient
+              </label>
+              {{ form.client }}
+
+              {% if form.client.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.client.errors|striptags }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-md-12 d-none" id="locationWrapper">
+              <label class="form-label offer-label" for="{{ form.location.id_for_label }}">
+                Lokalizacja
+              </label>
+              {{ form.location }}
+
+              {% if form.location.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.location.errors|striptags }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="col-12">
+              <label class="form-label offer-label" for="{{ form.description.id_for_label }}">
+                Opis oferty
+              </label>
+              {{ form.description }}
+
+              {% if form.description.errors %}
+                <div class="invalid-feedback d-block">
+                  {{ form.description.errors|striptags }}
+                </div>
+              {% endif %}
+            </div>
+
+            {% if form.images %}
+              <div class="col-12">
+                <label class="form-label offer-label" for="{{ form.images.id_for_label }}">
+                  Zdjęcia
+                </label>
+                {{ form.images }}
+
+                {% if form.images.errors %}
+                  <div class="invalid-feedback d-block">
+                    {{ form.images.errors|striptags }}
+                  </div>
+                {% endif %}
+
+                <div id="imgPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+              </div>
+            {% endif %}
+
+          </div>
+        </form>
+      </div>
+
+      <div class="offer-form-actions">
+        <a href="{% url 'offer_list' %}" class="btn-soft">
+          Anuluj
+        </a>
+
+        <button form="offerForm" type="submit" class="btn-orange">
+          <i class="bi bi-save me-1"></i>
+          Zapisz ofertę
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="col-xl-4">
+    <div class="offer-preview-card">
+
+      <div class="offer-card-header">
+        <div class="offer-card-icon">
+          <i class="bi bi-eye"></i>
+        </div>
+
+        <div>
+          <h3>Podgląd</h3>
+          <p>Szybkie podsumowanie tworzonej oferty.</p>
+        </div>
+      </div>
+
+      <div class="offer-card-body">
+
+        <div class="preview-row">
+          <div class="preview-label">Tytuł</div>
+          <div class="preview-value" id="pvTitle">—</div>
+        </div>
+
+        <div class="preview-row">
+          <div class="preview-label">Klient</div>
+          <div class="preview-value" id="pvClient">—</div>
+        </div>
+
+        <div class="preview-row">
+          <div class="preview-label">Lokalizacja</div>
+          <div class="preview-value" id="pvLocation">—</div>
+        </div>
+
+        <div class="preview-row">
+          <div class="preview-label">Status</div>
+          <div class="preview-value">
+            <span class="preview-badge">
+              <i class="bi bi-circle-fill small"></i>
+              Nowe
+            </span>
+          </div>
+        </div>
+
+        <div class="preview-row">
+          <div class="preview-label">Priorytet</div>
+          <div class="preview-value">Niski</div>
+        </div>
+
+        <div class="preview-row">
+          <div class="preview-label">Numer</div>
+          <div class="preview-value">Nadany automatycznie</div>
+        </div>
+
+        <div class="preview-row">
+          <div class="preview-label">Zdjęcia</div>
+          <div class="preview-value">
+            <span id="pvImages">0</span>
+          </div>
+        </div>
+
+        <div class="preview-row mb-0">
+          <div class="preview-label">Opis</div>
+          <div class="preview-value" id="pvDescription">—</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const form = document.getElementById('offerForm');
+  if (!form) return;
+
+  const byName = (n) => form.querySelector(`[name="${n}"]`);
+
+  const pv = {
+    title: document.getElementById('pvTitle'),
+    client: document.getElementById('pvClient'),
+    location: document.getElementById('pvLocation'),
+    description: document.getElementById('pvDescription'),
+    images: document.getElementById('pvImages'),
+  };
+
+  function updatePreview(){
+    if (pv.title) {
+      pv.title.textContent = byName('title')?.value || '—';
+    }
+
+    if (pv.description) {
+      pv.description.textContent = byName('description')?.value || '—';
+    }
+
+    const clientSel = byName('client');
+    if (pv.client) {
+      pv.client.textContent = clientSel?.selectedOptions?.[0]?.text || '—';
+    }
+
+    const locationSel = byName('location');
+    if (pv.location) {
+      const value = locationSel?.value;
+      pv.location.textContent = value
+        ? (locationSel?.selectedOptions?.[0]?.text || '—')
+        : '—';
+    }
+
+    const imgInput = byName('images');
+    if (pv.images) {
+      pv.images.textContent = imgInput?.files?.length || 0;
+    }
+  }
+
+  form.addEventListener('input', updatePreview);
+  form.addEventListener('change', updatePreview);
+
+  form.addEventListener('submit', (e) => {
+    if (!form.checkValidity()) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    form.classList.add('was-validated');
+  });
+
+  updatePreview();
+
+  window.updateOfferPreview = updatePreview;
+})();
+</script>
+
+<script>
+(function(){
+  const form = document.getElementById('offerForm');
+  if (!form) return;
+
+  const imgInput = form.querySelector('input[name="images"]');
+  const imgPreview = document.getElementById('imgPreview');
+
+  imgInput?.addEventListener('change', () => {
+    if (!imgPreview) return;
+
+    imgPreview.innerHTML = '';
+
+    [...imgInput.files].forEach(file => {
+      if (!file.type.startsWith('image/')) return;
+
+      const url = URL.createObjectURL(file);
+      const img = document.createElement('img');
+
+      img.src = url;
+      img.className = 'upload-preview-img';
+
+      imgPreview.appendChild(img);
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const form = document.getElementById('offerForm');
+  if (!form) return;
+
+  const clientInput = form.querySelector('[name="client"]');
+  const locationSelect = form.querySelector('[name="location"]');
+  const locationWrapper = document.getElementById('locationWrapper');
+
+  if (!clientInput || !locationSelect || !locationWrapper) return;
+
+  function resetLocation(){
+    locationSelect.innerHTML = '<option value="">---------</option>';
+    locationWrapper.classList.add('d-none');
+    locationSelect.value = '';
+    locationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+    if (typeof window.updateOfferPreview === 'function') {
+      window.updateOfferPreview();
+    }
+  }
+
+  function getLocationLabel(loc){
+    return (
+      loc.name ||
+      loc.address ||
+      loc.full_address ||
+      loc.label ||
+      loc.display ||
+      `Lokalizacja #${loc.id}`
+    );
+  }
+
+  function loadLocations(clientId){
+    if (!clientId){
+      resetLocation();
+      return;
+    }
+
+    fetch("{% url 'offer_client_locations_api' %}?client=" + clientId)
+      .then(res => res.json())
+      .then(data => {
+        if (!Array.isArray(data) || !data.length){
+          resetLocation();
+          return;
+        }
+
+        locationSelect.innerHTML = '<option value="">Wybierz lokalizację</option>';
+
+        data.forEach(loc => {
+          const option = document.createElement('option');
+          option.value = loc.id;
+          option.textContent = getLocationLabel(loc);
+          locationSelect.appendChild(option);
+        });
+
+        locationWrapper.classList.remove('d-none');
+        locationSelect.dispatchEvent(new Event('change', { bubbles: true }));
+
+        if (typeof window.updateOfferPreview === 'function') {
+          window.updateOfferPreview();
+        }
+      })
+      .catch(() => resetLocation());
+  }
+
+  clientInput.addEventListener('change', function(){
+    loadLocations(this.value);
+  });
+
+  if (clientInput.value) {
+    loadLocations(clientInput.value);
+  }
+})();
+</script>
+
+{% endblock %}

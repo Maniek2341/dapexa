@@ -1,0 +1,724 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+@media (max-width: 768px){
+  .h3{ font-size:1.05rem!important; }
+  .h4{ font-size:1rem!important; }
+  .btn{ font-size:.82rem; padding:.45rem .6rem; }
+  .btn-sm{ font-size:.78rem; padding:.35rem .5rem; }
+
+  .tool-header{
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    gap:.75rem!important;
+  }
+
+  .tool-header .ms-auto{
+    width:100%;
+    justify-content:flex-start!important;
+    flex-wrap:wrap;
+    gap:.5rem!important;
+  }
+
+  .nav-tabs{
+    overflow-x:auto;
+    overflow-y:hidden;
+    flex-wrap:nowrap!important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .nav-tabs .nav-link{
+    white-space:nowrap;
+    font-size:.82rem;
+    padding:.55rem .75rem;
+  }
+
+  .card-body.p-4{ padding:1rem!important; }
+}
+
+.tool-info-box{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:.85rem;
+  background:rgba(255,255,255,.02);
+}
+
+.tool-label{
+  color:var(--muted);
+  font-size:.82rem;
+  margin-bottom:.15rem;
+}
+
+.tool-value{
+  font-weight:600;
+}
+
+.timeline-scroll{
+  max-height:520px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+
+.timeline-scroll::-webkit-scrollbar{ width:6px; }
+.timeline-scroll::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.15);
+  border-radius:6px;
+}
+
+.status-dot{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  flex:0 0 auto;
+}
+</style>
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <div>
+    <h1 class="h3 fw-bold m-0">Szczegóły sprzętu</h1>
+    <div class="text-muted small">Elektronarzędzie / wyposażenie firmowe</div>
+  </div>
+
+  <div class="d-flex gap-2">
+    <a href="{% url 'tool_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i>
+    </a>
+
+    {% if can_edit_tool %}<a href="{% url 'tool_update' tool.pk %}" class="btn btn-brand">
+      <i class="bi bi-pencil-square"></i>
+    </a>{% endif %}
+    <button type="button"
+            class="btn btn-brand"
+            data-bs-toggle="modal"
+            data-bs-target="#toolEventModal">
+      <i class="bi bi-plus-lg me-2"></i>Zdarzenie
+    </button>
+
+    {% if can_delete_tool %}<button
+      type="button"
+      class="btn btn-danger"
+      data-bs-toggle="modal"
+      data-bs-target="#deleteToolModal"
+      data-delete-url="{% url 'tool_delete' tool.pk %}"
+      data-title="{{ tool.name|escape }}"
+    >
+      <i class="bi bi-trash"></i>
+    </button>{% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <div class="col-12 col-xxl-8">
+
+    <div class="card mb-3">
+      <div class="card-body p-4 d-flex gap-3 align-items-center tool-header">
+
+        <div class="avatar">
+          <i class="bi bi-tools"></i>
+        </div>
+
+        <div class="flex-grow-1">
+          <h2 class="h4 fw-bold m-0">{{ tool.name }}</h2>
+
+          <div class="mt-1 d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge-soft px-2 py-1">
+              <i class="bi bi-tag me-1"></i>
+              {{ tool.get_category_display }}
+            </span>
+
+            {% if tool.status == "available" %}
+              <span class="badge bg-success">{{ tool.get_status_display }}</span>
+            {% elif tool.status == "in_use" %}
+              <span class="badge bg-primary">{{ tool.get_status_display }}</span>
+            {% elif tool.status == "service" %}
+              <span class="badge bg-danger">{{ tool.get_status_display }}</span>
+            {% elif tool.status == "damaged" %}
+              <span class="badge bg-warning text-dark">{{ tool.get_status_display }}</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ tool.get_status_display }}</span>
+            {% endif %}
+          </div>
+
+          <div class="small text-muted mt-1">
+            {% if tool.manufacturer %}{{ tool.manufacturer }}{% endif %}
+            {% if tool.model %} • {{ tool.model }}{% endif %}
+            {% if tool.serial_number %} • SN: {{ tool.serial_number }}{% endif %}
+          </div>
+
+          <div class="small text-muted">
+            <i class="bi bi-box-seam"></i>
+            Nr ewidencyjny:
+            <strong>{{ tool.inventory_number|default:"—" }}</strong>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2 ms-auto">
+          {% if tool.current_holder %}
+            <span class="btn btn-outline-secondary btn-sm disabled">
+              <i class="bi bi-person-check"></i>
+              <span class="d-none d-sm-inline ms-1">{{ tool.current_holder }}</span>
+            </span>
+          {% else %}
+            <span class="btn btn-outline-secondary btn-sm disabled">
+              <i class="bi bi-house"></i>
+              <span class="d-none d-sm-inline ms-1">Nieprzypisany</span>
+            </span>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body p-0">
+
+        <ul class="nav nav-tabs px-3 pt-3" role="tablist" style="border-color:var(--border)">
+          <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-overview">
+              Przegląd
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-events">
+              Historia zdarzeń
+            </button>
+          </li>
+
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-history">
+              Historia zmian
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content p-3">
+
+          <div class="tab-pane fade show active" id="tab-overview">
+
+            <div class="row g-3">
+
+              <div class="col-12 col-lg-6">
+                <div class="tool-info-box h-100">
+                  <div class="tool-label">Producent</div>
+                  <div class="tool-value">{{ tool.manufacturer|default:"—" }}</div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="tool-info-box h-100">
+                  <div class="tool-label">Model</div>
+                  <div class="tool-value">{{ tool.model|default:"—" }}</div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="tool-info-box h-100">
+                  <div class="tool-label">Numer seryjny</div>
+                  <div class="tool-value">{{ tool.serial_number|default:"—" }}</div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="tool-info-box h-100">
+                  <div class="tool-label">Numer ewidencyjny</div>
+                  <div class="tool-value">{{ tool.inventory_number|default:"—" }}</div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="tool-info-box h-100">
+                  <div class="tool-label">Data zakupu</div>
+                  <div class="tool-value">{{ tool.purchase_date|date:"d.m.Y"|default:"—" }}</div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="tool-info-box h-100">
+                  <div class="tool-label">Cena zakupu netto</div>
+                  <div class="tool-value">
+                    {% if tool.purchase_price_net %}
+                      {{ tool.purchase_price_net }} zł
+                    {% else %}
+                      —
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="tool-info-box h-100">
+                  <div class="tool-label">Ostatni przegląd</div>
+                  <div class="tool-value">
+                      {{ tool.tool.last_inspection_date|date:"d.m.Y"|default:"—" }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-6">
+                <div class="tool-info-box h-100">
+                  <div class="tool-label">Następny przegląd</div>
+                  <div class="tool-value">
+                    {{ tool.next_inspection_date|date:"d.m.Y"|default:"—" }}
+
+                    {% if tool.needs_inspection %}
+                    <span class="badge bg-danger ms-2">Wymagany</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            
+            </div>
+
+        </div>
+
+          <div class="tab-pane fade" id="tab-history">
+
+  {% if history %}
+    <div class="timeline-scroll">
+
+      {% for h in history %}
+        <div class="d-flex gap-3 mb-3">
+
+          <div class="status-dot">
+            <i class="bi bi-clock-history"></i>
+          </div>
+
+          <div class="card flex-grow-1">
+            <div class="card-body p-3">
+
+              <span class="badge bg-secondary">
+                {{ h.get_type_display }}
+              </span>
+
+              <div class="fw-semibold mt-2">
+                {{ h.title }}
+              </div>
+
+              {% if h.description %}
+                <div class="small text-muted mt-2">
+                  {{ h.description|linebreaksbr }}
+                </div>
+              {% endif %}
+
+              <div class="small text-muted mt-2">
+                {{ h.created_at|date:"d.m.Y H:i" }}
+                —
+                {% if h.created_by %}
+                  {{ h.created_by.first_name }} {{ h.created_by.last_name }}
+                {% else %}
+                  System
+                {% endif %}
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      {% endfor %}
+
+    </div>
+  {% else %}
+    <div class="text-muted">Brak historii zmian.</div>
+  {% endif %}
+
+</div>
+<div class="tab-pane fade" id="tab-events">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h6 class="fw-bold m-0">Historia zdarzeń</h6>
+
+    <button type="button"
+            class="btn btn-brand btn-sm"
+            data-bs-toggle="modal"
+            data-bs-target="#toolEventModal">
+      <i class="bi bi-plus-lg me-1"></i>Dodaj zdarzenie
+    </button>
+  </div>
+
+  {% if events %}
+
+    <div class="timeline-scroll">
+
+      {% for event in events %}
+
+        <div class="d-flex gap-3 mb-3">
+
+          <div class="status-dot">
+            {% if event.type == 'damage' %}
+              <i class="bi bi-exclamation-triangle"></i>
+            {% elif event.type == 'service' %}
+              <i class="bi bi-wrench"></i>
+            {% elif event.type == 'inspection' %}
+              <i class="bi bi-clipboard-check"></i>
+            {% elif event.type == 'assigned' %}
+              <i class="bi bi-person-check"></i>
+            {% elif event.type == 'returned' %}
+              <i class="bi bi-arrow-return-left"></i>
+            {% elif event.type == 'lost' %}
+              <i class="bi bi-question-circle"></i>
+            {% elif event.type == 'photo' %}
+              <i class="bi bi-camera"></i>
+            {% else %}
+              <i class="bi bi-clock-history"></i>
+            {% endif %}
+          </div>
+
+          <div class="card flex-grow-1">
+            <div class="card-body p-3">
+
+              <div class="d-flex justify-content-between align-items-start gap-3">
+
+                <div class="flex-grow-1">
+
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <span class="badge bg-secondary">
+                      {{ event.get_type_display }}
+                    </span>
+
+                    <span class="small text-muted">
+                      {{ event.event_date|date:"d.m.Y H:i" }}
+                    </span>
+                  </div>
+
+                  {% if event.description %}
+                    <div class="mt-2">
+                      {{ event.description|linebreaksbr }}
+                    </div>
+                  {% else %}
+                    <div class="text-muted mt-2">
+                      Brak opisu.
+                    </div>
+                  {% endif %}
+
+                  {% if event.media.all %}
+                    <div class="row g-2 mt-3">
+
+                      {% for media in event.media.all %}
+                        <div class="col-6 col-md-4">
+
+                          <a href="{{ media.image.url }}"
+                             target="_blank"
+                             class="d-block">
+
+                            <img src="{{ media.image.url }}"
+                                 alt="Zdjęcie zdarzenia"
+                                 class="img-fluid rounded border"
+                                 style="height:120px;width:100%;object-fit:cover;border-color:var(--border);">
+
+                          </a>
+
+                        </div>
+                      {% endfor %}
+
+                    </div>
+                  {% endif %}
+
+                </div>
+
+                <div class="text-end small text-muted">
+                  {% if event.created_by %}
+                    {{ event.created_by.first_name }} {{ event.created_by.last_name }}
+                  {% else %}
+                    System
+                  {% endif %}
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      {% endfor %}
+
+    </div>
+
+  {% else %}
+
+    <div class="text-muted">
+      Brak historii zdarzeń.
+    </div>
+
+  {% endif %}
+
+</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-12 col-xxl-4">
+
+    <div class="card mb-3">
+      <div class="card-body p-2">
+
+        {% if tool.image %}
+
+          <img src="{{ tool.image.url }}"
+               alt="{{ tool.name }}"
+               class="img-fluid rounded-4 border"
+               style="border-color:var(--border);max-height:260px;object-fit:cover;width:100%;">
+
+        {% else %}
+
+          <div class="rounded-4 border d-flex align-items-center justify-content-center"
+               style="height:220px;border-color:var(--border)!important;background:rgba(255,255,255,.03);">
+
+            <i class="bi bi-tools fs-1 text-muted"></i>
+
+          </div>
+
+        {% endif %}
+
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body p-4">
+
+        <h6 class="fw-bold mb-2">Aktualne przypisanie</h6>
+
+        <div class="mb-3">
+          <div class="small text-muted">Aktualnie u pracownika</div>
+          <div class="fw-semibold">
+            {% if tool.current_holder %}
+              {{ tool.current_holder.first_name }} {{ tool.current_holder.last_name }}
+            {% else %}
+              Nieprzypisany
+            {% endif %}
+          </div>
+        </div>
+
+        <div>
+          <div class="small text-muted">Miejsce przechowywania</div>
+          <div class="fw-semibold">
+            {{ tool.storage_place|default:"—" }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body p-4">
+
+        <h6 class="fw-bold mb-2">Status</h6>
+
+        <div class="d-flex flex-wrap gap-2">
+          <button class="chip btn btn-sm {% if tool.status == 'available' %}btn-brand{% else %}btn-outline-secondary{% endif %}">
+            Dostępne
+          </button>
+
+          <button class="chip btn btn-sm {% if tool.status == 'in_use' %}btn-brand{% else %}btn-outline-secondary{% endif %}">
+            W użyciu
+          </button>
+
+          <button class="chip btn btn-sm {% if tool.status == 'service' %}btn-brand{% else %}btn-outline-secondary{% endif %}">
+            W serwisie
+          </button>
+
+          <button class="chip btn btn-sm {% if tool.status == 'damaged' %}btn-brand{% else %}btn-outline-secondary{% endif %}">
+            Uszkodzone
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body p-4">
+
+        <h6 class="fw-bold mb-2">Gwarancja</h6>
+
+        <div class="mb-3">
+          <div class="small text-muted">Gwarancja do</div>
+          <div class="fw-semibold">
+            {{ tool.warranty_until|date:"d.m.Y"|default:"—" }}
+
+            {% if tool.is_warranty_active %}
+              <span class="badge bg-success ms-2">Aktywna</span>
+            {% elif tool.warranty_until %}
+              <span class="badge bg-secondary ms-2">Wygasła</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    
+
+    <div class="card">
+      <div class="card-body p-4">
+
+        <h6 class="fw-bold mb-2">System</h6>
+
+        <div class="mb-3">
+          <div class="small text-muted">Utworzył</div>
+          <div class="fw-semibold">
+            {% if tool.created_by %}
+              {{ tool.created_by.first_name }} {{ tool.created_by.last_name }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="small text-muted">Utworzono</div>
+          <div class="fw-semibold">
+            {{ tool.created_at|date:"d.m.Y H:i" }}
+          </div>
+        </div>
+
+        <div>
+          <div class="small text-muted">Ostatnia aktualizacja</div>
+          <div class="fw-semibold">
+            {{ tool.updated_at|date:"d.m.Y H:i" }}
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<div class="modal fade" id="toolEventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content"
+         style="background:var(--card);color:var(--text);border:1px solid var(--border)">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Dodaj zdarzenie</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+      </div>
+
+      <form method="post"
+            action="{% url 'tool_event_add' tool.pk %}"
+            enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="modal-body">
+
+          <div class="small text-muted mb-3">
+            Sprzęt:
+            <span class="fw-semibold">{{ tool.name }}</span>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Typ zdarzenia</label>
+            {{ event_form.type }}
+            {{ event_form.type.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Data zdarzenia</label>
+            {{ event_form.event_date }}
+            {{ event_form.event_date.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Opis</label>
+            {{ event_form.description }}
+            {{ event_form.description.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Zdjęcia</label>
+            {{ event_form.images }}
+            {{ event_form.images.errors }}
+
+          </div>
+
+        </div>
+
+        <div class="modal-footer d-flex justify-content-end gap-2">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit" class="btn btn-brand">
+            <i class="bi bi-check-lg me-1"></i>Zapisz
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteToolModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content"
+         style="background:var(--card);color:var(--text);border:1px solid var(--border)">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Usunąć sprzęt?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="text-muted small mb-2">
+          Ta operacja jest nieodwracalna.
+        </div>
+
+        <div class="p-3 rounded-3 border"
+             style="border-color:rgba(255,255,255,.08)!important;">
+          <div class="small text-muted mb-1">Usuwasz:</div>
+          <div id="deleteToolPreview" class="fw-semibold">—</div>
+        </div>
+      </div>
+
+      <div class="modal-footer d-flex justify-content-end gap-2">
+        <button type="button"
+                class="btn btn-outline-secondary"
+                data-bs-dismiss="modal">
+          Anuluj
+        </button>
+
+        <form id="deleteToolForm" method="post" action="">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash me-1"></i>Usuń
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modal = document.getElementById('deleteToolModal');
+  if(!modal) return;
+
+  const form = document.getElementById('deleteToolForm');
+  const preview = document.getElementById('deleteToolPreview');
+
+  modal.addEventListener('show.bs.modal', function(event){
+    const btn = event.relatedTarget;
+
+    const url = btn?.getAttribute('data-delete-url') || '';
+    const title = btn?.getAttribute('data-title') || '—';
+
+    if(form) form.action = url;
+    if(preview) preview.textContent = title;
+  });
+})();
+</script>
+{% endblock %}

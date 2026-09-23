@@ -1,0 +1,838 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+  .page-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:1rem;
+    margin-bottom:1.5rem;
+    flex-wrap:wrap;
+  }
+
+  .page-title{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .page-title-icon{
+    width:60px;
+    height:60px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+      linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+    border:1px solid rgba(20,104,245,.18);
+    color:#1468f5;
+    font-size:1.5rem;
+  }
+
+  .page-title h1{
+    margin:0;
+    font-size:1.45rem;
+    font-weight:900;
+    color:var(--text);
+  }
+
+  .page-title p{
+    margin:.2rem 0 0;
+    color:var(--muted);
+    font-size:.9rem;
+  }
+
+  .top-actions{
+    display:flex;
+    gap:.75rem;
+    flex-wrap:wrap;
+  }
+
+  .modern-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:.45rem;
+    border-radius:14px;
+    padding:.75rem 1rem;
+    font-weight:800;
+    text-decoration:none;
+    border:1px solid var(--border);
+  }
+
+  .modern-btn-primary{
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+    color:#fff;
+    border-color:transparent;
+  }
+
+  .modern-btn-soft{
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+  }
+
+  .modern-btn:hover{
+    color:inherit;
+    filter:brightness(1.05);
+  }
+
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0,1fr));
+    gap:1rem;
+    margin-bottom:1.25rem;
+  }
+
+  .stat-card{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-label{
+    color:var(--muted);
+    font-size:.8rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+
+  .stat-value{
+    margin-top:.35rem;
+    color:var(--text);
+    font-size:1.65rem;
+    font-weight:950;
+  }
+
+  .content-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:0 18px 55px rgba(0,0,0,.14);
+  }
+
+  .content-card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    padding:1.25rem;
+    border-bottom:1px solid var(--border);
+    flex-wrap:wrap;
+  }
+
+  .search-box{
+    min-width:260px;
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+    border-radius:14px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.035);
+  }
+
+  .search-box i{
+    color:#1468f5;
+  }
+
+  .search-box input{
+    width:100%;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:var(--text);
+    font-weight:600;
+  }
+
+  .search-box input::placeholder{
+    color:var(--muted);
+  }
+
+  .table-modern{
+    color:var(--text);
+  }
+
+  .table-modern thead th{
+    color:var(--muted);
+    font-size:.78rem;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    border-color:var(--border);
+    padding:1rem 1.25rem;
+  }
+
+  .table-modern tbody td{
+    border-color:var(--border);
+    padding:1rem 1.25rem;
+  }
+
+  .client-main{
+    display:flex;
+    align-items:center;
+    gap:.9rem;
+  }
+
+  .client-icon{
+    width:52px;
+    height:52px;
+    border-radius:16px;
+    background:rgba(20,104,245,.12);
+    border:1px solid rgba(20,104,245,.16);
+    color:#1468f5;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1.2rem;
+    flex-shrink:0;
+  }
+
+  .client-title{
+    color:var(--text);
+    font-weight:900;
+    text-decoration:none;
+  }
+
+  .client-title:hover{
+    color:#1468f5;
+  }
+
+  .client-subtitle{
+    color:var(--muted);
+    font-size:.85rem;
+    margin-top:.15rem;
+  }
+
+  .badge-soft{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    padding:.45rem .7rem;
+    border-radius:999px;
+    font-size:.78rem;
+    font-weight:800;
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--border);
+    color:var(--muted);
+  }
+
+  .badge-client-company{
+    background:rgba(20,104,245,.12);
+    border-color:rgba(20,104,245,.18);
+    color:#1468f5;
+  }
+
+  .badge-client-private{
+    background:rgba(13,110,253,.12);
+    border-color:rgba(13,110,253,.18);
+    color:#4dabf7;
+  }
+
+
+
+  .action-icon{
+    width:34px;
+    height:34px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.03);
+    text-decoration:none;
+  }
+
+  .action-icon:hover{
+    background:rgba(255,255,255,.07);
+  }
+
+  .mobile-list{
+    display:none;
+    padding:1rem;
+  }
+
+  .mobile-card{
+    background:rgba(255,255,255,.025);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:1rem;
+    margin-bottom:.9rem;
+  }
+
+  .mobile-card-top{
+    display:flex;
+    align-items:flex-start;
+    gap:.85rem;
+  }
+
+  .mobile-card-title{
+    color:var(--text);
+    font-weight:900;
+    text-decoration:none;
+  }
+
+  .mobile-card-muted{
+    color:var(--muted);
+    font-size:.82rem;
+    margin-top:.15rem;
+  }
+
+  .mobile-card-actions{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:.55rem;
+    margin-top:1rem;
+  }
+
+  .mobile-action{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    border-radius:14px;
+    padding:.65rem .5rem;
+    font-size:.78rem;
+    font-weight:800;
+    text-decoration:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.35rem;
+  }
+
+  .empty-state{
+    padding:4rem 1.5rem;
+    text-align:center;
+  }
+
+  .empty-icon{
+    width:90px;
+    height:90px;
+    border-radius:28px;
+    background:rgba(20,104,245,.10);
+    color:#1468f5;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:0 auto 1rem;
+    font-size:2rem;
+  }
+
+  @media(max-width:768px){
+    .page-header{
+      flex-direction:column;
+      align-items:stretch;
+    }
+
+    .top-actions{
+      display:grid;
+      grid-template-columns:1fr;
+    }
+
+    .stats-grid{
+      grid-template-columns:1fr;
+    }
+
+    .content-card-header{
+      align-items:stretch;
+    }
+
+    .search-box{
+      width:100%;
+      min-width:0;
+    }
+
+    .desktop-table{
+      display:none;
+    }
+
+    .mobile-list{
+      display:block;
+    }
+
+    .page-title-icon{
+      width:54px;
+      height:54px;
+      border-radius:17px;
+      font-size:1.3rem;
+    }
+
+    .page-title h1{
+      font-size:1.25rem;
+    }
+  }
+
+  .content-card-header-modern{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left,
+      rgba(20,104,245,.12),
+      transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.content-card-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.content-card-header-modern h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.content-card-header-modern p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.modern-search-form{
+  margin-left:auto;
+}
+
+.search-box{
+  position:relative;
+  min-width:280px;
+}
+
+.search-box input{
+  width:100%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  padding:.75rem 2.8rem .75rem 2.6rem;
+}
+
+.search-box i.bi-search{
+  position:absolute;
+  left:.95rem;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+}
+
+.search-clear{
+  position:absolute;
+  right:.9rem;
+  top:50%;
+  transform:translateY(-50%);
+  color:var(--muted);
+  text-decoration:none;
+}
+
+.search-clear:hover{
+  color:#1468f5;
+}
+
+@media(max-width:768px){
+
+  .content-card-header-modern{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  .modern-search-form{
+    width:100%;
+    margin-left:0;
+  }
+
+  .search-box{
+    width:100%;
+    min-width:0;
+  }
+}
+
+.client-filter-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+}
+
+.client-filter-card .form-control,
+.client-filter-card .form-select{
+  min-height:50px;
+  background:var(--body);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:14px;
+}
+
+.client-filter-card .form-control::placeholder{
+  color:var(--muted);
+}
+
+.client-filter-card .form-control:focus,
+.client-filter-card .form-select:focus{
+  background:rgba(255,255,255,.05);
+  border-color:#1468f5;
+  color:var(--text);
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.12);
+}
+
+.client-filter-card .btn-orange{
+  height:50px;
+  border:0;
+  border-radius:14px;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  color:#fff;
+  font-weight:800;
+  box-shadow:0 12px 28px rgba(20,104,245,.20);
+  transition:.2s ease;
+}
+
+.client-filter-card .btn-orange:hover{
+  transform:translateY(-1px);
+  filter:brightness(1.05);
+}
+
+.client-filter-card .btn-orange i{
+  font-size:1rem;
+}
+
+@media(max-width:991px){
+
+  .client-filter-card{
+    padding:1rem;
+  }
+
+  .client-filter-card .btn-orange{
+    width:100%;
+  }
+}
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.72rem 1rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+  .icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-orange{
+  color:#ff9f2f;
+  border-color:rgba(20,104,245,.25);
+}
+
+.icon-btn-warning{
+  color:#ffb24d;
+}
+
+.icon-btn-green{
+  color:#00ff2a;
+  border-color:rgba(0,255,42,.18);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+</style>
+
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon">
+      <i class="bi bi-buildings"></i>
+    </div>
+
+    <div>
+      <h1>Lista klientów</h1>
+      <p>Podgląd wszystkich klientów w Twojej firmie.</p>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <a class="modern-btn modern-btn-soft" href="{% url 'klient_archive' %}">
+      <i class="bi bi-archive"></i>
+      Archiwum klientów
+    </a>
+
+    {% if can_manage_clients %}
+      <a class="modern-btn modern-btn-primary" href="{% url 'klient_add' %}">
+        <i class="bi bi-plus-lg"></i>
+        Nowy klient
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Łącznie klientów</div>
+    <div class="stat-value">{{ clients|length }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Firmy</div>
+    <div class="stat-value">{{ company_count|default:"0" }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Osoby prywatne</div>
+    <div class="stat-value">{{ private_count|default:"0" }}</div>
+  </div>
+</div>
+
+<div class="client-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+
+      <div class="col-12 col-md">
+        <input type="text"
+               name="q"
+               class="form-control"
+               placeholder="Szukaj klienta..."
+               value="{{ q }}">
+      </div>
+      <div class="col-12 col-md">
+
+        <select name="client_type" class="form-select">
+          <option value="">Wszyscy</option>
+          <option value="company" {% if request.GET.client_type == "company" %}selected{% endif %}>Firmy</option>
+          <option value="private" {% if request.GET.client_type == "private" %}selected{% endif %}>Osoby prywatne</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-auto d-flex gap-2">
+        <button class="btn-orange w-100">
+          <i class="bi bi-search"></i>
+          Szukaj
+        </button>
+        <a href="{% url 'klient' %}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="content-card">
+  <div class="content-card-header-modern">
+    <div class="content-card-icon">
+      <i class="bi bi-people"></i>
+    </div>
+    <div>
+      <h3>Lista klientów</h3>
+      <p>Klienci indywidualni, firmy, dane kontaktowe i szybkie akcje.</p>
+    </div>
+  </div>
+
+  {% if clients %}
+
+    <div class="table-responsive desktop-table">
+      <table class="table table-modern align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Klient</th>
+            <th>Typ</th>
+            <th>Telefon</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for client in clients %}
+            <tr>
+              <td>
+                <div class="client-main">
+                  <div class="client-icon">
+                    {% if client.client_type == 'company' %}
+                      <i class="bi bi-building"></i>
+                    {% else %}
+                      <i class="bi bi-person"></i>
+                    {% endif %}
+                  </div>
+
+                  <div>
+                    <a href="{% url 'klient_detail' client.pk %}" class="client-title">
+                      {% if client.client_type == 'company' %}
+                        {{ client.name|default:"—" }}
+                      {% else %}
+                        {{ client.first_name }} {{ client.last_name }}
+                      {% endif %}
+                    </a>
+
+                    <div class="client-subtitle">
+                      {% if client.email %}
+                        {{ client.email }}
+                      {% else %}
+                        Brak adresu e-mail
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <span class="badge-soft {% if client.client_type == 'company' %}badge-client-company{% else %}badge-client-private{% endif %}">
+                  {% if client.client_type == 'company' %}
+                    <i class="bi bi-building"></i>
+                  {% else %}
+                    <i class="bi bi-person"></i>
+                  {% endif %}
+                  {{ client.get_client_type_display }}
+                </span>
+              </td>
+
+              <td>
+                {{ client.phone|default:"—" }}
+              </td>
+
+              <td>
+                {% if can_manage_clients %}
+                  <div>
+                    <a href="{% url 'klient_edit' client.pk %}" class="icon-btn icon-btn-green" title="Edytuj">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+
+                    <a href="{% url 'klient_delete' client.pk %}" class="icon-btn icon-btn-danger" title="Usuń">
+                      <i class="fa-solid fa-trash"></i>
+                    </a>
+
+                    <a href="{% url 'klient_deactivate' client.pk %}" class="icon-btn icon-btn-warning" title="Dezaktywuj">
+                      <i class="fa-solid fa-user-slash"></i>
+                    </a>
+                  </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mobile-list">
+      {% for client in clients %}
+        <div class="mobile-card">
+          <div class="mobile-card-top">
+            <div class="client-icon">
+              {% if client.client_type == 'company' %}
+                <i class="bi bi-building"></i>
+              {% else %}
+                <i class="bi bi-person"></i>
+              {% endif %}
+            </div>
+
+            <div>
+              <a href="{% url 'klient_detail' client.pk %}" class="mobile-card-title">
+                {% if client.client_type == 'company' %}
+                  {{ client.name|default:"—" }}
+                {% else %}
+                  {{ client.first_name }} {{ client.last_name }}
+                {% endif %}
+              </a>
+
+              <div class="mobile-card-muted">
+                {{ client.phone|default:"Brak telefonu" }}
+              </div>
+
+              <div class="mt-2">
+                <span class="badge-soft {% if client.client_type == 'company' %}badge-client-company{% else %}badge-client-private{% endif %}">
+                  {{ client.get_client_type_display }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {% if can_manage_clients %}
+            <div class="mobile-card-actions">
+              <a href="{% url 'klient_edit' client.pk %}" class="mobile-action">
+                <i class="fa-solid fa-pen-to-square" style="color:#00ff2a;"></i>
+                Edytuj
+              </a>
+
+              <a href="{% url 'klient_delete' client.pk %}" class="mobile-action">
+                <i class="fa-solid fa-trash" style="color:#ea5455;"></i>
+                Usuń
+              </a>
+
+              <a href="{% url 'klient_deactivate' client.pk %}" class="mobile-action">
+                <i class="fa-solid fa-user-slash" style="color:#ff9900;"></i>
+                Archiwizuj
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="bi bi-buildings"></i>
+      </div>
+
+      <h4>Brak klientów</h4>
+
+      <p class="text-muted">
+        Nie znaleziono żadnych klientów do wyświetlenia.
+      </p>
+
+      {% if can_manage_clients %}
+        <a href="{% url 'klient_add' %}" class="modern-btn modern-btn-primary">
+          <i class="bi bi-plus-lg"></i>
+          Dodaj pierwszego klienta
+        </a>
+      {% endif %}
+    </div>
+
+  {% endif %}
+</div>
+
+{% endblock %}

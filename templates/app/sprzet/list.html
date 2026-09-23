@@ -1,0 +1,985 @@
+{# templates/app/sprzet/list.html #}
+{% extends "app/core/base.html" %}
+{% load static %}
+{% block content %}
+
+<style>
+.tool-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.tool-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.tool-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.tool-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.tool-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.tool-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1rem;
+  margin-bottom:1.5rem;
+}
+
+.tool-stat-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1.2rem;
+  box-shadow:0 14px 35px rgba(0,0,0,.12);
+}
+
+.tool-stat-label{
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:700;
+}
+
+.tool-stat-value{
+  margin-top:.35rem;
+  color:var(--text);
+  font-size:2rem;
+  font-weight:900;
+}
+
+.tool-filter-card,
+.tool-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.tool-filter-card{
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+}
+
+.tool-filter-card .form-control,
+.tool-filter-card .form-select{
+  min-height:50px;
+  background:var(--body);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:14px;
+}
+
+.tool-filter-card .form-control:focus,
+.tool-filter-card .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.tool-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.tool-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+}
+
+.tool-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.tool-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.tool-table{
+  color:var(--text);
+  margin:0;
+}
+
+.tool-table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+}
+
+.tool-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+  vertical-align:middle;
+}
+
+.tool-name{
+  color:var(--text);
+  font-weight:900;
+  text-decoration:none;
+}
+
+.tool-name:hover{
+  color:#1468f5;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+}
+
+.badge-available{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.badge-in-use{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.15);
+  border-color:rgba(13,110,253,.25);
+}
+
+.badge-service{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+}
+
+.badge-muted{
+  color:var(--muted);
+}
+
+.table-actions{
+  display:flex;
+  align-items:center;
+  gap:.7rem;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-orange{
+  color:#ff9f2f;
+  border-color:rgba(20,104,245,.25);
+}
+
+.icon-btn-green{
+  color:#00ff2a;
+  border-color:rgba(0,255,42,.18);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+
+.placeholder-box{
+  min-height:180px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.6rem;
+  text-align:center;
+  color:var(--muted);
+  border:1px dashed var(--border);
+  border-radius:22px;
+  background:rgba(255,255,255,.02);
+  margin:1.5rem;
+}
+
+.placeholder-box i{
+  font-size:2rem;
+  color:#1468f5;
+}
+
+/* MODALE */
+.tool-modal,
+.delete-tool-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.tool-modal-header,
+.delete-tool-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-tool-header{
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.tool-modal-header .btn-close,
+.delete-tool-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.tool-modal-icon,
+.delete-tool-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+}
+
+.delete-tool-icon{
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+  color:#ff6b6b;
+}
+
+.tool-modal-header h4,
+.delete-tool-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.tool-modal-header p,
+.delete-tool-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.tool-modal-body,
+.delete-tool-body{
+  padding:1.5rem;
+}
+
+.tool-modal .form-control,
+.tool-modal .form-select,
+.tool-modal select,
+.tool-modal textarea{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+
+.tool-modal textarea{
+  min-height:120px;
+}
+
+.tool-label{
+  display:block;
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:800;
+  margin-bottom:.45rem;
+}
+
+.delete-tool-preview{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid rgba(220,53,69,.22);
+  background:rgba(220,53,69,.08);
+}
+
+.tool-modal-footer,
+.delete-tool-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:991px){
+  .tool-stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:768px){
+  .tool-page-head{
+    flex-direction:column;
+  }
+
+  .tool-page-head .btn-orange{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+
+  .tool-stats{
+    grid-template-columns:1fr;
+  }
+
+  .tool-modal-footer,
+  .delete-tool-footer{
+    flex-direction:column;
+  }
+
+  .tool-modal-footer button,
+  .delete-tool-footer button{
+    width:100%;
+    justify-content:center;
+  }
+}
+
+/* =========================
+   MOBILE SPRZĘT
+========================= */
+
+@media(max-width:768px){
+
+  .tool-title-wrap{
+    width:100%;
+    align-items:flex-start;
+  }
+
+  .tool-title-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .tool-title{
+    font-size:1.3rem;
+  }
+
+  .tool-subtitle{
+    font-size:.85rem;
+  }
+
+  .tool-filter-card{
+    padding:1rem;
+    border-radius:22px;
+  }
+
+  .tool-filter-card .row > div{
+    width:100%;
+  }
+
+  .tool-filter-card .btn-orange{
+    min-height:50px;
+  }
+
+  .tool-list-card{
+    border-radius:22px;
+  }
+
+  .tool-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .tool-list-icon{
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    font-size:1.1rem;
+  }
+
+  .tool-list-header h3{
+    font-size:1rem;
+  }
+
+  .tool-list-header p{
+    font-size:.8rem;
+  }
+
+  .tool-table,
+  .tool-table thead,
+  .tool-table tbody,
+  .tool-table tr,
+  .tool-table th,
+  .tool-table td{
+    display:block;
+    width:100%;
+  }
+
+  .tool-table thead{
+    display:none;
+  }
+
+  .tool-table tbody{
+    padding:1rem;
+    display:grid;
+    gap:1rem;
+  }
+
+  .tool-table tbody tr{
+    border:1px solid var(--border);
+    border-radius:20px;
+    background:rgba(255,255,255,.025);
+    padding:1rem;
+  }
+
+  .tool-table tbody td{
+    border:0;
+    padding:.45rem 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .tool-table tbody td::before{
+    content:attr(data-label);
+    color:var(--muted);
+    font-size:.78rem;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    flex-shrink:0;
+  }
+
+  .tool-table tbody td:first-child{
+    padding-top:0;
+  }
+
+  .tool-table tbody td:first-child::before{
+    content:"Nazwa";
+  }
+
+  .tool-table tbody td:nth-child(2)::before{
+    content:"Producent";
+  }
+
+  .tool-table tbody td:nth-child(3)::before{
+    content:"Model";
+  }
+
+  .tool-table tbody td:nth-child(4)::before{
+    content:"Status";
+  }
+
+  .tool-table tbody td:nth-child(5){
+    padding-top:.8rem;
+    margin-top:.4rem;
+    border-top:1px solid var(--border);
+    justify-content:flex-start;
+  }
+
+  .tool-table tbody td:nth-child(5)::before{
+    content:"Akcje";
+    margin-right:auto;
+  }
+
+  .tool-name{
+    text-align:right;
+    max-width:65%;
+  }
+
+  .badge-soft{
+    white-space:nowrap;
+  }
+
+  .table-actions{
+    display:flex;
+    gap:.6rem;
+  }
+
+  .icon-btn{
+    width:42px;
+    height:42px;
+    border-radius:14px;
+  }
+
+  .tool-modal-header,
+  .delete-tool-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .tool-modal-icon,
+  .delete-tool-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .tool-modal-header h4,
+  .delete-tool-header h4{
+    font-size:1.1rem;
+  }
+
+  .tool-modal-body,
+  .delete-tool-body{
+    padding:1rem;
+  }
+
+  .tool-modal-footer,
+  .delete-tool-footer{
+    padding:0 1rem 1rem;
+  }
+
+  .tool-modal-footer .btn-soft,
+  .tool-modal-footer .btn-orange,
+  .delete-tool-footer .btn-soft,
+  .delete-tool-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+</style>
+
+<div class="tool-page-head">
+  <div class="tool-title-wrap">
+    <div class="tool-title-icon">
+      <i class="bi bi-tools"></i>
+    </div>
+
+    <div>
+      <h1 class="tool-title">Sprzęt</h1>
+      <div class="tool-subtitle">
+        Lista elektronarzędzi i wyposażenia.
+      </div>
+    </div>
+  </div>
+
+  <a href="{% url 'tool_create' %}" class="btn-orange">
+    <i class="bi bi-plus-lg me-1"></i>
+    Dodaj sprzęt
+  </a>
+</div>
+
+<div class="tool-stats">
+  <div class="tool-stat-card">
+    <div class="tool-stat-label">Wszystkie</div>
+    <div class="tool-stat-value">{{ stats.all }}</div>
+  </div>
+
+  <div class="tool-stat-card">
+    <div class="tool-stat-label">Dostępne</div>
+    <div class="tool-stat-value">{{ stats.available }}</div>
+  </div>
+
+  <div class="tool-stat-card">
+    <div class="tool-stat-label">W użyciu</div>
+    <div class="tool-stat-value">{{ stats.in_use }}</div>
+  </div>
+
+  <div class="tool-stat-card">
+    <div class="tool-stat-label">Serwis</div>
+    <div class="tool-stat-value">{{ stats.service }}</div>
+  </div>
+</div>
+
+<div class="tool-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+      <div class="col-12 col-md">
+        <input type="text"
+               name="q"
+               class="form-control"
+               placeholder="Szukaj sprzętu..."
+               value="{{ current_q }}">
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="status" class="form-select">
+          <option value="">Wszystkie statusy</option>
+          {% for value, label in statuses %}
+            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="category" class="form-select">
+          <option value="">Wszystkie kategorie</option>
+          {% for value, label in categories %}
+            <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>
+              {{ label }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-auto d-flex gap-2">
+        <button class="btn-orange w-100">
+          <i class="bi bi-search"></i>
+          Szukaj
+        </button>
+        
+        <a href="{% url 'tool_list' %}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="tool-list-card">
+  <div class="tool-list-header">
+    <div class="tool-list-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista sprzętu</h3>
+      <p>Nazwa, producent, model, status i szybkie akcje.</p>
+    </div>
+  </div>
+
+  {% if tools %}
+    <div class="table-responsive">
+      <table class="table table-modern align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Nazwa</th>
+            <th>Producent</th>
+            <th>Model</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for tool in tools %}
+            <tr>
+              <td>
+                <a href="{% url 'tool_detail' tool.pk %}" class="tool-name">
+                  {{ tool.name }}
+                </a>
+              </td>
+
+              <td>{{ tool.manufacturer|default:"—" }}</td>
+              <td>{{ tool.model|default:"—" }}</td>
+
+              <td>
+                {% if tool.status == "available" %}
+                  <span class="badge-soft badge-available">{{ tool.get_status_display }}</span>
+                {% elif tool.status == "in_use" %}
+                  <span class="badge-soft badge-in-use">{{ tool.get_status_display }}</span>
+                {% elif tool.status == "service" %}
+                  <span class="badge-soft badge-service">{{ tool.get_status_display }}</span>
+                {% else %}
+                  <span class="badge-soft badge-muted">{{ tool.get_status_display }}</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div>
+                  <button type="button"
+                          class="icon-btn icon-btn-orange openToolEventModal"
+                          data-bs-toggle="modal"
+                          data-bs-target="#toolEventModal"
+                          data-action="{% url 'tool_event_add' tool.pk %}"
+                          data-tool-name="{{ tool.name|escape }}"
+                          title="Dodaj zdarzenie">
+                    <i class="bi bi-plus-circle"></i>
+                  </button>
+
+                  {% if can_edit_tool %}<a href="{% url 'tool_update' tool.pk %}"
+                     class="icon-btn icon-btn-green"
+                     title="Edytuj">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </a>{% endif %}
+
+                  {% if can_delete_tool %}<button type="button"
+                          class="icon-btn icon-btn-danger"
+                          title="Usuń"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteToolModal"
+                          data-delete-url="{% url 'tool_delete' tool.pk %}"
+                          data-title="{{ tool.name|escape }}">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>{% endif %}
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="placeholder-box">
+      <i class="bi bi-tools"></i>
+      <strong>Brak sprzętu</strong>
+      <span>Dodaj pierwszy sprzęt do systemu.</span>
+    </div>
+  {% endif %}
+</div>
+
+<div class="modal fade" id="toolEventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content tool-modal">
+
+      <form id="toolEventForm" method="post" action="" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="tool-modal-header">
+          <div class="tool-modal-icon">
+            <i class="bi bi-plus-circle"></i>
+          </div>
+
+          <div>
+            <h4>Dodaj zdarzenie</h4>
+            <p>Sprzęt: <strong id="toolEventName">—</strong></p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="tool-modal-body">
+          <div class="mb-3">
+            <label class="tool-label">Typ zdarzenia</label>
+            {{ event_form.type }}
+            {{ event_form.type.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label class="tool-label">Data zdarzenia</label>
+            {{ event_form.event_date }}
+            {{ event_form.event_date.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label class="tool-label">Opis</label>
+            {{ event_form.description }}
+            {{ event_form.description.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label class="tool-label">Zdjęcia</label>
+            {{ event_form.images }}
+            {{ event_form.images.errors }}
+          </div>
+        </div>
+
+        <div class="tool-modal-footer">
+          <button type="button" class="btn-soft" data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit" class="btn-orange">
+            <i class="bi bi-check-lg me-1"></i>
+            Zapisz
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="deleteToolModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-tool-modal">
+
+      <form id="deleteToolForm" method="post" action="">
+        {% csrf_token %}
+
+        <div class="delete-tool-header">
+          <div class="delete-tool-icon">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć sprzęt?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="delete-tool-body">
+          <div class="delete-tool-preview">
+            <div class="small text-muted mb-1">Usuwasz:</div>
+            <strong id="deleteToolPreview">—</strong>
+          </div>
+        </div>
+
+        <div class="delete-tool-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-trash"></i>
+            Usuń sprzęt
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const eventModal = document.getElementById('toolEventModal');
+  const deleteModal = document.getElementById('deleteToolModal');
+
+  if(eventModal){
+    const form = document.getElementById('toolEventForm');
+    const nameEl = document.getElementById('toolEventName');
+
+    eventModal.addEventListener('show.bs.modal', function(event){
+      const btn = event.relatedTarget;
+      if(form) form.action = btn?.getAttribute('data-action') || '';
+      if(nameEl) nameEl.textContent = btn?.getAttribute('data-tool-name') || '—';
+    });
+  }
+
+  if(deleteModal){
+    const form = document.getElementById('deleteToolForm');
+    const preview = document.getElementById('deleteToolPreview');
+
+    deleteModal.addEventListener('show.bs.modal', function(event){
+      const btn = event.relatedTarget;
+      if(form) form.action = btn?.getAttribute('data-delete-url') || '';
+      if(preview) preview.textContent = btn?.getAttribute('data-title') || '—';
+    });
+  }
+})();
+</script>
+
+{% endblock %}

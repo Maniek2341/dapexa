@@ -1,0 +1,7 @@
+from .warranty_list_view import WarrantyListView
+from .warranty_create_view import WarrantyClaimCreateView
+from .warranty_detail_view import WarrantyDetailView
+from .warranty_mark_reported_view import WarrantyClaimMarkReportedView
+from .warranty_mark_repaired_view import WarrantyClaimMarkRepairedView
+from .warranty_delete_view import WarrantyClaimDeleteView
+from .warranty_update_view import WarrantyClaimUpdateView

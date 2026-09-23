@@ -1,0 +1,194 @@
+
+{% load static %}
+<div class="row g-3">
+    <!-- Podstawowe dane -->
+    <div class="col-md-6">
+        <label class="form-label">Nazwa lokalizacji</label>
+        <input type="text" 
+               name="name" 
+               value="{{ location.name|default:'' }}"
+               class="form-control{% if form.name.errors %} is-invalid{% endif %}" 
+               placeholder="np. Siedziba główna, Magazyn">
+        {% if form.name.errors %}
+            <div class="invalid-feedback">{{ form.name.errors.0 }}</div>
+        {% endif %}
+        <div class="form-text text-muted small">Opcjonalna nazwa dla lokalizacji</div>
+    </div>
+    
+    <div class="col-md-6">
+        <label class="form-label">Kod</label>
+        <input type="text" 
+               name="code" 
+               value="{{ location.code|default:'' }}"
+               class="form-control{% if form.code.errors %} is-invalid{% endif %}" 
+               placeholder="np. OFF-01, WH-02">
+        {% if form.code.errors %}
+            <div class="invalid-feedback">{{ form.code.errors.0 }}</div>
+        {% endif %}
+        <div class="form-text text-muted small">Wewnętrzny kod lokalizacji</div>
+    </div>
+    
+    <!-- Osoba kontaktowa -->
+    <div class="col-12">
+        <label class="form-label required-field">Osoba kontaktowa dla tej lokalizacji</label>
+        <select name="contact_person" class="form-select{% if form.contact_person.errors %} is-invalid{% endif %}" required>
+            <option value="">--- Wybierz osobę kontaktową ---</option>
+            {% for cp in contact_people %}
+                <option value="{{ cp.pk }}" {% if location.contact_person.pk == cp.pk %}selected{% endif %}>
+                    {{ cp.first_name }} {{ cp.last_name }} 
+                    {% if cp.email %} ({{ cp.email }}){% endif %}
+                </option>
+            {% endfor %}
+        </select>
+        {% if form.contact_person.errors %}
+            <div class="invalid-feedback">{{ form.contact_person.errors.0 }}</div>
+        {% endif %}
+        <div class="form-text text-muted small">
+            <i class="bi bi-info-circle me-1"></i>Dane kontaktowe (telefon, email) są pobierane z wybranej osoby.
+        </div>
+    </div>
+    
+    <!-- Adres -->
+    <div class="col-12 mt-3">
+        <h6 class="fw-bold mb-3">Adres lokalizacji</h6>
+    </div>
+    
+    <div class="col-md-12">
+        <label class="form-label">Ulica i numer</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-signpost"></i></span>
+            <input type="text" 
+                   name="street_full" 
+                   value="{{ location.address.street|default:'' }}"
+                   class="form-control{% if form.street_full.errors %} is-invalid{% endif %}" 
+                   placeholder="np. Prosta 12/4">
+        </div>
+        {% if form.street_full.errors %}
+            <div class="invalid-feedback d-block">{{ form.street_full.errors.0 }}</div>
+        {% endif %}
+        <div class="form-text text-muted small">Wpisz ulicę wraz z numerem domu/lokalu</div>
+    </div>
+    
+    <div class="col-md-4">
+        <label class="form-label">Kod pocztowy</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-mailbox"></i></span>
+            <input type="text" 
+                   name="zip_code" 
+                   value="{{ location.address.postcode|default:'' }}"
+                   class="form-control{% if form.zip_code.errors %} is-invalid{% endif %}" 
+                   placeholder="00-000">
+        </div>
+        {% if form.zip_code.errors %}
+            <div class="invalid-feedback d-block">{{ form.zip_code.errors.0 }}</div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-5">
+        <label class="form-label">Miasto</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-building"></i></span>
+            <input type="text" 
+                   name="city" 
+                   value="{{ location.address.city|default:'' }}"
+                   class="form-control{% if form.city.errors %} is-invalid{% endif %}" 
+                   placeholder="np. Warszawa">
+        </div>
+        {% if form.city.errors %}
+            <div class="invalid-feedback d-block">{{ form.city.errors.0 }}</div>
+        {% endif %}
+    </div>
+    
+    <div class="col-md-3">
+        <label class="form-label">Kraj</label>
+        <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-globe"></i></span>
+            <input type="text" 
+                   name="country" 
+                   value="{{ location.address.country|default:'Polska' }}"
+                   class="form-control{% if form.country.errors %} is-invalid{% endif %}" 
+                   placeholder="Polska">
+        </div>
+        {% if form.country.errors %}
+            <div class="invalid-feedback d-block">{{ form.country.errors.0 }}</div>
+        {% endif %}
+    </div>
+    
+    <!-- Notatki -->
+    <div class="col-12 mt-3">
+        <label class="form-label">Notatki</label>
+        <textarea name="notes" 
+                  class="form-control{% if form.notes.errors %} is-invalid{% endif %}" 
+                  rows="3" 
+                  placeholder="Dodatkowe informacje o lokalizacji...">{{ location.notes|default:'' }}</textarea>
+        {% if form.notes.errors %}
+            <div class="invalid-feedback">{{ form.notes.errors.0 }}</div>
+        {% endif %}
+        <div class="form-text text-muted small">
+            <i class="bi bi-pencil me-1"></i>Wewnętrzne notatki dotyczące tej lokalizacji
+        </div>
+    </div>
+    
+    <!-- Opcje -->
+    <div class="col-12 mt-3">
+        <div class="card bg-light border-0">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3">Opcje lokalizacji</h6>
+                
+                <div class="d-flex flex-wrap gap-4">
+                    <div class="form-check">
+                        <input type="checkbox" 
+                               name="is_default" 
+                               class="form-check-input" 
+                               id="is_default"
+                               {% if location.is_default %}checked{% endif %}>
+                        <label class="form-check-label" for="is_default">
+                            <i class="bi bi-star-fill text-warning me-1"></i>
+                            Ustaw jako domyślną lokalizację
+                        </label>
+                    </div>
+                    
+                    <div class="form-check">
+                        <input type="checkbox" 
+                               name="is_active" 
+                               class="form-check-input" 
+                               id="is_active"
+                               {% if location.is_active or not location.pk %}checked{% endif %}>
+                        <label class="form-check-label" for="is_active">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>
+                            Lokalizacja aktywna
+                        </label>
+                    </div>
+                </div>
+                
+                {% if location.is_default %}
+                    <div class="alert alert-info mt-3 mb-0 py-2 small">
+                        <i class="bi bi-info-circle me-1"></i>
+                        To jest domyślna lokalizacja. Będzie automatycznie wybierana w formularzach.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.required-field:after {
+    content: " *";
+    color: #dc3545;
+    font-weight: normal;
+}
+
+.bg-light {
+    background-color: rgba(255,255,255,0.05) !important;
+}
+
+[data-theme="dark"] .bg-light {
+    background-color: rgba(0,0,0,0.2) !important;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+</style>

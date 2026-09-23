@@ -1,0 +1,5180 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.offer-detail-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.offer-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.offer-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.offer-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.offer-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.offer-head-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+}
+
+.btn-danger-modern{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+  box-shadow:0 14px 32px rgba(220,53,69,.20);
+}
+
+.btn-orange:hover,
+.btn-soft:hover,
+.btn-danger-modern:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.offer-main-card,
+.offer-content-card,
+.offer-side-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+.variants-list{
+  display:flex;
+  flex-direction:column;
+  gap:1.25rem;
+}
+
+.variant-modern-card{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+}
+
+.variant-modern-card.variant-selected{
+  border-color:rgba(25,135,84,.35);
+  box-shadow:0 0 0 1px rgba(25,135,84,.08);
+}
+
+.variant-modern-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  padding:1.35rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 42%),
+    rgba(255,255,255,.015);
+}
+
+.variant-title-wrap{
+  display:flex;
+  align-items:flex-start;
+  gap:1rem;
+}
+
+.variant-icon{
+  width:54px;
+  height:54px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.35rem;
+}
+
+.variant-title-row{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.variant-title-row h4{
+  margin:0;
+  color:var(--text);
+  font-size:1.15rem;
+  font-weight:950;
+}
+
+.variant-title-wrap p{
+  margin:.35rem 0 0;
+  color:var(--muted);
+  font-size:.88rem;
+  line-height:1.45;
+}
+
+.variant-badge-selected{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.38rem .7rem;
+  border-radius:999px;
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border:1px solid rgba(25,135,84,.25);
+  font-size:.74rem;
+  font-weight:900;
+}
+
+.variant-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:.5rem;
+  flex-wrap:wrap;
+}
+
+.variant-action-btn{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  padding:.65rem .9rem;
+  font-weight:900;
+  font-size:.82rem;
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  text-decoration:none;
+}
+
+.variant-action-btn:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.variant-action-success{
+  color:#47d18c;
+  border-color:rgba(25,135,84,.25);
+  background:rgba(25,135,84,.12);
+}
+
+.variant-action-warning{
+  color:#ffc857;
+  border-color:rgba(255,193,7,.25);
+  background:rgba(255,193,7,.12);
+}
+
+.variant-action-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.25);
+  background:rgba(220,53,69,.10);
+}
+
+.variant-stats{
+  display:grid;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:1rem;
+  padding:1.35rem;
+}
+
+.variant-stat{
+  padding:1rem;
+  border-radius:20px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+}
+
+.variant-stat small{
+  display:block;
+  color:var(--muted);
+  margin-bottom:.4rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  font-size:.72rem;
+  font-weight:900;
+}
+
+.variant-stat strong{
+  display:block;
+  color:var(--text);
+  font-size:1.15rem;
+  font-weight:950;
+  line-height:1.15;
+}
+
+.variant-stat.profit{
+  background:rgba(25,135,84,.10);
+  border-color:rgba(25,135,84,.22);
+}
+
+.variant-stat.profit strong{
+  color:#47d18c;
+}
+
+.variant-section{
+  padding:0 1.35rem 1.35rem;
+}
+
+.variant-section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  margin-bottom:.85rem;
+}
+
+.variant-section-head h5{
+  margin:0;
+  color:var(--text);
+  font-size:1rem;
+  font-weight:950;
+}
+
+.variant-section-head p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.variant-table-wrap{
+  overflow:hidden;
+  border:1px solid var(--border);
+  border-radius:20px;
+}
+
+.variant-table{
+  color:var(--text);
+}
+
+.variant-table thead th{
+  background:rgba(255,255,255,.035);
+  color:var(--muted);
+  font-size:.75rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  font-weight:900;
+  padding:1rem;
+  border-color:var(--border);
+  white-space:nowrap;
+}
+
+.variant-table tbody td{
+  padding:1rem;
+  border-color:var(--border);
+  vertical-align:middle;
+}
+
+.variant-table tbody tr:hover{
+  background:rgba(255,255,255,.025);
+}
+
+.variant-item-main{
+  display:flex;
+  align-items:center;
+  gap:.85rem;
+  min-width:220px;
+}
+
+.variant-item-icon{
+  width:44px;
+  height:44px;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  color:#1468f5;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.variant-item-name{
+  color:var(--text);
+  font-weight:900;
+}
+
+.variant-item-sub{
+  color:var(--muted);
+  font-size:.82rem;
+  margin-top:.12rem;
+}
+
+.variant-type-badge{
+  display:inline-flex;
+  align-items:center;
+  padding:.38rem .7rem;
+  border-radius:999px;
+  color:#ff9f43;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.22);
+  font-size:.74rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.variant-files-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:.85rem;
+}
+
+.variant-file-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.8rem;
+  padding:.9rem;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:rgba(255,255,255,.025);
+}
+
+.variant-file-main{
+  display:flex;
+  align-items:center;
+  gap:.8rem;
+  min-width:0;
+  color:var(--text);
+  text-decoration:none;
+  flex:1;
+}
+
+.variant-file-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  color:#ff6b6b;
+  background:rgba(220,53,69,.12);
+  border:1px solid rgba(220,53,69,.22);
+  font-size:1.2rem;
+}
+
+.variant-file-content{
+  min-width:0;
+}
+
+.variant-file-name{
+  color:var(--text);
+  font-weight:900;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.variant-file-date{
+  color:var(--muted);
+  font-size:.78rem;
+  margin-top:.15rem;
+}
+
+.variant-file-open{
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  text-decoration:none;
+}
+
+.variant-file-open:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.variants-empty{
+  min-height:260px;
+  border:1px dashed var(--border);
+  border-radius:26px;
+  background:rgba(255,255,255,.025);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:2rem;
+}
+
+.variants-empty-icon{
+  width:78px;
+  height:78px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:2rem;
+  margin-bottom:1rem;
+}
+
+.variants-empty h4{
+  color:var(--text);
+  font-weight:950;
+  margin-bottom:.35rem;
+}
+
+.variants-empty p{
+  color:var(--muted);
+  margin-bottom:1.25rem;
+}
+
+@media(max-width:1200px){
+  .variant-stats{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .variant-files-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:768px){
+  .variant-modern-header{
+    flex-direction:column;
+    padding:1rem;
+  }
+
+  .variant-title-wrap{
+    width:100%;
+  }
+
+  .variant-actions{
+    width:100%;
+  }
+
+  .variant-actions form,
+  .variant-actions .variant-action-btn{
+    width:100%;
+  }
+
+  .variant-action-btn{
+    justify-content:center;
+  }
+
+  .variant-stats{
+    grid-template-columns:1fr;
+    padding:1rem;
+  }
+
+  .variant-section{
+    padding:0 1rem 1rem;
+  }
+
+  .variant-table,
+  .variant-table thead,
+  .variant-table tbody,
+  .variant-table tr,
+  .variant-table th,
+  .variant-table td{
+    display:block;
+    width:100%;
+  }
+
+  .variant-table thead{
+    display:none;
+  }
+
+  .variant-table tbody{
+    display:grid;
+    gap:.85rem;
+    padding:.85rem;
+  }
+
+  .variant-table tbody tr{
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:.9rem;
+    background:rgba(255,255,255,.025);
+  }
+
+  .variant-table tbody td{
+    border:0;
+    padding:.45rem 0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .variant-table tbody td:first-child{
+    display:block;
+    padding-top:0;
+  }
+
+  .variant-table tbody td:first-child::before{
+    display:none;
+  }
+
+  .variant-table tbody td::before{
+    content:attr(data-label);
+    color:var(--muted);
+    font-size:.72rem;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+
+  .variant-item-main{
+    min-width:0;
+  }
+
+  .variant-file-card{
+    padding:.8rem;
+  }
+}
+
+.offer-main-body{
+  padding:1.5rem;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.offer-avatar{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.6rem;
+  flex-shrink:0;
+}
+
+.offer-main-title{
+  margin:0;
+  color:var(--text);
+  font-size:1.35rem;
+  font-weight:950;
+}
+
+.offer-meta{
+  margin-top:.5rem;
+  display:flex;
+  gap:.5rem;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+}
+
+.badge-client{
+  color:#ff9f43;
+  background:rgba(20,104,245,.12);
+  border-color:rgba(20,104,245,.22);
+}
+
+.badge-priority{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.15);
+  border-color:rgba(13,110,253,.25);
+}
+
+.badge-success-soft{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.badge-warning-soft{
+  color:#ffc857;
+  background:rgba(255,193,7,.16);
+  border-color:rgba(255,193,7,.25);
+}
+
+.badge-danger-soft{
+  color:#ff6b6b;
+  background:rgba(220,53,69,.13);
+  border-color:rgba(220,53,69,.25);
+}
+
+.offer-small-muted{
+  color:var(--muted);
+  font-size:.86rem;
+  margin-top:.45rem;
+}
+
+.offer-contact-actions{
+  display:flex;
+  gap:.5rem;
+  flex-wrap:wrap;
+  margin-left:auto;
+}
+
+.offer-tabs{
+  border-bottom:1px solid var(--border)!important;
+  padding:1rem 1rem 0;
+  gap:.35rem;
+  overflow-x:auto;
+  flex-wrap:nowrap;
+}
+
+.offer-tabs .nav-link{
+  color:var(--muted);
+  border:0!important;
+  border-radius:14px 14px 0 0;
+  font-weight:800;
+  white-space:nowrap;
+  padding:.75rem 1rem;
+}
+
+.offer-tabs .nav-link.active{
+  background:rgba(20,104,245,.12)!important;
+  color:#1468f5!important;
+}
+
+.offer-tab-body{
+  padding:1.5rem;
+}
+
+.info-card{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:1rem;
+  height:100%;
+}
+
+.info-label{
+  color:var(--muted);
+  font-size:.76rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:.35rem;
+}
+
+.info-value{
+  color:var(--text);
+  font-weight:900;
+}
+
+.section-title{
+  color:var(--text);
+  font-weight:950;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+  margin-bottom:1rem;
+}
+
+.section-title i{
+  color:#1468f5;
+}
+
+.side-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.25rem 1.4rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.side-card-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  flex-shrink:0;
+}
+
+.side-card-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1rem;
+  font-weight:950;
+}
+
+.side-card-body{
+  padding:1.25rem;
+}
+
+.side-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem;
+}
+
+.side-actions .btn,
+.side-actions .btn-orange,
+.side-actions .btn-soft{
+  border-radius:14px;
+  font-weight:800;
+}
+
+.side-row{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.75rem 0;
+  border-bottom:1px solid var(--border);
+  font-size:.9rem;
+}
+
+.side-row:last-child{
+  border-bottom:0;
+}
+
+.side-row span:first-child{
+  color:var(--muted);
+}
+
+.side-row strong{
+  color:var(--text);
+  text-align:right;
+}
+
+.media-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:.85rem;
+}
+
+.media-tile{
+  position:relative;
+  border:1px solid var(--border);
+  background:transparent;
+  padding:0;
+  border-radius:18px;
+  overflow:hidden;
+  cursor:pointer;
+  aspect-ratio:4/3;
+}
+
+.media-tile img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.variant-box{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:22px;
+  overflow:hidden;
+}
+
+.offer-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.offer-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.offer-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.offer-list-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.offer-tabs-modern{
+  display:flex;
+  gap:.65rem;
+  list-style:none;
+  margin:0;
+  padding:1rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;
+  flex-wrap:nowrap;
+}
+
+.offer-tabs-modern li{
+  flex-shrink:0;
+}
+
+.offer-tabs-modern button{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:999px;
+  padding:.65rem 1rem;
+  font-weight:900;
+  font-size:.86rem;
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+  white-space:nowrap;
+}
+
+.offer-tabs-modern button:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.offer-tabs-modern button.active{
+  color:#fff;
+  border-color:transparent;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 10px 26px rgba(20,104,245,.20);
+}
+
+@media(max-width:768px){
+  .offer-list-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .offer-tabs-modern{
+    padding:.9rem 1rem;
+    gap:.5rem;
+  }
+
+  .offer-tabs-modern button{
+    padding:.6rem .85rem;
+    font-size:.82rem;
+  }
+}
+
+.file-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:.75rem;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+}
+
+.file-main{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  flex:1;
+  min-width:0;
+  color:var(--text);
+  text-decoration:none;
+}
+
+.file-ico{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.10);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.file-name{
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.crm-timeline-scroll{
+  max-height:520px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+
+.crm-card{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:1rem;
+}
+
+@media(max-width:768px){
+  .offer-detail-head{
+    flex-direction:column;
+  }
+
+  .offer-head-actions,
+  .offer-head-actions a,
+  .offer-head-actions button{
+    width:100%;
+  }
+
+  .offer-head-actions a,
+  .offer-head-actions button{
+    display:flex;
+    justify-content:center;
+  }
+
+  .offer-title{
+    font-size:1.35rem;
+  }
+
+  .offer-main-body{
+    padding:1rem;
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .offer-contact-actions{
+    margin-left:0;
+    width:100%;
+  }
+
+  .offer-contact-actions a{
+    flex:1;
+  }
+
+  .offer-tab-body{
+    padding:1rem;
+  }
+
+  .media-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .side-actions .btn,
+  .side-actions .btn-orange,
+  .side-actions .btn-soft{
+    width:100%;
+    justify-content:center;
+  }
+}
+.overview-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:1rem;
+}
+
+.overview-card,
+.overview-description{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+}
+
+.overview-card-head{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.1rem 1.2rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.10), transparent 40%),
+    rgba(255,255,255,.015);
+}
+
+.overview-card-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  flex-shrink:0;
+}
+
+.overview-card-head h4{
+  margin:0;
+  color:var(--text);
+  font-size:1rem;
+  font-weight:950;
+}
+
+.overview-card-head p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.82rem;
+}
+
+.overview-card-body{
+  padding:1.2rem;
+}
+
+.overview-row{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.7rem 0;
+  border-bottom:1px solid var(--border);
+}
+
+.overview-row:first-child{
+  padding-top:0;
+}
+
+.overview-row:last-of-type{
+  border-bottom:0;
+}
+
+.overview-row span,
+.overview-label{
+  color:var(--muted);
+  font-size:.78rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.overview-row strong,
+.overview-value{
+  color:var(--text);
+  font-weight:900;
+  text-align:right;
+}
+
+.overview-action{
+  margin-top:.75rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+  width:100%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  padding:.7rem 1rem;
+  font-weight:900;
+  text-decoration:none;
+}
+
+.overview-action:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.overview-workers{
+  margin-top:1rem;
+}
+
+.overview-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:.6rem;
+}
+
+.overview-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.42rem .75rem;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:800;
+  color:#ff9f43;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.22);
+}
+
+.overview-muted{
+  color:var(--muted);
+  font-size:.88rem;
+}
+
+.overview-stats-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1rem;
+}
+
+.overview-stat-card{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.1rem;
+  border-radius:22px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+}
+
+.overview-stat-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  flex-shrink:0;
+}
+
+.overview-status{
+  display:inline-flex;
+  padding:.38rem .7rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:900;
+}
+
+.overview-status.success{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border:1px solid rgba(25,135,84,.25);
+}
+
+.overview-status.muted{
+  color:var(--muted);
+  background:rgba(108,117,125,.14);
+  border:1px solid rgba(108,117,125,.22);
+}
+
+.overview-description-body{
+  padding:1.2rem;
+  color:var(--text);
+  line-height:1.65;
+}
+
+@media(max-width:992px){
+  .overview-grid,
+  .overview-stats-grid{
+    grid-template-columns:1fr;
+  }
+}
+
+@media(max-width:768px){
+  .overview-card-head{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .overview-card-body,
+  .overview-description-body{
+    padding:1rem;
+  }
+
+  .overview-row{
+    flex-direction:column;
+    gap:.25rem;
+  }
+
+  .overview-row strong,
+  .overview-value{
+    text-align:left;
+  }
+}
+
+.gallery-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+    padding:22px;
+    border:1px solid var(--border);
+    border-radius:22px;
+    background:
+        radial-gradient(circle at top left,
+        rgba(20,104,245,.12),
+        transparent 45%),
+        rgba(255,255,255,.02);
+
+}
+
+.gallery-header h4{
+    margin:0;
+    font-weight:900;
+    color:var(--text);
+}
+
+.gallery-header p{
+    margin:6px 0 0;
+    color:var(--muted);
+}
+
+.gallery-counter{
+    width:62px;
+    height:62px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:18px;
+    background:#1468f5;
+    color:#fff;
+    font-size:1.4rem;
+    font-weight:900;
+}
+
+
+.gallery-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+    gap:22px;
+}
+
+.gallery-card{
+    position:relative;
+    overflow:hidden;
+    border:none;
+    padding:0;
+    border-radius:22px;
+    cursor:pointer;
+    aspect-ratio:4/3;
+    background:#000;
+    transition:.25s;
+}
+
+.gallery-card:hover{
+    transform:translateY(-4px);
+}
+
+.gallery-card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:.35s;
+}
+
+.gallery-card:hover img{
+    transform:scale(1.08);
+}
+
+.gallery-overlay{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:18px;
+    opacity:0;
+    transition:.25s;
+    background:linear-gradient(
+        to top,
+        rgba(0,0,0,.75),
+        rgba(0,0,0,.15));
+}
+
+.gallery-card:hover .gallery-overlay{
+    opacity:1;
+}
+
+.gallery-overlay-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.gallery-icon{
+    width:42px;
+    height:42px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:14px;
+    color:#fff;
+    background:rgba(255,255,255,.16);
+    backdrop-filter:blur(8px);
+}
+
+.gallery-date{
+    padding:7px 12px;
+    border-radius:999px;
+    color:white;
+    background:rgba(255,255,255,.15);
+    backdrop-filter:blur(8px);
+    font-size:.75rem;
+    font-weight:700;
+}
+
+.gallery-open{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 16px;
+    border-radius:999px;
+    background:white;
+    color:#111;
+    font-weight:800;
+}
+
+.gallery-empty{
+    min-height:340px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    border:2px dashed var(--border);
+    border-radius:28px;
+    text-align:center;
+}
+
+.gallery-empty-icon{
+    width:90px;
+    height:90px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:24px;
+    background:rgba(20,104,245,.12);
+    color:#1468f5;
+    font-size:2.5rem;
+    margin-bottom:18px;
+}
+
+.gallery-empty h4{
+    font-weight:900;
+    color:var(--text);
+}
+
+.gallery-empty p{
+    color:var(--muted);
+    max-width:340px;
+}
+
+.history-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  padding:1.25rem;
+  border:1px solid var(--border);
+  border-radius:24px;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 45%),
+    rgba(255,255,255,.025);
+  margin-bottom:1rem;
+}
+
+.history-head h4{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:950;
+  display:flex;
+  align-items:center;
+  gap:.5rem;
+}
+
+.history-head h4 i{
+  color:#1468f5;
+}
+
+.history-head p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.history-counter{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  color:#fff;
+  font-size:1.4rem;
+  font-weight:950;
+  box-shadow:0 14px 32px rgba(20,104,245,.20);
+  flex-shrink:0;
+}
+
+.history-filters{
+  display:flex;
+  gap:.6rem;
+  overflow-x:auto;
+  flex-wrap:nowrap;
+  padding-bottom:.75rem;
+  margin-bottom:1rem;
+}
+
+.history-filter{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:999px;
+  padding:.6rem .95rem;
+  font-size:.82rem;
+  font-weight:900;
+  white-space:nowrap;
+}
+
+.history-filter:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.history-filter.active{
+  border-color:transparent;
+  color:#fff;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 10px 26px rgba(20,104,245,.18);
+}
+
+.history-timeline{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+  max-height:560px;
+  overflow-y:auto;
+  padding:.25rem .35rem .25rem 1.1rem;
+}
+
+.history-timeline::before{
+  content:"";
+  position:absolute;
+  left:28px;
+  top:.5rem;
+  bottom:.5rem;
+  width:2px;
+  background:linear-gradient(
+    to bottom,
+    rgba(20,104,245,.45),
+    rgba(255,255,255,.06)
+  );
+}
+
+.history-timeline::-webkit-scrollbar{
+  width:6px;
+}
+
+.history-timeline::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.15);
+  border-radius:999px;
+}
+
+.history-item{
+  position:relative;
+  display:grid;
+  grid-template-columns:44px 1fr;
+  gap:.9rem;
+  align-items:flex-start;
+}
+
+.history-dot{
+  width:44px;
+  height:44px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:2;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.20);
+  color:#1468f5;
+  box-shadow:0 0 0 6px var(--card);
+}
+
+.history-dot.status{
+  color:#7aa7ff;
+  background:rgba(13,110,253,.14);
+  border-color:rgba(13,110,253,.25);
+}
+
+.history-dot.variant{
+  color:#ff9f43;
+}
+
+.history-dot.priority{
+  color:#ffc857;
+  background:rgba(255,193,7,.14);
+  border-color:rgba(255,193,7,.25);
+}
+
+.history-dot.workers{
+  color:#b58cff;
+  background:rgba(111,66,193,.14);
+  border-color:rgba(111,66,193,.25);
+}
+
+.history-dot.approval{
+  color:#47d18c;
+  background:rgba(25,135,84,.15);
+  border-color:rgba(25,135,84,.25);
+}
+
+.history-card{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+  border-radius:22px;
+  padding:1rem;
+}
+
+.history-card-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  margin-bottom:.7rem;
+}
+
+.history-type{
+  display:inline-flex;
+  padding:.38rem .7rem;
+  border-radius:999px;
+  color:#ff9f43;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.22);
+  font-size:.74rem;
+  font-weight:900;
+}
+
+.history-date{
+  color:var(--muted);
+  font-size:.8rem;
+  white-space:nowrap;
+}
+
+.history-title{
+  color:var(--text);
+  font-weight:950;
+  margin-bottom:.4rem;
+}
+
+.history-description{
+  color:var(--muted);
+  font-size:.9rem;
+  line-height:1.5;
+  white-space:pre-wrap;
+}
+
+.history-author{
+  margin-top:.75rem;
+  padding-top:.75rem;
+  border-top:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:.4rem;
+  color:var(--muted);
+  font-size:.82rem;
+  font-weight:700;
+}
+
+.history-more-btn{
+  width:100%;
+  margin-top:1rem;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:16px;
+  padding:.85rem 1rem;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+}
+
+.history-more-btn:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.history-empty{
+  min-height:260px;
+  border:1px dashed var(--border);
+  border-radius:26px;
+  background:rgba(255,255,255,.025);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  padding:2rem;
+}
+
+.history-empty-icon{
+  width:78px;
+  height:78px;
+  border-radius:24px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:2rem;
+  margin-bottom:1rem;
+}
+
+.history-empty h4{
+  color:var(--text);
+  font-weight:950;
+  margin-bottom:.35rem;
+}
+
+.history-empty p{
+  color:var(--muted);
+  margin:0;
+}
+
+@media(max-width:768px){
+  .history-head{
+    align-items:flex-start;
+    padding:1rem;
+  }
+
+  .history-counter{
+    width:52px;
+    height:52px;
+    border-radius:18px;
+    font-size:1.15rem;
+  }
+
+  .history-timeline{
+    max-height:none;
+    padding-left:.3rem;
+  }
+
+  .history-timeline::before{
+    left:21px;
+  }
+
+  .history-item{
+    grid-template-columns:38px 1fr;
+    gap:.7rem;
+  }
+
+  .history-dot{
+    width:38px;
+    height:38px;
+    border-radius:14px;
+    box-shadow:0 0 0 5px var(--card);
+  }
+
+  .history-card{
+    padding:.9rem;
+    border-radius:18px;
+  }
+
+  .history-card-top{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:.45rem;
+  }
+
+  .history-date{
+    white-space:normal;
+  }
+}
+.delete-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.delete-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.13);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ff6b6b;
+  font-size:1.55rem;
+  flex-shrink:0;
+  margin: 0;
+}
+
+.delete-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.delete-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.delete-modal-body{
+  padding:1.5rem;
+}
+
+.delete-preview-card{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid rgba(220,53,69,.22);
+  background:rgba(220,53,69,.08);
+}
+
+.delete-preview-card strong{
+  color:var(--text);
+  font-weight:900;
+}
+
+.delete-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.btn-danger-modern{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:768px){
+  .delete-modal-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .delete-modal-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .delete-modal-body{
+    padding:1rem;
+  }
+
+  .delete-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .delete-modal-footer .btn-soft,
+  .delete-modal-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+
+.image-modal{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:26px;
+    overflow:hidden;
+    box-shadow:0 30px 70px rgba(0,0,0,.45);
+}
+
+.image-modal-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:1.25rem 1.5rem;
+    border-bottom:1px solid var(--border);
+    background:
+        linear-gradient(180deg,rgba(255,255,255,.03),transparent),
+        radial-gradient(circle at top left,rgba(13,110,253,.12),transparent 45%);
+}
+
+.image-modal-header h5{
+    margin:0;
+    font-weight:700;
+}
+
+.image-modal-header small{
+    color:var(--muted);
+}
+
+.image-modal-icon{
+    width:54px;
+    height:54px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(13,110,253,.12);
+    border:1px solid rgba(13,110,253,.25);
+    color:#4dabff;
+    font-size:1.4rem;
+}
+
+.image-modal-body{
+    padding:1.5rem;
+    background:rgba(0,0,0,.15);
+    text-align:center;
+}
+
+.image-preview{
+    max-width:100%;
+    max-height:75vh;
+    border-radius:18px;
+    object-fit:contain;
+    box-shadow:0 15px 45px rgba(0,0,0,.35);
+}
+
+@media(max-width:768px){
+
+    .image-modal{
+        border-radius:20px;
+    }
+
+    .image-modal-header{
+        padding:1rem;
+    }
+
+    .image-modal-icon{
+        width:46px;
+        height:46px;
+        font-size:1.2rem;
+        border-radius:14px;
+    }
+
+    .image-modal-body{
+        padding:.75rem;
+    }
+
+    .image-preview{
+        max-height:60vh;
+        border-radius:14px;
+    }
+
+}
+.approve-modal{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:26px;
+    overflow:hidden;
+    box-shadow:0 30px 70px rgba(0,0,0,.4);
+}
+
+.approve-modal-header{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    padding:1.5rem;
+    border-bottom:1px solid var(--border);
+    background:
+        radial-gradient(circle at top left,rgba(25,135,84,.18),transparent 45%),
+        linear-gradient(180deg,rgba(255,255,255,.03),transparent);
+}
+
+.approve-modal-header .btn-close{
+    position:absolute;
+    top:1rem;
+    right:1rem;
+}
+
+.approve-icon{
+    width:64px;
+    height:64px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(25,135,84,.12);
+    border:1px solid rgba(25,135,84,.25);
+    color:#33d17a;
+    font-size:1.8rem;
+    flex-shrink:0;
+}
+
+.approve-modal-header h4{
+    margin:0;
+    font-weight:800;
+}
+
+.approve-modal-header p{
+    margin:.35rem 0 0;
+    color:var(--muted);
+    font-size:.92rem;
+}
+
+.approve-modal-body{
+    padding:1.5rem;
+}
+
+.approve-preview{
+    padding:1rem;
+    border-radius:18px;
+    border:1px solid rgba(25,135,84,.2);
+    background:rgba(25,135,84,.06);
+}
+
+.approve-modal-footer{
+    padding:0 1.5rem 1.5rem;
+    display:flex;
+    justify-content:flex-end;
+    gap:.75rem;
+}
+
+@media(max-width:768px){
+
+    .approve-modal-header{
+        padding:1.2rem;
+        align-items:flex-start;
+    }
+
+    .approve-icon{
+        width:56px;
+        height:56px;
+        border-radius:16px;
+        font-size:1.5rem;
+    }
+
+    .approve-modal-body{
+        padding:1rem;
+    }
+
+    .approve-modal-footer{
+        padding:0 1rem 1rem;
+        flex-direction:column;
+    }
+
+    .approve-modal-footer .btn{
+        width:100%;
+    }
+
+}
+
+.priority-modal{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:26px;
+    overflow:hidden;
+    box-shadow:0 30px 70px rgba(0,0,0,.4);
+}
+
+.priority-modal-header{
+    position:relative;
+    display:flex;
+    gap:1rem;
+    align-items:center;
+    padding:1.5rem;
+    border-bottom:1px solid var(--border);
+    background:
+        radial-gradient(circle at top left,rgba(13,110,253,.16),transparent 45%),
+        linear-gradient(180deg,rgba(255,255,255,.03),transparent);
+}
+
+.priority-modal-header .btn-close{
+    position:absolute;
+    right:1rem;
+    top:1rem;
+}
+
+.priority-icon{
+    width:64px;
+    height:64px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(13,110,253,.12);
+    border:1px solid rgba(13,110,253,.25);
+    color:#4dabff;
+    font-size:1.6rem;
+    flex-shrink:0;
+}
+
+.priority-modal-header h4{
+    margin:0;
+    font-weight:800;
+}
+
+.priority-modal-header p{
+    margin:.3rem 0 0;
+    color:var(--muted);
+}
+
+.priority-modal-body{
+    padding:1.5rem;
+}
+
+.priority-info{
+    display:flex;
+    flex-direction:column;
+    gap:.75rem;
+}
+
+.priority-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    padding:.9rem 1rem;
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:rgba(255,255,255,.03);
+}
+
+.priority-item small{
+    color:var(--muted);
+    text-align:right;
+}
+
+.priority-modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:.75rem;
+    padding:0 1.5rem 1.5rem;
+}
+
+@media(max-width:768px){
+
+    .priority-modal-header{
+        padding:1.2rem;
+        align-items:flex-start;
+    }
+
+    .priority-icon{
+        width:56px;
+        height:56px;
+        border-radius:16px;
+        font-size:1.4rem;
+    }
+
+    .priority-modal-body{
+        padding:1rem;
+    }
+
+    .priority-item{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .priority-item small{
+        text-align:left;
+    }
+
+    .priority-modal-footer{
+        padding:0 1rem 1rem;
+        flex-direction:column;
+    }
+
+    .priority-modal-footer .btn{
+        width:100%;
+    }
+
+}
+
+.workers-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.workers-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.workers-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.workers-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.workers-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.workers-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.workers-modal-body{
+  padding:1.5rem;
+}
+
+.workers-label{
+  display:block;
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:900;
+  margin-bottom:.55rem;
+}
+
+.workers-modal .form-select{
+  background:rgba(255,255,255,.04)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:18px!important;
+  min-height:170px;
+  padding:.75rem!important;
+  box-shadow:none!important;
+}
+
+.workers-modal .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.workers-modal option{
+  padding:.45rem .6rem;
+  border-radius:10px;
+}
+
+.workers-selected-box{
+  margin-top:1rem;
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.025);
+}
+
+.workers-selected-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:1rem;
+  margin-bottom:.8rem;
+}
+
+.workers-selected-head span{
+  color:var(--muted);
+  font-size:.78rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.workers-selected-head strong{
+  color:#ff9f43;
+  font-weight:950;
+}
+
+.workers-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  min-height:32px;
+}
+
+.workers-chips .btn,
+.workers-chips button,
+.workers-chip{
+  border:1px solid rgba(20,104,245,.22)!important;
+  background:rgba(20,104,245,.12)!important;
+  color:#ff9f43!important;
+  border-radius:999px!important;
+  padding:.42rem .75rem!important;
+  font-size:.78rem!important;
+  font-weight:900!important;
+}
+
+.workers-clear-btn{
+  margin-top:.9rem;
+  width:100%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.035);
+  color:var(--text);
+  border-radius:16px;
+  padding:.75rem 1rem;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45rem;
+}
+
+.workers-clear-btn:hover{
+  background:rgba(255,255,255,.07);
+}
+
+.workers-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+@media(max-width:768px){
+  .workers-modal-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .workers-modal-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .workers-modal-body{
+    padding:1rem;
+  }
+
+  .workers-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .workers-modal-footer .btn-soft,
+  .workers-modal-footer .btn-orange{
+    width:100%;
+    justify-content:center;
+  }
+}
+
+.meeting-modal{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:26px;
+    overflow:hidden;
+    box-shadow:0 35px 90px rgba(0,0,0,.4);
+}
+
+.meeting-modal-header{
+    position:relative;
+    display:flex;
+    gap:1rem;
+    align-items:center;
+    padding:1.5rem;
+    border-bottom:1px solid var(--border);
+
+    background:
+        radial-gradient(circle at top left,rgba(13,202,240,.18),transparent 45%),
+        linear-gradient(180deg,rgba(255,255,255,.03),transparent);
+}
+
+.meeting-modal-header .btn-close{
+    position:absolute;
+    top:1rem;
+    right:1rem;
+}
+
+.meeting-icon{
+    width:64px;
+    height:64px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(13,202,240,.12);
+    border:1px solid rgba(13,202,240,.22);
+    color:#4dd4ff;
+    font-size:1.6rem;
+    flex-shrink:0;
+}
+
+.meeting-modal-header h4{
+    margin:0;
+    font-weight:800;
+}
+
+.meeting-modal-header p{
+    margin:.35rem 0 0;
+    color:var(--muted);
+}
+
+.meeting-modal-body{
+    padding:1.5rem;
+}
+
+.meeting-label{
+    display:block;
+    margin-bottom:.6rem;
+    font-size:.85rem;
+    font-weight:800;
+}
+
+.meeting-modal .form-control{
+    border-radius:16px;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    color:var(--text);
+}
+
+.meeting-modal .form-control:focus{
+    border-color:#4dd4ff;
+    box-shadow:0 0 0 .2rem rgba(13,202,240,.15);
+}
+
+.meeting-info{
+    display:flex;
+    align-items:flex-start;
+    gap:.75rem;
+    padding:1rem;
+    border-radius:16px;
+    background:rgba(13,202,240,.08);
+    border:1px solid rgba(13,202,240,.15);
+}
+
+.meeting-info i{
+    color:#4dd4ff;
+    font-size:1.1rem;
+    margin-top:2px;
+}
+
+.meeting-modal-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:.75rem;
+    padding:0 1.5rem 1.5rem;
+}
+
+@media(max-width:768px){
+
+    .meeting-modal-header{
+        padding:1.2rem;
+        align-items:flex-start;
+    }
+
+    .meeting-icon{
+        width:56px;
+        height:56px;
+        border-radius:18px;
+        font-size:1.4rem;
+    }
+
+    .meeting-modal-body{
+        padding:1rem;
+    }
+
+    .meeting-modal-footer{
+        flex-direction:column;
+        padding:0 1rem 1rem;
+    }
+
+    .meeting-modal-footer .btn{
+        width:100%;
+    }
+
+}
+
+.meeting-notes-modal{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:26px;
+    overflow:hidden;
+    box-shadow:0 35px 90px rgba(0,0,0,.4);
+}
+
+.meeting-notes-header{
+    position:relative;
+    display:flex;
+    gap:1rem;
+    align-items:center;
+    padding:1.5rem;
+    border-bottom:1px solid var(--border);
+
+    background:
+        radial-gradient(circle at top left,
+            rgba(25,135,84,.18),
+            transparent 45%),
+        linear-gradient(180deg,
+            rgba(255,255,255,.03),
+            transparent);
+}
+
+.meeting-notes-header .btn-close{
+    position:absolute;
+    top:1rem;
+    right:1rem;
+}
+
+.meeting-notes-icon{
+    width:64px;
+    height:64px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(25,135,84,.12);
+    border:1px solid rgba(25,135,84,.22);
+    color:#35d18a;
+    font-size:1.7rem;
+    flex-shrink:0;
+}
+
+.meeting-notes-header h4{
+    margin:0;
+    font-weight:800;
+}
+
+.meeting-notes-header p{
+    margin:.35rem 0 0;
+    color:var(--muted);
+}
+
+.meeting-notes-body{
+    padding:1.5rem;
+}
+
+.meeting-notes-body textarea{
+    min-height:180px;
+    border-radius:18px;
+    resize:vertical;
+    background:rgba(255,255,255,.04);
+    border:1px solid var(--border);
+    color:var(--text);
+}
+
+.meeting-notes-body textarea:focus{
+    border-color:#35d18a;
+    box-shadow:0 0 0 .2rem rgba(25,135,84,.15);
+}
+
+.meeting-info{
+    display:flex;
+    gap:.75rem;
+    align-items:flex-start;
+    padding:1rem;
+    border-radius:16px;
+    background:rgba(25,135,84,.08);
+    border:1px solid rgba(25,135,84,.15);
+}
+
+.meeting-info i{
+    color:#35d18a;
+    font-size:1.1rem;
+    margin-top:2px;
+}
+
+.meeting-notes-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:.75rem;
+    padding:0 1.5rem 1.5rem;
+}
+
+@media(max-width:768px){
+
+    .meeting-notes-header{
+        align-items:flex-start;
+        padding:1.2rem;
+    }
+
+    .meeting-notes-icon{
+        width:56px;
+        height:56px;
+        border-radius:18px;
+        font-size:1.4rem;
+    }
+
+    .meeting-notes-body{
+        padding:1rem;
+    }
+
+    .meeting-notes-footer{
+        flex-direction:column;
+        padding:0 1rem 1rem;
+    }
+
+    .meeting-notes-footer .btn{
+        width:100%;
+    }
+
+}
+
+.rejection-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.rejection-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.rejection-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.rejection-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.13);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ff6b6b;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.rejection-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.rejection-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.rejection-modal-body{
+  padding:1.5rem;
+}
+
+.rejection-label{
+  display:block;
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:900;
+  margin-bottom:.55rem;
+}
+
+.rejection-modal textarea{
+  min-height:170px;
+  resize:vertical;
+  background:rgba(255,255,255,.04)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:18px!important;
+  box-shadow:none!important;
+}
+
+.rejection-modal textarea:focus{
+  border-color:rgba(220,53,69,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(220,53,69,.13)!important;
+}
+
+.rejection-info{
+  margin-top:1rem;
+  display:flex;
+  align-items:flex-start;
+  gap:.75rem;
+  padding:1rem;
+  border-radius:16px;
+  background:rgba(220,53,69,.08);
+  border:1px solid rgba(220,53,69,.18);
+  color:#ff6b6b;
+  font-size:.9rem;
+}
+
+.rejection-info i{
+  font-size:1.1rem;
+  margin-top:2px;
+}
+
+.rejection-info span{
+  color:var(--text);
+}
+
+.rejection-info strong{
+  color:#ff6b6b;
+}
+
+.rejection-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+@media(max-width:768px){
+  .rejection-modal-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .rejection-modal-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .rejection-modal-body{
+    padding:1rem;
+  }
+
+  .rejection-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .rejection-modal-footer .btn-soft,
+  .rejection-modal-footer .btn-danger-modern{
+    width:100%;
+    justify-content:center;
+  }
+}
+
+.prepared-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.prepared-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.prepared-modal-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.prepared-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.prepared-modal-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.prepared-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.prepared-modal-body{
+  padding:1.5rem;
+}
+
+.prepared-field{
+  margin-bottom:1rem;
+}
+
+.prepared-field label{
+  display:block;
+  color:var(--text);
+  font-size:.86rem;
+  font-weight:900;
+  margin-bottom:.5rem;
+}
+
+.prepared-input-wrap{
+  position:relative;
+}
+
+.prepared-input-wrap i{
+  position:absolute;
+  left:1rem;
+  top:50%;
+  transform:translateY(-50%);
+  color:#ff9f43;
+  z-index:2;
+}
+
+.prepared-input-wrap .form-control{
+  background:rgba(255,255,255,.04)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:18px!important;
+  min-height:52px;
+  padding-left:2.8rem!important;
+  box-shadow:none!important;
+}
+
+.prepared-input-wrap .form-control:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.prepared-info{
+  margin-top:1rem;
+  display:flex;
+  align-items:flex-start;
+  gap:.75rem;
+  padding:1rem;
+  border-radius:16px;
+  background:rgba(20,104,245,.08);
+  border:1px solid rgba(20,104,245,.18);
+  font-size:.9rem;
+}
+
+.prepared-info i{
+  color:#ff9f43;
+  font-size:1.1rem;
+  margin-top:2px;
+}
+
+.prepared-info span{
+  color:var(--text);
+}
+
+.prepared-info strong{
+  color:#ff9f43;
+}
+
+.prepared-modal-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+@media(max-width:768px){
+  .prepared-modal-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .prepared-modal-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.35rem;
+  }
+
+  .prepared-modal-body{
+    padding:1rem;
+  }
+
+  .prepared-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .prepared-modal-footer .btn-soft,
+  .prepared-modal-footer .btn-orange{
+    width:100%;
+    justify-content:center;
+  }
+}
+.forward-modal{
+    background:var(--card);
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 40px 90px rgba(0,0,0,.45);
+}
+
+.forward-header{
+    position:relative;
+    display:flex;
+    gap:1rem;
+    align-items:center;
+    padding:1.5rem;
+    border-bottom:1px solid var(--border);
+
+    background:
+        radial-gradient(circle at top left,
+        rgba(20,104,245,.18),
+        transparent 45%),
+        linear-gradient(180deg,
+        rgba(255,255,255,.03),
+        transparent);
+}
+
+.forward-header .btn-close{
+    position:absolute;
+    top:1rem;
+    right:1rem;
+}
+
+.forward-icon{
+    width:64px;
+    height:64px;
+    border-radius:22px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(20,104,245,.12);
+    border:1px solid rgba(20,104,245,.22);
+    color:#1468f5;
+    font-size:1.7rem;
+    flex-shrink:0;
+}
+
+.forward-header h4{
+    margin:0;
+    font-weight:900;
+}
+
+.forward-header p{
+    margin:.35rem 0 0;
+    color:var(--muted);
+}
+
+.forward-body{
+    padding:1.5rem;
+}
+
+.forward-info{
+    display:flex;
+    gap:.8rem;
+    align-items:flex-start;
+    padding:1rem;
+    margin-bottom:1.4rem;
+    border-radius:16px;
+    background:rgba(20,104,245,.08);
+    border:1px solid rgba(20,104,245,.15);
+}
+
+.forward-info i{
+    color:#ff9f43;
+    font-size:1.1rem;
+    margin-top:2px;
+}
+
+.forward-label{
+    font-weight:700;
+    margin-bottom:.5rem;
+    display:block;
+}
+
+.forward-input{
+    position:relative;
+}
+
+.forward-input i{
+    position:absolute;
+    left:1rem;
+    top:50%;
+    transform:translateY(-50%);
+    color:#ff9f43;
+    z-index:2;
+}
+
+.forward-input .form-control{
+    padding-left:2.8rem!important;
+}
+
+.forward-body .form-control,
+.forward-body .form-select{
+    background:rgba(255,255,255,.04)!important;
+    border:1px solid var(--border)!important;
+    border-radius:18px!important;
+    color:var(--text)!important;
+    box-shadow:none!important;
+}
+
+.forward-body textarea{
+    min-height:150px;
+    resize:vertical;
+}
+
+.forward-body .form-control:focus,
+.forward-body .form-select:focus{
+    border-color:#ff9f43!important;
+    box-shadow:0 0 0 .2rem rgba(20,104,245,.15)!important;
+}
+
+.forward-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:.75rem;
+    padding:0 1.5rem 1.5rem;
+}
+
+@media(max-width:768px){
+
+    .forward-header{
+        padding:1.2rem;
+        align-items:flex-start;
+    }
+
+    .forward-icon{
+        width:56px;
+        height:56px;
+        border-radius:18px;
+        font-size:1.4rem;
+    }
+
+    .forward-body{
+        padding:1rem;
+    }
+
+    .forward-footer{
+        flex-direction:column;
+        padding:0 1rem 1rem;
+    }
+
+    .forward-footer .btn-soft,
+    .forward-footer .btn-orange{
+        width:100%;
+        justify-content:center;
+    }
+
+}
+</style>
+
+<div class="offer-detail-head">
+  <div class="offer-title-wrap">
+    <div class="offer-title-icon">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+
+    <div>
+      <h1 class="offer-title">Szczegóły oferty</h1>
+      <div class="offer-subtitle">
+        {{ offer.number }} — {{ offer.client }}
+      </div>
+    </div>
+  </div>
+
+  <div class="offer-head-actions">
+    <a href="{% url 'offer_list' %}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>Wróć
+    </a>
+
+    <a href="{% url 'offer_edit' offer.pk %}" class="btn-orange">
+      <i class="bi bi-pencil-square me-1"></i>Edytuj
+    </a>
+
+    <button type="button"
+            class="btn-danger-modern"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteOfferModal"
+            data-delete-url="{% url 'offer_delete' offer.pk %}"
+            data-title="{{ offer.number }} – {{ offer.title|escape }}">
+      <i class="bi bi-trash me-1"></i>Usuń
+    </button>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-12 col-xxl-8">
+
+    <div class="offer-main-card">
+      <div class="offer-main-body">
+        <div class="offer-avatar">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+
+        <div class="flex-grow-1">
+          <h2 class="offer-main-title">{{ offer.title }}</h2>
+
+          <div class="offer-meta">
+            <span class="badge-soft badge-client">
+              <i class="bi bi-buildings"></i>
+              {{ offer.client }}
+            </span>
+
+            <span class="badge-soft">
+              {{ offer.get_status_display }}
+            </span>
+
+            <span class="badge-soft badge-priority">
+              {{ offer.get_priority_display }}
+            </span>
+          </div>
+
+          <div class="offer-small-muted">
+            Numer: <strong>{{ offer.number }}</strong>
+            {% if offer.location %} · Lokalizacja: {{ offer.location }}{% endif %}
+          </div>
+        </div>
+
+        <div class="offer-contact-actions">
+          {% if offer.client.phone %}
+            <a href="tel:{{ offer.client.phone }}" class="btn-soft btn-sm">
+              <i class="bi bi-telephone-outbound"></i>
+            </a>
+          {% endif %}
+
+          {% if offer.client.email %}
+            <a href="mailto:{{ offer.client.email }}" class="btn-soft btn-sm">
+              <i class="bi bi-envelope"></i>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    
+
+  <ul class="offer-tabs-modern" role="tablist">
+    <li>
+      <button class="active" data-bs-toggle="tab" data-bs-target="#tab-overview">
+        <i class="bi bi-grid"></i>
+        Przegląd
+      </button>
+    </li>
+
+    <li>
+      <button data-bs-toggle="tab" data-bs-target="#tab-variants">
+        <i class="bi bi-layers"></i>
+        Warianty
+      </button>
+    </li>
+
+    <li>
+      <button data-bs-toggle="tab" data-bs-target="#tab-media">
+        <i class="bi bi-images"></i>
+        Zdjęcia
+      </button>
+    </li>
+
+    <li>
+      <button data-bs-toggle="tab" data-bs-target="#tab-history">
+        <i class="bi bi-clock-history"></i>
+        Historia
+      </button>
+    </li>
+  </ul>
+<div class="offer-content-card">
+      <div class="tab-content offer-tab-body">
+       <div class="tab-pane fade show active" id="tab-overview">
+
+  <div class="overview-grid">
+
+    <div class="overview-card">
+      <div class="overview-card-head">
+        <div class="overview-card-icon">
+          <i class="bi bi-buildings"></i>
+        </div>
+
+        <div>
+          <h4>Dane klienta</h4>
+          <p>Kontakt i podstawowe informacje.</p>
+        </div>
+      </div>
+
+      <div class="overview-card-body">
+        <div class="overview-row">
+          <span>Klient</span>
+          <strong>{{ offer.client }}</strong>
+        </div>
+
+        {% if offer.client.phone %}
+          <div class="overview-row">
+            <span>Telefon</span>
+            <strong>{{ offer.client.phone }}</strong>
+          </div>
+
+          <a href="tel:{{ offer.client.phone }}" class="overview-action">
+            <i class="bi bi-telephone-outbound"></i>
+            Zadzwoń
+          </a>
+        {% endif %}
+
+        {% if offer.client.email %}
+          <div class="overview-row">
+            <span>E-mail</span>
+            <strong>{{ offer.client.email }}</strong>
+          </div>
+
+          <a href="mailto:{{ offer.client.email }}" class="overview-action">
+            <i class="bi bi-envelope"></i>
+            Wyślij e-mail
+          </a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="overview-card">
+      <div class="overview-card-head">
+        <div class="overview-card-icon">
+          <i class="bi bi-calendar2-week"></i>
+        </div>
+
+        <div>
+          <h4>Daty i realizacja</h4>
+          <p>Terminy, czas pracy i przypisani pracownicy.</p>
+        </div>
+      </div>
+
+      <div class="overview-card-body">
+        <div class="overview-row">
+          <span>Utworzono</span>
+          <strong>
+            {% if offer.issue_date %}
+              {{ offer.issue_date|date:"d.m.Y" }}
+            {% else %}
+              —
+            {% endif %}
+          </strong>
+        </div>
+
+        <div class="overview-row">
+          <span>Pracowników</span>
+          <strong>{{ offer.employees_count|default:"0" }}</strong>
+        </div>
+
+        <div class="overview-row">
+          <span>Roboczogodziny</span>
+          <strong>{{ offer.labor_hours|default:"0" }}</strong>
+        </div>
+
+        <div class="overview-row">
+          <span>Dni na wykonanie</span>
+          <strong>{{ offer.execution_days|default:"0" }}</strong>
+        </div>
+
+        <div class="overview-workers">
+          <div class="overview-label">Przypisani</div>
+
+          <div class="overview-chips">
+            {% for u in offer.assigned_employees.all %}
+              <span class="overview-chip">
+                <i class="bi bi-person"></i>
+                {{ u.first_name }} {{ u.last_name }}
+              </span>
+            {% empty %}
+              <span class="overview-muted">Brak przypisanych osób</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="overview-stats-grid mt-3">
+
+    <div class="overview-stat-card">
+      <div class="overview-stat-icon">
+        <i class="bi bi-shield-check"></i>
+      </div>
+
+      <div>
+        <div class="overview-label">Gwarancja</div>
+        <div class="overview-value">
+          {% if offer.has_warranty %}Tak{% else %}Nie{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-stat-card">
+      <div class="overview-stat-icon">
+        <i class="bi bi-tools"></i>
+      </div>
+
+      <div>
+        <div class="overview-label">Obsługa</div>
+        <div class="overview-value">
+          {% if offer.has_service %}Tak{% else %}Nie{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="overview-stat-card">
+      <div class="overview-stat-icon">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+
+      <div>
+        <div class="overview-label">Zatwierdzenie</div>
+        <div class="overview-value">
+          {% if has_selected_variant %}
+            <span class="overview-status success">Zatwierdzono</span>
+          {% else %}
+            <span class="overview-status muted">Nie</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="overview-description mt-3">
+    <div class="overview-card-head">
+      <div class="overview-card-icon">
+        <i class="bi bi-card-text"></i>
+      </div>
+
+      <div>
+        <h4>Opis oferty</h4>
+        <p>Zakres prac i dodatkowe informacje.</p>
+      </div>
+    </div>
+
+    <div class="overview-description-body {% if not offer.description %}text-muted{% endif %}">
+      {{ offer.description|default:"Brak opisu."|linebreaksbr }}
+    </div>
+  </div>
+
+</div>
+
+          <div class="tab-pane fade" id="tab-variants">
+
+  {% if offer.variants.all %}
+    <div class="variants-list">
+
+      {% for variant in offer.variants.all %}
+        <div class="variant-modern-card {% if variant.is_selected %}variant-selected{% endif %}">
+
+          <div class="variant-modern-header">
+
+            <div class="variant-title-wrap">
+              <div class="variant-icon">
+                <i class="bi bi-layers"></i>
+              </div>
+
+              <div>
+                <div class="variant-title-row">
+                  <h4>{{ variant.name }}</h4>
+
+                  {% if variant.is_selected %}
+                    <span class="variant-badge-selected">
+                      <i class="bi bi-check2-circle"></i>
+                      Wybrany
+                    </span>
+                  {% endif %}
+                </div>
+
+                {% if variant.description %}
+                  <p>{{ variant.description }}</p>
+                {% else %}
+                  <p>Brak opisu wariantu.</p>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="variant-actions">
+              <a href="{% url 'offer_variant_edit' variant.pk %}"
+                 class="variant-action-btn">
+                <i class="bi bi-pencil-square"></i>
+                Edytuj
+              </a>
+
+              <form method="post"
+                    action="{% url 'offer_variant_toggle_selected' variant.pk %}">
+                {% csrf_token %}
+
+                <button type="submit"
+                        class="variant-action-btn {% if variant.is_selected %}variant-action-warning{% else %}variant-action-success{% endif %}">
+                  {% if variant.is_selected %}
+                    <i class="bi bi-x-circle"></i>
+                    Odznacz
+                  {% else %}
+                    <i class="bi bi-check2-circle"></i>
+                    Wybierz
+                  {% endif %}
+                </button>
+              </form>
+
+              <button type="button"
+                      class="variant-action-btn variant-action-danger"
+                      data-bs-toggle="modal"
+                      data-bs-target="#deleteVariantModal"
+                      data-delete-url="{% url 'offer_variant_delete' variant.pk %}"
+                      data-title="{{ variant.name|escape }}">
+                <i class="bi bi-trash"></i>
+                Usuń
+              </button>
+            </div>
+
+          </div>
+
+          <div class="variant-stats">
+            <div class="variant-stat">
+              <small>Cena oferty</small>
+              <strong>{{ variant.total_netto }}</strong>
+            </div>
+
+            <div class="variant-stat">
+              <small>Materiały</small>
+              <strong>{{ variant.materials_netto }}</strong>
+            </div>
+
+            <div class="variant-stat">
+              <small>Akcesoria</small>
+              <strong>{{ variant.accessories_netto }}</strong>
+            </div>
+
+            <div class="variant-stat">
+              <small>Usługi</small>
+              <strong>{{ variant.services_netto }}</strong>
+            </div>
+
+            <div class="variant-stat profit">
+              <small>Zysk</small>
+              <strong>{{ variant.profit|floatformat:2 }} zł</strong>
+            </div>
+          </div>
+
+          {% if variant.items.all %}
+            <div class="variant-section">
+              <div class="variant-section-head">
+                <div>
+                  <h5>Pozycje wariantu</h5>
+                  <p>Produkty, usługi, ilości i wartości netto/brutto.</p>
+                </div>
+              </div>
+
+              <div class="variant-table-wrap">
+                <table class="table variant-table align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Pozycja</th>
+                      <th>Typ</th>
+                      <th>Ilość</th>
+                      <th>Jm.</th>
+                      <th>Cena netto</th>
+                      <th>Netto</th>
+                      <th>Brutto</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {% for item in variant.items.all %}
+                      <tr>
+                        <td>
+                          <div class="variant-item-main">
+                            <div class="variant-item-icon">
+                              <i class="bi bi-box-seam"></i>
+                            </div>
+
+                            <div>
+                              <div class="variant-item-name">
+                                {{ item.name }}
+                              </div>
+
+                              {% if item.product %}
+                                <div class="variant-item-sub">
+                                  {{ item.product }}
+                                </div>
+                              {% endif %}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td data-label="Typ">
+                          <span class="variant-type-badge">
+                            {{ item.get_item_type_display }}
+                          </span>
+                        </td>
+
+                        <td data-label="Ilość">
+                          {{ item.quantity }}
+                        </td>
+
+                        <td data-label="Jm.">
+                          {{ item.unit }}
+                        </td>
+
+                        <td data-label="Cena netto">
+                          {{ item.unit_price_netto }}
+                        </td>
+
+                        <td data-label="Netto">
+                          <strong>{{ item.total_netto }}</strong>
+                        </td>
+
+                        <td data-label="Brutto">
+                          <strong>{{ item.total_brutto }}</strong>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endif %}
+
+          {% if variant.files.all %}
+            <div class="variant-section">
+              <div class="variant-section-head">
+                <div>
+                  <h5>Pliki wariantu</h5>
+                  <p>PDF-y, dokumenty i załączniki przypisane do wariantu.</p>
+                </div>
+              </div>
+
+              <div class="variant-files-grid">
+                {% for f in variant.files.all %}
+                  <div class="variant-file-card">
+                    <a href="{{ f.file.url }}"
+                       target="_blank"
+                       class="variant-file-main">
+
+                      <div class="variant-file-icon">
+                        <i class="bi bi-file-earmark-pdf"></i>
+                      </div>
+
+                      <div class="variant-file-content">
+                        <div class="variant-file-name">
+                          {{ f.title|default:"PDF" }}
+                        </div>
+
+                        <div class="variant-file-date">
+                          Dodano: {{ f.uploaded_at|date:"d.m.Y H:i" }}
+                        </div>
+                      </div>
+                    </a>
+
+                    <a href="{{ f.file.url }}"
+                       target="_blank"
+                       class="variant-file-open"
+                       title="Otwórz">
+                      <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+        </div>
+      {% endfor %}
+
+    </div>
+  {% else %}
+    <div class="variants-empty">
+      <div class="variants-empty-icon">
+        <i class="bi bi-layers"></i>
+      </div>
+
+      <h4>Brak wariantów</h4>
+      <p>Dodaj pierwszy wariant oferty, aby przygotować wycenę dla klienta.</p>
+
+      <a href="{% url 'offer_variant_add' offer.pk %}" class="btn-orange">
+        <i class="bi bi-plus-lg me-1"></i>
+        Dodaj wariant
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+
+         <div class="tab-pane fade" id="tab-media">
+
+    {% if offer.images.all %}
+
+    <div class="gallery-header">
+
+        <div>
+            <h4>
+                <i class="bi bi-images me-2"></i>
+                Galeria zdjęć
+            </h4>
+
+            <p>
+                Łącznie dodano
+                <strong>{{ offer.images.count }}</strong>
+                zdjęć do tej oferty.
+            </p>
+        </div>
+
+        <span class="gallery-counter">
+            {{ offer.images.count }}
+        </span>
+
+    </div>
+
+
+    <div class="gallery-grid">
+
+        {% for img in offer.images.all %}
+
+        <button
+            type="button"
+            class="gallery-card"
+            data-bs-toggle="modal"
+            data-bs-target="#imagePreviewModal"
+            data-src="{{ img.file.url }}"
+            data-date="{{ img.uploaded_at|date:'d.m.Y H:i' }}">
+
+            <img src="{{ img.file.url }}" loading="lazy">
+
+            <div class="gallery-overlay">
+
+                <div class="gallery-overlay-top">
+
+                    <span class="gallery-icon">
+                        <i class="bi bi-image"></i>
+                    </span>
+
+                    <span class="gallery-date">
+                        {{ img.uploaded_at|date:"d.m.Y" }}
+                    </span>
+
+                </div>
+
+                <div class="gallery-overlay-bottom">
+
+                    <div class="gallery-open">
+
+                        <i class="bi bi-arrows-fullscreen"></i>
+
+                        Powiększ
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </button>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="gallery-empty">
+
+        <div class="gallery-empty-icon">
+
+            <i class="bi bi-images"></i>
+
+        </div>
+
+        <h4>Brak zdjęć</h4>
+
+        <p>
+            Do tej oferty nie dodano jeszcze żadnych zdjęć.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+          <div class="tab-pane fade" id="tab-history">
+
+  <div class="history-head">
+    <div>
+      <h4>
+        <i class="bi bi-clock-history"></i>
+        Historia oferty
+      </h4>
+      <p>Zmiany statusów, wariantów, priorytetów i przypisań.</p>
+    </div>
+
+    <div class="history-counter">
+      {{ activities_count|default:0 }}
+    </div>
+  </div>
+
+  <div class="history-filters">
+    <button class="history-filter active" type="button" data-activity-filter="all">Wszystko</button>
+    <button class="history-filter" type="button" data-activity-filter="status">Statusy</button>
+    <button class="history-filter" type="button" data-activity-filter="variant">Warianty</button>
+    <button class="history-filter" type="button" data-activity-filter="priority">Priorytet</button>
+    <button class="history-filter" type="button" data-activity-filter="workers">Pracownicy</button>
+    <button class="history-filter" type="button" data-activity-filter="system">System</button>
+  </div>
+
+  {% if activities %}
+    <div class="history-timeline">
+      {% for a in activities %}
+        <div class="history-item {% if forloop.counter > 8 %}d-none extra-activity{% endif %}"
+             data-activity-type="{{ a.type }}">
+
+          <div class="history-dot {{ a.type }}">
+            <i class="bi
+              {% if a.type == 'status' %} bi-arrow-repeat
+              {% elif a.type == 'variant' %} bi-layers
+              {% elif a.type == 'priority' %} bi-flag
+              {% elif a.type == 'workers' %} bi-people
+              {% elif a.type == 'file' %} bi-paperclip
+              {% elif a.type == 'image' %} bi-image
+              {% elif a.type == 'approval' %} bi-check-circle
+              {% else %} bi-dot
+              {% endif %}"></i>
+          </div>
+
+          <div class="history-card">
+            <div class="history-card-top">
+              <span class="history-type">
+                {{ a.get_type_display }}
+              </span>
+
+              <div class="history-date">
+                {{ a.created_at|date:"d.m.Y H:i" }}
+              </div>
+            </div>
+
+            <div class="history-title">
+              {{ a.title }}
+            </div>
+
+            {% if a.description %}
+              <div class="history-description">
+                {{ a.description }}
+              </div>
+            {% endif %}
+
+            <div class="history-author">
+              <i class="bi bi-person-circle"></i>
+              {% if a.created_by %}
+                {{ a.created_by.first_name }} {{ a.created_by.last_name }}
+              {% else %}
+                System
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if activities_count > 8 %}
+      <button id="showMoreActivities" class="history-more-btn">
+        <i class="bi bi-chevron-down"></i>
+        Pokaż więcej
+      </button>
+    {% endif %}
+  {% else %}
+    <div class="history-empty">
+      <div class="history-empty-icon">
+        <i class="bi bi-clock-history"></i>
+      </div>
+      <h4>Brak historii</h4>
+      <p>Dla tej oferty nie zapisano jeszcze żadnych aktywności.</p>
+    </div>
+  {% endif %}
+
+</div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xxl-4">
+
+    <div class="offer-side-card mb-3">
+      <div class="side-card-header">
+        <div class="side-card-icon">
+          <i class="bi bi-lightning-charge"></i>
+        </div>
+        <div>
+          <h3>Akcje</h3>
+        </div>
+      </div>
+
+      <div class="side-card-body">
+        <div class="side-actions">
+          {% if not offer.approved_by_manager %}
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
+              <i class="bi bi-check2 me-1"></i>Zatwierdź
+            </button>
+          {% endif %}
+
+          <a href="{% url 'offer_variant_add' offer.pk %}" class="btn-orange">
+            <p style="margin: 0; text-align:center;">Dodaj wariant</p>
+          </a>
+
+          <button type="button" class="btn-orange" data-bs-toggle="modal" data-bs-target="#priorityModal">
+            <p style="margin: 0;">Zmień priorytet</p>
+          </button>
+
+          <button type="button" class="btn-orange" data-bs-toggle="modal" data-bs-target="#workersModal">
+            Wyznacz serwisantów
+          </button>
+
+          {% if is_approved %}
+            <button type="button" class="btn-orange" data-bs-toggle="modal" data-bs-target="#forwardToExecutionModal">
+              Przekaż do realizacji
+            </button>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="offer-side-card mb-3">
+      <div class="side-card-header">
+        <div class="side-card-icon">
+          <i class="bi bi-sliders"></i>
+        </div>
+        <div>
+          <h3>Statusy</h3>
+        </div>
+      </div>
+
+      <div class="side-card-body">
+    <div class="side-actions">
+
+        {% for val,label in offer.STATUS_CHOICES %}
+
+            {% if val == offer.STATUS_NIEAKTUALNE %}
+
+                <button
+                    type="button"
+                    class="btn {% if offer.status == val %}btn-orange{% else %}btn-soft{% endif %}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#rejectionStatusModal">
+                    {{ label }}
+                </button>
+
+            {% elif val == offer.STATUS_SPOTKANIE %}
+
+                <button
+                    type="button"
+                    class="btn {% if offer.status == val %}btn-orange{% else %}btn-soft{% endif %}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#meetingStatusModal">
+                    {{ label }}
+                </button>
+
+            {% elif val == offer.STATUS_DOZROBIENIA and offer.meeting_date %}
+
+                <button
+                    type="button"
+                    class="btn {% if offer.status == val %}btn-orange{% else %}btn-soft{% endif %}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#postMeetingModal">
+                    {{ label }}
+                </button>
+
+            {% elif val == offer.STATUS_PRZYGOTOWANE %}
+
+                <button
+                    type="button"
+                    class="btn {% if offer.status == val %}btn-orange{% else %}btn-soft{% endif %}"
+                    data-bs-toggle="modal"
+                    data-bs-target="#preparedModal">
+                    {{ label }}
+                </button>
+
+            {% else %}
+
+                <form method="post"
+                      action="{% url 'offer_status_update' offer.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="{{ val }}">
+
+                    <button
+                        type="submit"
+                        class="btn {% if offer.status == val %}btn-orange{% else %}btn-soft{% endif %}">
+                        {{ label }}
+                    </button>
+                </form>
+
+            {% endif %}
+
+        {% endfor %}
+
+    </div>
+</div>
+    </div>
+
+    <div class="offer-side-card mb-3">
+      <div class="side-card-header">
+        <div class="side-card-icon">
+          <i class="bi bi-clipboard-data"></i>
+        </div>
+        <div>
+          <h3>Podsumowanie</h3>
+        </div>
+      </div>
+
+      <div class="side-card-body">
+        <div class="side-row">
+          <span>Numer</span>
+          <strong>{{ offer.number }}</strong>
+        </div>
+
+        <div class="side-row">
+          <span>Klient</span>
+          <strong>{{ offer.client }}</strong>
+        </div>
+
+        <div class="side-row">
+          <span>Status</span>
+          <strong>{{ offer.get_status_display }}</strong>
+        </div>
+
+        <div class="side-row">
+          <span>Priorytet</span>
+          <strong>{{ offer.get_priority_display }}</strong>
+        </div>
+
+        <div class="side-row">
+          <span>Warianty</span>
+          <strong>{{ offer.variants.count }}</strong>
+        </div>
+
+        <div class="side-row">
+          <span>Zdjęcia</span>
+          <strong>{{ offer.images.count }}</strong>
+        </div>
+
+        <div class="side-row">
+          <span>Praca</span>
+          <strong>
+            {% if offer.work_order %}
+              {{ offer.work_order.number }}
+            {% else %}
+              —
+            {% endif %}
+          </strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="offer-side-card">
+      <div class="side-card-header">
+        <div class="side-card-icon">
+          <i class="bi bi-check2-circle"></i>
+        </div>
+        <div>
+          <h3>Zatwierdzenie</h3>
+        </div>
+      </div>
+
+      <div class="side-card-body">
+        <div class="side-row">
+          <span>Zatwierdzono</span>
+          <strong>{% if is_approved %}Tak{% else %}Nie{% endif %}</strong>
+        </div>
+
+        <div class="mt-3">
+          <div class="info-label">Wybrane warianty</div>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            {% for variant in selected_variants %}
+              <span class="badge-soft badge-success-soft">
+                {{ variant.name }}
+              </span>
+            {% empty %}
+              <span class="text-muted">—</span>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="deleteOfferModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-modal">
+
+      <form id="deleteOfferForm" method="post" action="">
+        {% csrf_token %}
+
+        <div class="delete-modal-header">
+          <div class="delete-modal-icon">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć ofertę?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="delete-modal-body">
+          <div class="delete-preview-card">
+            <div class="small text-muted mb-1">
+              Usuwasz ofertę:
+            </div>
+
+            <strong id="deleteOfferPreview">—</strong>
+          </div>
+        </div>
+
+        <div class="delete-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-trash"></i>
+            Usuń ofertę
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content image-modal">
+
+            <div class="image-modal-header">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="image-modal-icon">
+                        <i class="bi bi-image"></i>
+                    </div>
+
+                    <div>
+                        <h5>Podgląd zdjęcia</h5>
+                        <small id="imgMeta">—</small>
+                    </div>
+
+                </div>
+
+                <button
+                    type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal">
+                </button>
+
+            </div>
+
+            <div class="image-modal-body">
+
+                <img
+                    id="imgPreview"
+                    src=""
+                    class="image-preview"
+                    alt="Podgląd zdjęcia">
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="approveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content approve-modal">
+
+            <form method="post" action="{% url 'offer_approve' offer.pk %}">
+                {% csrf_token %}
+
+                <div class="approve-modal-header">
+
+                    <div class="approve-icon">
+                        <i class="bi bi-check2-circle"></i>
+                    </div>
+
+                    <div>
+                        <h4>Zatwierdzić ofertę?</h4>
+                        <p>
+                            Oferta zostanie oznaczona jako zatwierdzona i będzie gotowa do dalszej realizacji.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="approve-modal-body">
+
+                    <div class="approve-preview">
+
+                        <div class="small text-muted mb-1">
+                            Oferta
+                        </div>
+
+                        <div class="fw-bold fs-5">
+                            {{ offer.number }}
+                        </div>
+
+                        <div class="text-muted">
+                            {{ offer.title }}
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="approve-modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                        Anuluj
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-success px-4">
+
+                        <i class="bi bi-check2 me-2"></i>
+                        Zatwierdź ofertę
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="priorityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content priority-modal">
+
+            <form method="post" action="{% url 'offer_priority_update' offer.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'offer_detail' offer.pk %}">
+
+                <div class="priority-modal-header">
+
+                    <div class="priority-icon">
+                        <i class="bi bi-flag-fill"></i>
+                    </div>
+
+                    <div>
+                        <h4>Zmień priorytet</h4>
+                        <p>Wybierz priorytet realizacji oferty.</p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="priority-modal-body">
+
+                    <label class="form-label fw-semibold mb-3">
+                        Priorytet
+                    </label>
+
+                    <select
+                        class="form-select form-select-lg"
+                        name="priority">
+
+                        {% for val,label in offer.Priority.choices %}
+                            <option value="{{ val }}"
+                                {% if offer.priority == val %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                    <div class="priority-info mt-4">
+
+                        <div class="priority-item">
+                            <span class="badge bg-secondary">Niski</span>
+                            <small>Może zostać wykonany później.</small>
+                        </div>
+
+                        <div class="priority-item">
+                            <span class="badge bg-primary">Normalny</span>
+                            <small>Standardowa kolejka realizacji.</small>
+                        </div>
+
+                        <div class="priority-item">
+                            <span class="badge bg-warning text-dark">Wysoki</span>
+                            <small>Wymaga szybkiej realizacji.</small>
+                        </div>
+
+                        <div class="priority-item">
+                            <span class="badge bg-danger">Krytyczny</span>
+                            <small>Natychmiastowa reakcja.</small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="priority-modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                        Anuluj
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-brand px-4">
+
+                        <i class="bi bi-save me-2"></i>
+                        Zapisz
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="workersModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content workers-modal">
+
+      <form method="post" action="{% url 'offer_assign_workers' offer.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'offer_detail' offer.pk %}">
+
+        <div class="workers-modal-header">
+          <div class="workers-modal-icon">
+            <i class="bi bi-people-fill"></i>
+          </div>
+
+          <div>
+            <h4>Wyznacz serwisantów</h4>
+            <p>Wybierz maksymalnie 3 osoby odpowiedzialne za ofertę.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="workers-modal-body">
+          <label class="workers-label">
+            Pracownicy / serwisanci
+          </label>
+
+          <select name="workers"
+                  id="workersSelect"
+                  class="form-select"
+                  multiple
+                  size="6"
+                  data-max="3">
+            {% for u in workers %}
+              <option value="{{ u.pk }}" {% if u in offer.assigned_employees.all %}selected{% endif %}>
+                {{ u.first_name }} {{ u.last_name }}
+              </option>
+            {% endfor %}
+          </select>
+
+          <div class="workers-selected-box">
+            <div class="workers-selected-head">
+              <span>Wybrani</span>
+
+              <strong>
+                <span id="assignedCount">0</span>/3
+              </strong>
+            </div>
+
+            <div id="assignedChips" class="workers-chips"></div>
+          </div>
+
+          <button type="button"
+                  class="workers-clear-btn"
+                  id="assignedClear">
+            <i class="bi bi-x-circle"></i>
+            Wyczyść wybór
+          </button>
+        </div>
+
+        <div class="workers-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-orange">
+            <i class="bi bi-save me-1"></i>
+            Zapisz
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="meetingStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content meeting-modal">
+
+            <form method="post" action="{% url 'offer_status_update' offer.pk %}">
+                {% csrf_token %}
+                <input type="hidden"
+                       name="status"
+                       value="{{ offer.STATUS_SPOTKANIE }}">
+
+                <div class="meeting-modal-header">
+
+                    <div class="meeting-icon">
+                        <i class="bi bi-calendar-event-fill"></i>
+                    </div>
+
+                    <div>
+                        <h4>Ustaw termin spotkania</h4>
+                        <p>
+                            Wybierz datę i godzinę planowanego spotkania z klientem.
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="meeting-modal-body">
+
+                    <label class="meeting-label">
+                        Data i godzina
+                    </label>
+
+                    <input
+                        type="datetime-local"
+                        name="meeting_date"
+                        class="form-control form-control-lg"
+                        required
+                        value="{% if offer.meeting_date %}{{ offer.meeting_date|date:'Y-m-d\\TH:i' }}{% endif %}"
+                    >
+
+                    <div class="meeting-info mt-4">
+
+                        <i class="bi bi-info-circle-fill"></i>
+
+                        <span>
+                            Po zapisaniu oferta otrzyma status
+                            <strong>Spotkanie</strong>.
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div class="meeting-modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-secondary"
+                        data-bs-dismiss="modal">
+                        Anuluj
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-brand px-4">
+
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Zapisz termin
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="postMeetingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content meeting-notes-modal">
+
+            <form method="post"
+                  action="{% url 'offer_status_update' offer.pk %}">
+
+                {% csrf_token %}
+                <input type="hidden"
+                       name="status"
+                       value="{{ offer.STATUS_DOZROBIENIA }}">
+
+                <div class="meeting-notes-header">
+
+                    <div class="meeting-notes-icon">
+                        <i class="bi bi-chat-left-text-fill"></i>
+                    </div>
+
+                    <div>
+                        <h4>Informacje po spotkaniu</h4>
+                        <p>
+                            Dodaj najważniejsze ustalenia oraz kolejne kroki.
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+
+                <div class="meeting-notes-body">
+
+                    <label class="meeting-label">
+                        Notatka ze spotkania
+                    </label>
+
+                    <textarea
+                        name="post_meeting_notes"
+                        class="form-control"
+                        rows="7"
+                        placeholder="Opisz przebieg spotkania, ustalenia, uwagi klienta oraz kolejne działania...">{{ offer.post_meeting_notes }}</textarea>
+
+                    <div class="meeting-info mt-4">
+                        <i class="bi bi-lightbulb-fill"></i>
+
+                        <span>
+                            Po zapisaniu oferta zostanie oznaczona jako
+                            <strong>Do zrobienia</strong>.
+                        </span>
+                    </div>
+
+                </div>
+
+                <div class="meeting-notes-footer">
+
+                    <button type="button"
+                            class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Anuluj
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-brand px-4">
+
+                        <i class="bi bi-save me-2"></i>
+                        Zapisz informacje
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rejectionStatusModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rejection-modal">
+
+      <form method="post" action="{% url 'offer_status_update' offer.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="{{ offer.STATUS_NIEAKTUALNE }}">
+
+        <div class="rejection-modal-header">
+          <div class="rejection-modal-icon">
+            <i class="bi bi-x-octagon-fill"></i>
+          </div>
+
+          <div>
+            <h4>Powód odrzucenia oferty</h4>
+            <p>Wpisz dlaczego oferta została oznaczona jako nieaktualna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="rejection-modal-body">
+          <label class="rejection-label">
+            Powód
+          </label>
+
+          <textarea
+            name="rejection_reason"
+            class="form-control"
+            rows="6"
+            placeholder="Np. klient wybrał inną ofertę, za wysoka cena, brak kontaktu..."
+            required>{{ offer.rejection_reason }}</textarea>
+
+          <div class="rejection-info">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+
+            <span>
+              Po zapisaniu oferta otrzyma status
+              <strong>Nieaktualne</strong>.
+            </span>
+          </div>
+        </div>
+
+        <div class="rejection-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-save"></i>
+            Zapisz i ustaw Nieaktualne
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="preparedModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content prepared-modal">
+
+      <form method="post" action="{% url 'offer_status_update' offer.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="{{ offer.STATUS_PRZYGOTOWANE }}">
+
+        <div class="prepared-modal-header">
+          <div class="prepared-modal-icon">
+            <i class="bi bi-clipboard-check-fill"></i>
+          </div>
+
+          <div>
+            <h4>Dane do realizacji</h4>
+            <p>Uzupełnij zasoby i czas potrzebny do wykonania oferty.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="prepared-modal-body">
+
+          <div class="prepared-field">
+            <label>Ilu pracowników</label>
+            <div class="prepared-input-wrap">
+              <i class="bi bi-people"></i>
+              <input type="number"
+                     name="employees_count"
+                     class="form-control"
+                     min="1"
+                     value="{{ offer.employees_count }}">
+            </div>
+          </div>
+
+          <div class="prepared-field">
+            <label>Roboczogodziny</label>
+            <div class="prepared-input-wrap">
+              <i class="bi bi-clock-history"></i>
+              <input type="number"
+                     name="labor_hours"
+                     step="0.01"
+                     class="form-control"
+                     value="{{ offer.labor_hours }}">
+            </div>
+          </div>
+
+          <div class="prepared-field">
+            <label>Dni na wykonanie</label>
+            <div class="prepared-input-wrap">
+              <i class="bi bi-calendar-check"></i>
+              <input type="number"
+                     name="execution_days"
+                     class="form-control"
+                     min="1"
+                     value="{{ offer.execution_days }}">
+            </div>
+          </div>
+
+          <div class="prepared-info">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>
+              Po zapisaniu oferta otrzyma status
+              <strong>Przygotowane</strong>.
+            </span>
+          </div>
+
+        </div>
+
+        <div class="prepared-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-orange">
+            <i class="bi bi-save me-1"></i>
+            Zapisz dane
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="forwardToExecutionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content forward-modal">
+
+            <form method="post"
+                  action="{% url 'offer_forward_to_execution' offer.pk %}">
+                {% csrf_token %}
+
+                <div class="forward-header">
+
+                    <div class="forward-icon">
+                        <i class="bi bi-send-check-fill"></i>
+                    </div>
+
+                    <div>
+                        <h4>Przekaż ofertę do realizacji</h4>
+                        <p>
+                            Z wybranych wariantów zostanie utworzone nowe zlecenie.
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
+
+                </div>
+
+                <div class="forward-body">
+
+                    <div class="forward-info">
+                        <i class="bi bi-info-circle-fill"></i>
+
+                        <span>
+                            Zostanie utworzona nowa praca wraz z przypisanymi
+                            serwisantami.
+                        </span>
+                    </div>
+
+                    <div class="row g-3 mt-1">
+
+                        <div class="col-md-6">
+
+                            <label class="forward-label">
+                                Data rozpoczęcia
+                            </label>
+
+                            <div class="forward-input">
+                                <i class="bi bi-calendar-event"></i>
+
+                                <input type="date"
+                                       name="planned_start"
+                                       class="form-control">
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="forward-label">
+                                Data zakończenia
+                            </label>
+
+                            <div class="forward-input">
+                                <i class="bi bi-calendar-check"></i>
+
+                                <input type="date"
+                                       name="planned_end"
+                                       class="form-control">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="mt-4">
+
+                        <label class="forward-label">
+                            Przypisani serwisanci
+                        </label>
+
+                        <select
+                            name="workers"
+                            id="forwardWorkersSelect"
+                            class="form-select"
+                            multiple
+                            size="6"
+                            data-max="3">
+
+                            {% for u in workers %}
+                                <option value="{{ u.pk }}"
+                                        {% if u in offer.assigned_employees.all %}selected{% endif %}>
+                                    {{ u.first_name }} {{ u.last_name }}
+                                </option>
+                            {% endfor %}
+
+                        </select>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+
+                            <small class="text-muted">
+                                Wybrano
+                                <strong id="forwardAssignedCount">0</strong>/3
+                            </small>
+
+                            <button type="button"
+                                    id="forwardAssignedClear"
+                                    class="btn btn-sm btn-soft">
+                                Wyczyść
+                            </button>
+
+                        </div>
+
+                        <div id="forwardAssignedChips"
+                             class="d-flex flex-wrap gap-2 mt-3"></div>
+
+                    </div>
+
+                    <div class="mt-4">
+
+                        <label class="forward-label">
+                            Uwagi dla ekipy
+                        </label>
+
+                        <textarea
+                            name="execution_note"
+                            class="form-control"
+                            rows="5"
+                            placeholder="Zakres prac, ustalenia z klientem, ważne informacje...">{{ offer.post_meeting_notes }}</textarea>
+                    </div>
+                </div>
+
+                <div class="forward-footer">
+                    <button type="button"
+                            class="btn-soft"
+                            data-bs-dismiss="modal">
+                        Anuluj
+                    </button>
+
+                    <button type="submit"
+                            class="btn-orange">
+                        <i class="bi bi-send-check me-2"></i>
+                        Przekaż do realizacji
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const sel = document.getElementById("forwardWorkersSelect");
+  if (!sel) return;
+
+  const max = parseInt(sel.dataset.max || "3", 10);
+  const chipsWrap = document.getElementById("forwardAssignedChips");
+  const countEl = document.getElementById("forwardAssignedCount");
+  const clearBtn = document.getElementById("forwardAssignedClear");
+
+  function selectedOptions() {
+    return [...sel.options].filter(o => o.selected);
+  }
+
+  function enforceMax() {
+    const selected = selectedOptions();
+    if (selected.length <= max) return;
+    selected.slice(max).forEach(o => o.selected = false);
+  }
+
+  function render() {
+    const selected = selectedOptions();
+
+    if (countEl) {
+      countEl.textContent = String(selected.length);
+    }
+
+    if (chipsWrap) {
+      chipsWrap.innerHTML = "";
+
+      selected.forEach(opt => {
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "btn btn-sm btn-outline-secondary rounded-pill d-inline-flex align-items-center gap-2";
+        chip.innerHTML = `<span>${opt.text}</span><span class="fw-bold">✕</span>`;
+
+        chip.addEventListener("click", function () {
+          opt.selected = false;
+          sel.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+
+        chipsWrap.appendChild(chip);
+      });
+    }
+
+    const limitReached = selected.length >= max;
+    [...sel.options].forEach(opt => {
+      if (!opt.selected) opt.disabled = limitReached;
+    });
+  }
+
+  sel.addEventListener("change", function () {
+    [...sel.options].forEach(o => o.disabled = false);
+    enforceMax();
+    render();
+  });
+
+  clearBtn?.addEventListener("click", function () {
+    [...sel.options].forEach(o => {
+      o.selected = false;
+      o.disabled = false;
+    });
+    render();
+  });
+
+  const modal = document.getElementById("forwardToExecutionModal");
+  modal?.addEventListener("shown.bs.modal", render);
+
+  render();
+});
+</script>
+
+<div class="modal fade" id="deleteVariantModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-modal">
+
+      <form id="deleteVariantForm" method="post" action="">
+        {% csrf_token %}
+
+        <div class="delete-modal-header">
+          <div class="delete-modal-icon">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć wariant?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="delete-modal-body">
+          <div class="delete-preview-card">
+            <div class="small text-muted mb-1">
+              Usuwasz wariant:
+            </div>
+
+            <strong id="deleteVariantPreview">—</strong>
+          </div>
+        </div>
+
+        <div class="delete-modal-footer">
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-modern">
+            <i class="bi bi-trash"></i>
+            Usuń wariant
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const modalEl = document.getElementById('deleteVariantModal');
+  if (!modalEl) return;
+
+  const form = document.getElementById('deleteVariantForm');
+  const previewEl = document.getElementById('deleteVariantPreview');
+
+  modalEl.addEventListener('show.bs.modal', (event) => {
+    const btn = event.relatedTarget;
+    const url = btn?.getAttribute('data-delete-url') || '';
+    const preview = btn?.getAttribute('data-title') || '—';
+
+    if (form) form.action = url;
+    if (previewEl) previewEl.textContent = preview;
+  });
+})();
+</script>
+<script>
+(function(){
+  const modal = document.getElementById('workersModal');
+  const select = document.getElementById('workersSelect');
+  const chips = document.getElementById('assignedChips');
+  const count = document.getElementById('assignedCount');
+  const clearBtn = document.getElementById('assignedClear');
+
+  if (!modal || !select || !chips || !count) return;
+
+  const max = parseInt(select.dataset.max || '3', 10);
+
+  function getSelectedOptions(){
+    return Array.from(select.options).filter(option => option.selected);
+  }
+
+  function renderWorkers(){
+    const selected = getSelectedOptions();
+
+    count.textContent = selected.length;
+    chips.innerHTML = '';
+
+    selected.forEach(option => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'workers-chip';
+      chip.innerHTML = `
+        <i class="bi bi-person"></i>
+        ${option.textContent.trim()}
+        <span>×</span>
+      `;
+
+      chip.addEventListener('click', function(){
+        option.selected = false;
+        renderWorkers();
+      });
+
+      chips.appendChild(chip);
+    });
+
+    const limitReached = selected.length >= max;
+
+    Array.from(select.options).forEach(option => {
+      option.disabled = limitReached && !option.selected;
+    });
+  }
+
+  select.addEventListener('change', function(){
+    const selected = getSelectedOptions();
+
+    if (selected.length > max) {
+      selected.slice(max).forEach(option => {
+        option.selected = false;
+      });
+    }
+
+    renderWorkers();
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function(){
+      Array.from(select.options).forEach(option => {
+        option.selected = false;
+        option.disabled = false;
+      });
+
+      renderWorkers();
+    });
+  }
+
+  modal.addEventListener('shown.bs.modal', function(){
+    Array.from(select.options).forEach(option => {
+      option.disabled = false;
+    });
+
+    renderWorkers();
+  });
+
+  renderWorkers();
+})();
+</script>
+<script>
+(function(){
+  const modalEl = document.getElementById('deleteOfferModal');
+  if (!modalEl) return;
+
+  const form = document.getElementById('deleteOfferForm');
+  const previewEl = document.getElementById('deleteOfferPreview');
+
+  modalEl.addEventListener('show.bs.modal', (event) => {
+    const btn = event.relatedTarget;
+    const url = btn?.getAttribute('data-delete-url') || '';
+    const preview = btn?.getAttribute('data-title') || '—';
+
+    if (form) form.action = url;
+    if (previewEl) previewEl.textContent = preview;
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const modal = document.getElementById('imagePreviewModal');
+  if(!modal) return;
+
+  const img = document.getElementById('imgPreview');
+  const meta = document.getElementById('imgMeta');
+
+  modal.addEventListener('show.bs.modal', (ev)=>{
+    const btn = ev.relatedTarget;
+    const src = btn?.getAttribute('data-src') || '';
+    const date = btn?.getAttribute('data-date') || '';
+
+    if(img) img.src = src;
+    if(meta) meta.textContent = date ? `Dodano: ${date}` : '—';
+  });
+
+  modal.addEventListener('hidden.bs.modal', ()=>{
+    if(img) img.src = '';
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const root = document.documentElement;
+  const key = 'dashboard-theme';
+  const saved = localStorage.getItem(key) || 'dark';
+  root.setAttribute('data-theme', saved);
+
+  const btn = document.getElementById('themeToggle');
+  if (!btn) return;
+
+  const setIcon = () => {
+    btn.innerHTML = root.getAttribute('data-theme') === 'light'
+      ? '<i class="bi bi-sun"></i>'
+      : '<i class="bi bi-moon-stars"></i>';
+  };
+
+  setIcon();
+
+  btn.addEventListener('click', ()=>{
+    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem(key, next);
+    setIcon();
+  });
+})();
+</script>
+<script>
+(function(){
+  const tab = document.getElementById('tab-history');
+  if (!tab) return;
+
+  const buttons = tab.querySelectorAll('[data-activity-filter]');
+  const items = tab.querySelectorAll('.crm-item');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const type = btn.getAttribute('data-activity-filter');
+
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      items.forEach(item => {
+        const itemType = item.getAttribute('data-activity-type');
+        item.style.display = (type === 'all' || itemType === type) ? '' : 'none';
+      });
+    });
+  });
+
+  const moreBtn = document.getElementById('showMoreActivities');
+  moreBtn?.addEventListener('click', () => {
+    document.querySelectorAll('.extra-activity').forEach(el => {
+      el.classList.remove('d-none');
+    });
+    moreBtn.remove();
+  });
+})();
+</script>
+{% endblock %}

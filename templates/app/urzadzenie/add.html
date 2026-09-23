@@ -1,0 +1,306 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+
+<style>
+  .product-page-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    margin-bottom:1.5rem;
+    flex-wrap:wrap;
+  }
+
+  .product-title{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .product-title-icon{
+    width:58px;
+    height:58px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+      linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+    color:#1468f5;
+    border:1px solid rgba(20,104,245,.22);
+    font-size:1.5rem;
+  }
+
+  .product-title h1{
+    margin:0;
+    font-size:1.65rem;
+    font-weight:800;
+    color:var(--text);
+  }
+
+  .product-title p{
+    margin:0;
+    color:var(--muted);
+    font-size:.9rem;
+  }
+
+  .product-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    overflow:hidden;
+  }
+
+  .product-card-header{
+    padding:1.25rem 1.5rem;
+    border-bottom:1px solid var(--border);
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.14), transparent 38%),
+      rgba(255,255,255,.02);
+  }
+
+  .product-card-header h2{
+    margin:0;
+    font-size:1.05rem;
+    font-weight:800;
+    color:var(--text);
+  }
+
+  .product-card-header span{
+    color:var(--muted);
+    font-size:.85rem;
+  }
+
+  .product-card-body{
+    padding:1.5rem;
+  }
+
+  .form-label{
+    font-weight:700;
+    color:var(--text);
+    font-size:.88rem;
+  }
+
+  .form-text{
+    color:var(--muted);
+  }
+
+  .form-control,
+  .form-select{
+    background:var(--input-bg, rgba(255,255,255,.04));
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:14px;
+    min-height:46px;
+  }
+
+  .form-control:focus,
+  .form-select:focus{
+    border-color:rgba(20,104,245,.65);
+    box-shadow:0 0 0 .2rem rgba(20,104,245,.15);
+    background:var(--input-bg, rgba(255,255,255,.05));
+    color:var(--text);
+  }
+
+  .product-actions{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:.75rem;
+    padding-top:1.25rem;
+    border-top:1px solid var(--border);
+    margin-top:1.5rem;
+    flex-wrap:wrap;
+  }
+
+  .btn-orange{
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+    color:#fff;
+    border:0;
+    border-radius:14px;
+    font-weight:800;
+    padding:.75rem 1.2rem;
+  }
+
+  .btn-orange:hover{
+    color:#fff;
+    filter:brightness(1.05);
+  }
+
+  .btn-soft{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    border-radius:14px;
+    font-weight:700;
+    padding:.75rem 1.1rem;
+    text-decoration:none;
+  }
+
+  .btn-soft:hover{
+    color:var(--text);
+    background:rgba(255,255,255,.07);
+  }
+
+  .errorlist{
+    margin:.4rem 0 0;
+    padding:0;
+    list-style:none;
+    color:#ff6b6b;
+    font-size:.85rem;
+  }
+
+  @media(max-width: 576px){
+    .product-card-body{
+      padding:1rem;
+    }
+
+    .product-actions{
+      justify-content:stretch;
+    }
+
+    .product-actions .btn,
+    .product-actions a{
+      width:100%;
+      text-align:center;
+    }
+  }
+</style>
+
+<div class="product-page-header">
+  <div class="product-title">
+    <div class="product-title-icon">
+      <i class="bi bi-box-seam"></i>
+    </div>
+
+    <div>
+      <h1>
+        {% if product %}
+          Edytuj produkt
+        {% else %}
+          Dodaj produkt
+        {% endif %}
+      </h1>
+
+      <p>
+        {% if product %}
+          {{ product.name }}
+        {% else %}
+          Dodaj nową pozycję katalogu
+        {% endif %}
+      </p>
+    </div>
+  </div>
+
+  <a href="{% url 'product_list' %}" class="btn-soft">
+    <i class="bi bi-arrow-left me-1"></i>
+    Wróć
+  </a>
+</div>
+
+<div class="product-card">
+  <div class="product-card-header">
+    <h2>Informacje o pozycji</h2>
+    <span>Uzupełnij podstawowe dane katalogowe.</span>
+  </div>
+
+  <div class="product-card-body">
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-8">
+          <label class="form-label" for="{{ form.name.id_for_label }}">
+            {{ form.name.label }}
+          </label>
+          {{ form.name }}
+          {{ form.name.errors }}
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <label class="form-label" for="{{ form.sku.id_for_label }}">
+            {{ form.sku.label }}
+          </label>
+          {{ form.sku }}
+          {{ form.sku.errors }}
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="{{ form.type.id_for_label }}">
+            {{ form.type.label }}
+          </label>
+          {{ form.type }}
+          {{ form.type.errors }}
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="{{ form.category.id_for_label }}">
+            {{ form.category.label }}
+          </label>
+          {{ form.category }}
+          {{ form.category.errors }}
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="{{ form.unit.id_for_label }}">
+            {{ form.unit.label }}
+          </label>
+          {{ form.unit }}
+          {{ form.unit.errors }}
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="{{ form.net_price.id_for_label }}">
+            {{ form.net_price.label }}
+          </label>
+          {{ form.net_price }}
+          {{ form.net_price.errors }}
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label class="form-label" for="{{ form.vat_rate.id_for_label }}">
+            {{ form.vat_rate.label }}
+          </label>
+          {{ form.vat_rate }}
+          {{ form.vat_rate.errors }}
+        </div>
+
+        <div class="col-12">
+          <div class="form-check mt-2">
+            {{ form.is_active }}
+            <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+              {{ form.is_active.label }}
+            </label>
+          </div>
+          {{ form.is_active.errors }}
+        </div>
+      </div>
+
+      <div class="product-actions">
+        <a href="{% url 'product_list' %}" class="btn-soft">
+          Anuluj
+        </a>
+
+        <button type="submit" class="btn btn-orange">
+          <i class="bi bi-check2-circle me-1"></i>
+          {% if product %}
+            Zapisz zmiany
+          {% else %}
+            Dodaj produkt
+          {% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

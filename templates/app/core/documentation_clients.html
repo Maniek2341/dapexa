@@ -1,0 +1,231 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+<style>
+  .docs-page{max-width:1450px;margin:0 auto}
+  .docs-head{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:1.4rem;flex-wrap:wrap}
+  .docs-title-wrap{display:flex;align-items:center;gap:1rem}
+  .docs-icon{width:62px;height:62px;display:grid;place-items:center;border-radius:20px;color:#1468f5;background:linear-gradient(135deg,rgba(20,104,245,.2),rgba(20,104,245,.06));border:1px solid rgba(20,104,245,.28);font-size:1.55rem}
+  .docs-title{margin:0;color:var(--text);font-size:1.55rem;font-weight:900}
+  .docs-subtitle{margin:.25rem 0 0;color:var(--muted);font-size:.9rem}
+  .docs-layout{display:grid;grid-template-columns:235px minmax(0,1fr);gap:1.25rem;align-items:start}
+  .docs-nav{position:sticky;top:88px;padding:.65rem;background:var(--card);border:1px solid var(--border);border-radius:20px}
+  .docs-nav-title{padding:.55rem .7rem .7rem;color:var(--muted);font-size:.7rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+  .docs-nav-group{display:flex;align-items:center;gap:.4rem;padding:.55rem .7rem .25rem;color:#7dc4ff;font-size:.68rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+  .docs-nav-group.service{margin-top:.45rem;color:#ffb36b}
+  .docs-nav a{display:flex;align-items:center;gap:.55rem;padding:.65rem .7rem;color:var(--muted);border-radius:11px;text-decoration:none;font-size:.8rem;font-weight:800}
+  .docs-nav a:hover{color:var(--text);background:rgba(20,104,245,.09)}
+  .docs-nav i{width:22px;color:#1468f5;text-align:center}
+  .docs-card{scroll-margin-top:90px;margin-bottom:1rem;background:var(--card);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:0 14px 38px rgba(0,0,0,.1)}
+  .docs-card-head{display:flex;align-items:center;gap:.75rem;padding:1rem 1.2rem;border-bottom:1px solid var(--border);background:linear-gradient(100deg,rgba(20,104,245,.1),rgba(255,255,255,.015) 50%);flex-wrap:wrap}
+  .docs-card-head i{color:#1468f5;font-size:1.1rem}
+  .docs-card-head h2{margin:0;color:var(--text);font-size:1rem;font-weight:900}
+  .docs-module-badge{display:inline-flex;align-items:center;margin-left:auto;padding:.3rem .6rem;border-radius:999px;font-size:.68rem;font-weight:900;letter-spacing:.03em;text-transform:uppercase;white-space:nowrap}
+  .docs-module-client{color:#7dc4ff;background:rgba(13,110,253,.13);border:1px solid rgba(13,110,253,.25)}
+  .docs-module-service{color:#ffb36b;background:rgba(20,104,245,.13);border:1px solid rgba(20,104,245,.25)}
+  .docs-module-marker{display:flex;align-items:center;gap:.6rem;margin:1.25rem 0 .7rem;padding:.65rem .85rem;border-radius:14px;font-size:.78rem;font-weight:900;letter-spacing:.05em;text-transform:uppercase}
+  .docs-module-marker:first-child{margin-top:0}
+  .docs-module-marker i{font-size:1rem}
+  .docs-module-marker-client{color:#7dc4ff;background:linear-gradient(90deg,rgba(13,110,253,.18),rgba(13,110,253,.04));border:1px solid rgba(13,110,253,.3)}
+  .docs-module-marker-service{color:#ffb36b;background:linear-gradient(90deg,rgba(20,104,245,.18),rgba(20,104,245,.04));border:1px solid rgba(20,104,245,.3)}
+  .docs-body{padding:1.2rem;color:var(--muted);font-size:.86rem;line-height:1.65}
+  .docs-body p{margin:0 0 .8rem}.docs-body p:last-child{margin-bottom:0}
+  .docs-body ul,.docs-body ol{margin:0 0 .8rem;padding-left:1.25rem}.docs-body li{margin:.25rem 0}
+  .docs-body strong{color:var(--text)}
+  .docs-module-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+  .docs-module-card{scroll-margin-top:90px;padding:1rem;background:var(--card);border:1px solid var(--border);border-radius:18px}
+  .docs-module-card-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.55rem}
+  .docs-module-card-head i{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;color:#1468f5;background:rgba(20,104,245,.12);font-size:1rem}
+  .docs-module-card h3{margin:0;color:var(--text);font-size:.92rem;font-weight:900}
+  .docs-module-card p{margin:0;color:var(--muted);font-size:.8rem;line-height:1.5}
+  .docs-module-card .docs-feature{margin-top:.55rem;color:var(--muted);font-size:.75rem;line-height:1.5}
+  .docs-body code{padding:.15rem .35rem;color:#ffb36b;background:rgba(20,104,245,.1);border-radius:6px;font-size:.8em}
+  .docs-table{width:100%;margin-top:.3rem;border-collapse:collapse;color:var(--muted)}
+  .docs-table th,.docs-table td{padding:.65rem .7rem;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+  .docs-table th{color:var(--text);font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+  .docs-table td:first-child{color:#ffb36b;font-weight:800;white-space:nowrap}
+  .docs-note{margin-top:.8rem;padding:.75rem .85rem;border:1px solid rgba(20,104,245,.2);border-radius:12px;background:rgba(20,104,245,.07)}
+  @media(max-width:900px){.docs-layout{grid-template-columns:1fr}.docs-nav{position:static;display:flex;gap:.25rem;overflow-x:auto}.docs-nav-title{display:none}.docs-nav a{flex:0 0 auto}.docs-nav i{display:none}}
+  @media(max-width:600px){.docs-title{font-size:1.3rem}.docs-body{padding:1rem;font-size:.84rem}.docs-table{display:block;overflow-x:auto;white-space:nowrap}.docs-table td:last-child{white-space:normal;min-width:230px}.docs-module-grid{grid-template-columns:1fr}}
+</style>
+
+<div class="docs-page">
+  <div class="docs-head">
+    <div class="docs-title-wrap">
+      <div class="docs-icon"><i class="bi bi-journal-text"></i></div>
+      <div>
+        <h1 class="docs-title">Dokumentacja modułów</h1>
+        <p class="docs-subtitle">Instrukcje obsługi modułów Klienci i Serwisy.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="docs-layout">
+    <nav class="docs-nav" aria-label="Spis treści dokumentacji">
+      <div class="docs-nav-title">Spis treści</div>
+      <div class="docs-nav-group"><i class="bi bi-people"></i>Klienci</div>
+      <a href="#start"><i class="bi bi-info-circle"></i>Opis modułu</a>
+      <a href="#list"><i class="bi bi-list-ul"></i>Lista klientów</a>
+      <a href="#form"><i class="bi bi-person-plus"></i>Dodawanie i edycja</a>
+      <a href="#details"><i class="bi bi-person-vcard"></i>Szczegóły klienta</a>
+      <a href="#locations"><i class="bi bi-geo-alt"></i>Lokalizacje</a>
+      <a href="#notes"><i class="bi bi-sticky"></i>Notatki i historia</a>
+      <a href="#archive"><i class="bi bi-archive"></i>Archiwizacja</a>
+      <a href="#permissions"><i class="bi bi-shield-lock"></i>Uprawnienia</a>
+      <div class="docs-nav-group service"><i class="bi bi-tools"></i>Serwisy</div>
+      <a href="#services"><i class="bi bi-tools"></i>Serwisy</a>
+      <a href="#service-workflow"><i class="bi bi-diagram-3"></i>Realizacja</a>
+      <a href="#service-hourly"><i class="bi bi-clock-history"></i>Godziny</a>
+      <div class="docs-nav-group service"><i class="bi bi-grid"></i>Pozostałe moduły</div>
+      <a href="#all-modules"><i class="bi bi-grid-3x3-gap"></i>Katalog modułów</a>
+    </nav>
+
+    <main>
+      <div class="docs-module-marker docs-module-marker-client"><i class="bi bi-people"></i>Moduł: Klienci</div>
+      <section class="docs-card" id="start">
+        <div class="docs-card-head"><i class="bi bi-people"></i><h2>Do czego służy moduł?</h2><span class="docs-module-badge docs-module-client">Klienci</span></div>
+        <div class="docs-body">
+          <p>Moduł Klienci jest centralnym miejscem przechowywania informacji o osobach prywatnych i firmach. Z karty klienta można przejść do powiązanych serwisów, prac i protokołów.</p>
+          <p>Dane są przypisane do firmy użytkownika. Użytkownik nie powinien mieć dostępu do klientów należących do innej firmy.</p>
+        </div>
+      </section>
+
+      <section class="docs-card" id="list">
+        <div class="docs-card-head"><i class="bi bi-list-ul"></i><h2>Lista klientów</h2><span class="docs-module-badge docs-module-client">Klienci</span></div>
+        <div class="docs-body">
+          <p>Lista pokazuje aktywnych klientów i umożliwia wyszukiwanie po nazwie, imieniu, nazwisku, e-mailu, telefonie lub NIP-ie.</p>
+          <ul><li>Przycisk klienta otwiera jego kartę szczegółów.</li><li>Klientów można archiwizować albo usuwać, jeśli użytkownik ma odpowiednie uprawnienie.</li><li>Archiwum zawiera klientów nieaktywnych i pozwala ich przywrócić.</li></ul>
+        </div>
+      </section>
+
+      <section class="docs-card" id="form">
+        <div class="docs-card-head"><i class="bi bi-person-plus"></i><h2>Dodawanie i edycja klienta</h2><span class="docs-module-badge docs-module-client">Klienci</span></div>
+        <div class="docs-body">
+          <p>Formularz obsługuje dwa typy klientów:</p>
+          <ul><li><strong>Osoba prywatna</strong> – wymagane imię i nazwisko.</li><li><strong>Firma</strong> – wymagana nazwa firmy i NIP złożony z 10 cyfr. Można podać osobę kontaktową.</li></ul>
+          <p>Adres wysyłkowy jest wymagany. Kod pocztowy musi mieć format <code>00-000</code>, a system próbuje automatycznie ustalić współrzędne adresu. Adres rozliczeniowy jest domyślnie taki sam jak wysyłkowy; zaznaczenie osobnego adresu wymaga uzupełnienia wszystkich jego pól.</p>
+          <div class="docs-note"><strong>Wskazówka:</strong> przed zapisaniem sprawdź typ klienta — od niego zależy zestaw wymaganych pól.</div>
+        </div>
+      </section>
+
+      <section class="docs-card" id="details">
+        <div class="docs-card-head"><i class="bi bi-person-vcard"></i><h2>Szczegóły klienta</h2><span class="docs-module-badge docs-module-client">Klienci</span></div>
+        <div class="docs-body">
+          <p>Karta szczegółów zbiera w jednym miejscu dane kontaktowe, opiekuna, adresy, lokalizacje, osoby kontaktowe, notatki, historię oraz powiązane realizacje.</p>
+          <ul><li>Serwisy, prace i protokoły są filtrowane po wybranym kliencie.</li><li>Osoby kontaktowe można dodawać tylko dla klienta typu Firma.</li><li>Każda zmiana biznesowa może zostać zapisana w historii aktywności.</li></ul>
+        </div>
+      </section>
+
+      <section class="docs-card" id="locations">
+        <div class="docs-card-head"><i class="bi bi-geo-alt"></i><h2>Lokalizacje klienta</h2><span class="docs-module-badge docs-module-client">Klienci</span></div>
+        <div class="docs-body">
+          <p>Klient może mieć wiele lokalizacji, np. oddziały, magazyny lub miejsca realizacji usług. Lokalizacja zawiera nazwę, kod, adres, osobę kontaktową, notatki i status aktywności.</p>
+          <p>W obrębie klienta może być tylko jedna lokalizacja domyślna. Ustawienie nowej automatycznie odznacza poprzednią. Usunięcie lokalizacji nie usuwa powiązanych serwisów — serwis otrzymuje adres klienta jako fallback.</p>
+        </div>
+      </section>
+
+      <section class="docs-card" id="notes">
+        <div class="docs-card-head"><i class="bi bi-sticky"></i><h2>Notatki i historia aktywności</h2><span class="docs-module-badge docs-module-client">Klienci</span></div>
+        <div class="docs-body">
+          <p>Notatki są wewnętrznymi informacjami o kliencie. Można je przypinać, aby ważne treści były wyżej, oraz usuwać zgodnie z uprawnieniami.</p>
+          <p>Historia aktywności rejestruje m.in. dodanie klienta, zmianę statusu, notatki, rozmowy, e-maile, zadania, serwisy, oferty, faktury i pliki. Przy usunięciu notatki jej skrócona treść pozostaje w historii.</p>
+        </div>
+      </section>
+
+      <section class="docs-card" id="archive">
+        <div class="docs-card-head"><i class="bi bi-archive"></i><h2>Archiwizacja i usuwanie</h2><span class="docs-module-badge docs-module-client">Klienci</span></div>
+        <div class="docs-body">
+          <ol><li>Archiwizacja ustawia klienta jako nieaktywnego i przenosi go do archiwum.</li><li>Przywrócenie ponownie ustawia klienta jako aktywnego.</li><li>Trwałe usunięcie wymaga potwierdzenia i usuwa klienta oraz nieużywane adresy.</li></ol>
+          <div class="docs-note"><strong>Uwaga:</strong> archiwizacja jest bezpieczniejsza niż trwałe usunięcie, ponieważ zachowuje dane klienta.</div>
+        </div>
+      </section>
+
+      <section class="docs-card" id="permissions">
+        <div class="docs-card-head"><i class="bi bi-shield-lock"></i><h2>Uprawnienia</h2><span class="docs-module-badge docs-module-client">Klienci</span></div>
+        <div class="docs-body">
+          <table class="docs-table"><thead><tr><th>Uprawnienie</th><th>Funkcja</th></tr></thead><tbody>
+            <tr><td>klient_add</td><td>Dodawanie klientów</td></tr>
+            <tr><td>klient_edit</td><td>Edycja danych klienta</td></tr>
+            <tr><td>klient_detail</td><td>Wyświetlanie szczegółów</td></tr>
+            <tr><td>klient_delete</td><td>Trwałe usuwanie</td></tr>
+            <tr><td>klient_deactivate / klient_activate</td><td>Archiwizowanie i przywracanie</td></tr>
+            <tr><td>client_note_pin / client_note_delete</td><td>Przypinanie i usuwanie notatek</td></tr>
+            <tr><td>contact_person_add</td><td>Dodawanie osoby kontaktowej</td></tr>
+            <tr><td>location_add / location_edit / location_delete</td><td>Zarządzanie lokalizacjami</td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <div class="docs-module-marker docs-module-marker-service"><i class="bi bi-tools"></i>Moduł: Serwisy</div>
+      <section class="docs-card" id="services">
+        <div class="docs-card-head"><i class="bi bi-tools"></i><h2>Moduł Serwisy</h2><span class="docs-module-badge docs-module-service">Serwisy</span></div>
+        <div class="docs-body">
+          <p>Serwisy służą do rejestrowania zgłoszeń, planowania realizacji i dokumentowania wykonanych prac u klienta. Każdy serwis jest przypisany do firmy oraz klienta i ma własny numer.</p>
+          <p>W formularzu wybierz rodzaj zgłoszenia:</p>
+          <ul><li><strong>Serwis</strong> – standardowe zgłoszenie serwisowe.</li><li><strong>Obsługa</strong> – zgłoszenie obsługowe, numerowane osobnym prefiksem z ustawień firmy.</li></ul>
+          <p>Można również wybrać sposób rozliczenia: <strong>Godzinowo</strong> albo <strong>Od roboty</strong>.</p>
+        </div>
+      </section>
+
+      <section class="docs-card" id="service-workflow">
+        <div class="docs-card-head"><i class="bi bi-diagram-3"></i><h2>Tworzenie i realizacja serwisu</h2><span class="docs-module-badge docs-module-service">Serwisy</span></div>
+        <div class="docs-body">
+          <ol><li>Wybierz klienta i opcjonalnie jego lokalizację.</li><li>Uzupełnij temat, opis, priorytet oraz rodzaj zgłoszenia.</li><li>Ustal termin rozpoczęcia i zakończenia, jeśli serwis jest zaplanowany.</li><li>Przypisz maksymalnie trzy osoby do realizacji.</li><li>W razie potrzeby dodaj zdjęcia, załączniki i notatki.</li></ol>
+          <p>Adres realizacji jest pobierany z lokalizacji klienta, a gdy jej nie wybrano — z adresu wysyłkowego klienta. Po zmianie lokalizacji system aktualizuje adres serwisu.</p>
+          <div class="docs-note"><strong>Ważne:</strong> planowana data jest opcjonalna przy tworzeniu zgłoszenia. Serwis bez terminu nie pojawi się w zestawieniu najbliższych serwisów.</div>
+        </div>
+      </section>
+
+      <section class="docs-card" id="service-statuses">
+        <div class="docs-card-head"><i class="bi bi-kanban"></i><h2>Statusy i priorytety</h2><span class="docs-module-badge docs-module-service">Serwisy</span></div>
+        <div class="docs-body">
+          <p>Standardowe statusy serwisu to: <strong>Nowe</strong>, <strong>W trakcie</strong>, <strong>Zakończone</strong>, <strong>Anulowane</strong> oraz statusy pomocnicze, np. „Zapomniane”. Dla zgłoszeń typu Obsługa dostępny jest osobny status obsługi.</p>
+          <p>Priorytet może być niski, normalny, wysoki albo krytyczny. Priorytet jest widoczny na liście i w szczegółach serwisu.</p>
+        </div>
+      </section>
+
+      <section class="docs-card" id="service-hourly">
+        <div class="docs-card-head"><i class="bi bi-clock-history"></i><h2>Rozliczenie godzinowe</h2><span class="docs-module-badge docs-module-service">Serwisy</span></div>
+        <div class="docs-body">
+          <p>Dla serwisu rozliczanego godzinowo osoba realizująca dodaje dzienne wpisy pracy. Wpis zawiera dzień pracy, liczbę godzin, liczbę osób, dojazdy, materiały i opis wykonanych prac.</p>
+          <p>Osoba wypełniająca formularz jest przypisywana automatycznie. Godziny można wpisać wyłącznie w zakresie domyślnych godzin pracy firmy.</p>
+          <p>Po zakończeniu serwisu i potwierdzeniu utworzenia protokołu wpisy dzienne są sumowane w danych protokołu.</p>
+        </div>
+      </section>
+
+      <section class="docs-card" id="service-permissions">
+        <div class="docs-card-head"><i class="bi bi-shield-lock"></i><h2>Najważniejsze uprawnienia serwisowe</h2><span class="docs-module-badge docs-module-service">Serwisy</span></div>
+        <div class="docs-body">
+          <table class="docs-table"><thead><tr><th>Uprawnienie</th><th>Funkcja</th></tr></thead><tbody>
+            <tr><td>serwis_nowe</td><td>Lista serwisów</td></tr>
+            <tr><td>serwis_add</td><td>Dodawanie zgłoszeń</td></tr>
+            <tr><td>serwis_detail</td><td>Szczegóły zgłoszenia</td></tr>
+            <tr><td>serwis_edit / serwis_delete</td><td>Edycja i usuwanie zgłoszeń</td></tr>
+            <tr><td>serwis_status_update</td><td>Zmiana statusu</td></tr>
+            <tr><td>serwis_schedule_update</td><td>Ustalanie terminu</td></tr>
+            <tr><td>serwis_assign_workers</td><td>Przypisywanie pracowników</td></tr>
+            <tr><td>service_work_log_add</td><td>Dodawanie dziennych wpisów pracy</td></tr>
+            <tr><td>service_note_add / pin / delete</td><td>Notatki serwisowe</td></tr>
+          </tbody></table>
+        </div>
+      </section>
+
+      <section class="docs-card" id="all-modules">
+        <div class="docs-card-head"><i class="bi bi-grid-3x3-gap"></i><h2>Dokumentacja pozostałych modułów</h2><span class="docs-module-badge docs-module-service">Moduły systemu</span></div>
+        <div class="docs-body">
+          <p>Poniżej znajduje się katalog pozostałych modułów. Kliknij moduł w spisie treści, aby przejść do jego opisu.</p>
+          <div class="docs-module-grid">
+            {% for module in documentation_modules %}
+              <article class="docs-module-card" id="{{ module.anchor }}">
+                <div class="docs-module-card-head"><i class="bi {{ module.icon }}"></i><h3>{{ module.name }}</h3></div>
+                <p>{{ module.description }}</p>
+                <div class="docs-feature"><strong>Zakres:</strong> {{ module.features }}</div>
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+{% endblock %}

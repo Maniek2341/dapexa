@@ -1,0 +1,2904 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+.protocol-detail-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.protocol-detail-title{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.protocol-detail-icon,
+.avatar{
+  width:64px;
+  height:64px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.7rem;
+  flex-shrink:0;
+}
+
+.protocol-detail-title h1{
+  margin:0;
+  font-size:1.8rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.protocol-detail-sub{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.5rem;
+  margin-top:.55rem;
+}
+
+.detail-badge,
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.45rem .75rem;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:800;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+
+.detail-badge-orange{
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  border-color:rgba(20,104,245,.18);
+}
+
+.detail-badge-success{
+  background:rgba(25,135,84,.15);
+  color:#47d18c;
+  border-color:rgba(25,135,84,.18);
+}
+
+.detail-badge-danger{
+  background:rgba(220,53,69,.15);
+  color:#ff6b81;
+  border-color:rgba(220,53,69,.18);
+}
+
+.detail-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.btn-orange,
+.btn-brand{
+  border:0;
+  color:#fff !important;
+  font-weight:800;
+  border-radius:14px;
+  padding:.75rem 1.1rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  text-decoration:none;
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+}
+
+.btn-soft,
+.btn-outline-secondary{
+  border:1px solid var(--border) !important;
+  background:rgba(255,255,255,.04) !important;
+  color:var(--text) !important;
+  border-radius:14px !important;
+  font-weight:800;
+  padding:.75rem 1.1rem;
+  text-decoration:none;
+}
+
+.btn-soft:hover,
+.btn-outline-secondary:hover{
+  color:var(--text) !important;
+  background:rgba(255,255,255,.07) !important;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.card-body{
+  color:var(--text);
+}
+
+.nav-tabs{
+  border-bottom:1px solid var(--border) !important;
+  gap:.5rem;
+}
+
+.nav-tabs .nav-link{
+  color:var(--muted);
+  border:1px solid var(--border) !important;
+  background:rgba(255,255,255,.03);
+  border-radius:999px;
+  font-weight:800;
+  margin-bottom:.75rem;
+}
+
+.nav-tabs .nav-link.active{
+  color:#fff !important;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%) !important;
+  border-color:transparent !important;
+}
+
+.info-box{
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+  box-shadow:none;
+}
+
+.info-box:hover{
+  border-color:rgba(20,104,245,.22);
+  box-shadow:none;
+  transform:none;
+}
+
+.info-icon,
+.section-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  background:rgba(20,104,245,.11);
+  border:1px solid rgba(20,104,245,.17);
+  color:#1468f5;
+}
+
+.info-label{
+  color:var(--muted);
+  font-size:.78rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+}
+
+.info-value{
+  color:var(--text);
+  font-size:1.1rem;
+  font-weight:900;
+}
+
+.work-description{
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+  color:var(--text);
+}
+
+.table{
+  color:var(--text);
+}
+
+.table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+}
+
+.table tbody td{
+  border-color:var(--border);
+}
+
+.media-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:.75rem;
+}
+
+.media-tile{
+  border:1px solid var(--border);
+  background:var(--card);
+  border-radius:16px;
+  overflow:hidden;
+  aspect-ratio:4/3;
+}
+
+.media-tile:hover{
+  border-color:rgba(20,104,245,.35);
+  transform:none;
+  box-shadow:none;
+}
+
+.file-row{
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:16px;
+}
+
+.file-ico{
+  background:rgba(20,104,245,.10);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.15);
+}
+
+.crm-card{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:18px;
+  padding:1rem;
+}
+
+.crm-dot{
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.modal-content{
+  background:var(--card) !important;
+  color:var(--text) !important;
+  border:1px solid var(--border) !important;
+  border-radius:26px !important;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.modal-header{
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.16), transparent 45%),
+    rgba(255,255,255,.02);
+}
+
+.modal-footer{
+  border-top:1px solid var(--border);
+}
+
+@media(max-width:768px){
+  .protocol-detail-header{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .protocol-detail-title h1{
+    font-size:1.35rem;
+  }
+
+  .detail-actions{
+    display:grid;
+    grid-template-columns:1fr;
+    width:100%;
+  }
+
+  .detail-actions a,
+  .detail-actions button{
+    width:100%;
+    text-align:center;
+  }
+
+  .media-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .card{
+    border-radius:20px;
+  }
+
+  .nav-tabs{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:.3rem;
+  }
+
+  .nav-tabs .nav-link{
+    white-space:nowrap;
+  }
+}
+</style>
+<style>
+  /* ================= INFO BOX ================= */
+
+.info-box{
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  transition: all .18s ease;
+}
+
+.info-box:hover{
+  border-color: var(--brand-600);
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  transform: translateY(-2px);
+}
+
+.info-icon{
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(0,0,0,.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--brand-600);
+}
+
+.info-label{
+  font-size: 13px;
+  color: var(--bs-secondary);
+}
+
+.info-value{
+  font-size: 20px;
+  font-weight: 600;
+}
+  .chip.btn {
+    border-radius: 999px;
+    transition: all .2s ease;
+  }
+  .chip.btn-outline-secondary:hover {
+    background: var(--brand-600);
+    color: #fff;
+    border-color: var(--brand-600);
+  }
+  .nav-tabs .nav-link.active {
+    border-bottom: 2px solid var(--brand-600);
+    font-weight: 600;
+  }
+  .nav-tabs .badge {
+    font-size: 0.65rem;
+    vertical-align: middle;
+  }
+  .nav-tabs .nav-link.active .badge {
+    background: var(--brand-600) !important;
+  }
+  /* ===== MEDIA GRID ===== */
+
+  /* ============================= */
+  /* ======= MEDIA STYLING ======= */
+  /* ============================= */
+  
+  /* ---- Sekcje nagłówków ---- */
+  
+  #tab-media h6 {
+    font-weight: 600;
+    letter-spacing: .2px;
+  }
+  
+  /* ================= GRID ZDJĘĆ ================= */
+  
+  .media-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  
+  .media-tile{
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 4/3;
+    background: var(--card);
+    border: 1px solid var(--border);
+    transition: all .18s ease;
+  }
+  
+  .media-tile img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .2s ease;
+  }
+  
+  .media-tile:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    border-color: var(--brand-600);
+  }
+  
+  .media-tile:hover img{
+    transform: scale(1.04);
+  }
+  
+  .media-badge{
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 6px;
+    border-radius: 8px;
+  }
+  
+  /* ================= PLIKI ================= */
+  
+  .file-row{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    transition: all .18s ease;
+  }
+  
+  .file-row:hover{
+    border-color: var(--brand-600);
+    background: rgba(0,0,0,.02);
+    box-shadow: 0 4px 14px rgba(0,0,0,.06);
+  }
+  
+  .file-main{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+    flex: 1;
+  }
+  
+  .file-ico{
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: rgba(0,0,0,.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: var(--brand-600);
+  }
+  
+  .file-meta{
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .file-name{
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  .file-sub{
+    font-size: 12px;
+  }
+  
+  .file-cta{
+    margin-left: 12px;
+  }
+
+  /* ===== WYKONANE PRACE ===== */
+
+.section-icon{
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0,0,0,.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-600);
+  font-size: 16px;
+}
+
+.work-description{
+  font-size: 14px;
+}
+
+.work-description p{
+  margin-bottom: .6rem;
+}
+
+.work-description p:last-child{
+  margin-bottom: 0;
+}
+  
+  .icon-btn{
+    width:34px;
+    height:34px;
+    border-radius:999px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text);
+    text-decoration:none;
+    transition:transform .12s ease, background .12s ease, border-color .12s ease, opacity .12s ease;
+    opacity:.85;
+  }
+  .icon-btn:hover, .icon-btn:focus{
+    opacity:1;
+    background:rgba(255,255,255,.06);
+    transform:translateY(-1px);
+  }
+  
+  /* kosz – dyskretny, ale “danger” */
+  .icon-btn-danger{
+    border-color:rgba(220,53,69,.35);
+    color:rgba(220,53,69,.95);
+  }
+  .icon-btn-danger:hover, .icon-btn-danger:focus{
+    background:rgba(220,53,69,.12);
+    border-color:rgba(220,53,69,.6);
+  }
+  
+  /* na mobile minimalnie mniejsze */
+  @media (max-width:768px){
+    .icon-btn{ width:32px; height:32px; }
+    .file-row{ padding:.55rem .65rem; border-radius:12px; }
+  }
+  
+  /* ================= RESPONSIVE ================= */
+  
+  @media (max-width: 768px){
+  
+    .media-grid{
+      grid-template-columns: repeat(2, 1fr);
+    }
+  
+    .file-row{
+      padding: 10px;
+    }
+  
+    .file-name{
+      font-size: 13px;
+    }
+  
+  }
+
+.media-tile-wrap{ position: relative; }
+  .media-del{
+    position:absolute;
+    right:10px;
+    bottom:10px;
+    border:1px solid rgba(255,255,255,.15);
+    background: rgba(0,0,0,.45);
+    color:#fff;
+    border-radius: 999px;
+    width:36px; height:36px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .media-del:hover{ background: rgba(0,0,0,.65); }
+.detail-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.detail-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.2rem 1.35rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.detail-card-icon{
+  width:52px;
+  height:52px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.detail-card-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.08rem;
+  font-weight:900;
+}
+
+.detail-card-header p{
+  margin:.2rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.detail-card-body{
+  padding:1.35rem;
+}
+
+.protocol-main-badges{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.55rem;
+}
+
+.detail-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  padding:.45rem .75rem;
+  border-radius:999px;
+  font-size:.78rem;
+  font-weight:800;
+  background:rgba(255,255,255,.05);
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+
+.detail-badge-orange{
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  border-color:rgba(20,104,245,.18);
+}
+
+.detail-badge-danger{
+  background:rgba(220,53,69,.14);
+  color:#ff6b81;
+  border-color:rgba(220,53,69,.22);
+}
+
+.info-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:1rem;
+}
+
+.info-item{
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.info-label{
+  color:var(--muted);
+  font-size:.76rem;
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:.35rem;
+}
+
+.info-value{
+  color:var(--text);
+  font-size:.98rem;
+  font-weight:800;
+  word-break:break-word;
+}
+
+.placeholder-box{
+  padding:1.25rem;
+  border-radius:20px;
+  background:rgba(255,255,255,.03);
+  border:1px dashed rgba(255,255,255,.14);
+  color:var(--muted);
+  text-align:center;
+}
+
+.placeholder-box i{
+  display:block;
+  font-size:1.7rem;
+  color:#1468f5;
+  margin-bottom:.5rem;
+}
+
+.work-description{
+  color:var(--text);
+  font-size:.95rem;
+  line-height:1.7;
+}
+
+.protocol-table{
+  color:var(--text);
+}
+
+.protocol-table thead th{
+  color:var(--muted);
+  font-size:.76rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+}
+
+.protocol-table tbody td{
+  border-color:var(--border);
+  padding:1rem;
+}
+
+.scroll-table{
+  max-height:360px;
+  overflow:auto;
+  border-radius:18px;
+}
+
+.crm-timeline-scroll{
+  max-height:520px;
+  overflow-y:auto;
+  padding-right:4px;
+}
+
+.crm-item{
+  position:relative;
+  padding-left:2rem;
+  margin-bottom:1rem;
+}
+
+.crm-item::before{
+  content:"";
+  position:absolute;
+  left:11px;
+  top:0;
+  bottom:-1rem;
+  width:1px;
+  background:rgba(255,255,255,.08);
+}
+
+.crm-dot{
+  position:absolute;
+  left:0;
+  top:.25rem;
+  width:24px;
+  height:24px;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  color:#1468f5;
+  border:1px solid rgba(20,104,245,.18);
+  z-index:2;
+}
+
+.crm-card{
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  border-radius:18px;
+  padding:1rem;
+}
+
+.media-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:.8rem;
+}
+
+.media-tile-wrap{
+  position:relative;
+}
+
+.media-tile{
+  width:100%;
+  position:relative;
+  border:1px solid var(--border);
+  border-radius:18px;
+  overflow:hidden;
+  aspect-ratio:4/3;
+  background:transparent;
+  padding:0;
+  cursor:pointer;
+}
+
+.info-box{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+
+  height:100%;
+
+  padding:1.2rem;
+
+  border-radius:22px;
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(20,104,245,.10),
+      transparent 45%),
+    rgba(255,255,255,.03);
+
+  border:1px solid var(--border);
+
+  transition:.2s ease;
+}
+
+
+.media-tile img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.media-badge{
+  position:absolute;
+  left:10px;
+  top:10px;
+  background:rgba(0,0,0,.45);
+  color:#fff;
+  border-radius:999px;
+  padding:.22rem .5rem;
+  font-size:.78rem;
+}
+
+.media-del{
+  position:absolute;
+  right:10px;
+  bottom:10px;
+  width:36px;
+  height:36px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(0,0,0,.45);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.file-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.75rem;
+  padding:.7rem .8rem;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:rgba(255,255,255,.025);
+}
+
+.file-main{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  min-width:0;
+  flex:1;
+  color:inherit;
+  text-decoration:none;
+}
+
+.file-ico{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+  color:#1468f5;
+  flex-shrink:0;
+}
+
+.file-meta{
+  min-width:0;
+}
+
+.file-name{
+  font-weight:800;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.file-sub{
+  font-size:.8rem;
+}
+
+.file-cta{
+  display:flex;
+  gap:.4rem;
+  flex-shrink:0;
+}
+
+.invoice-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  gap:1rem;
+
+  padding:.85rem 0;
+
+  border-bottom:1px solid var(--border);
+}
+
+.invoice-row:last-of-type{
+  border-bottom:0;
+}
+
+.invoice-row span{
+  color:var(--muted);
+  font-size:.88rem;
+}
+
+.invoice-row strong{
+  color:var(--text);
+  font-size:.92rem;
+  font-weight:800;
+  text-align:right;
+}
+
+.invoice-note{
+  margin-top:1rem;
+
+  padding:1rem;
+
+  border-radius:18px;
+
+  background:rgba(255,255,255,.03);
+
+  border:1px solid var(--border);
+}
+
+.invoice-note-label{
+  color:var(--muted);
+  font-size:.8rem;
+  font-weight:700;
+
+  margin-bottom:.5rem;
+
+  text-transform:uppercase;
+  letter-spacing:.05em;
+}
+
+.invoice-note-content{
+  color:var(--text);
+  font-size:.9rem;
+  line-height:1.6;
+}
+
+.invoice-note-content p:last-child{
+  margin-bottom:0;
+}
+
+.icon-btn{
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  text-decoration:none;
+}
+
+.icon-btn-danger{
+  border-color:rgba(220,53,69,.35);
+  color:#ff6b6b;
+}
+
+.invoice-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.invoice-modal-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.6rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.035), transparent);
+}
+
+.invoice-modal-header h4{
+  margin:0;
+  color:var(--text);
+  font-size:1.35rem;
+  font-weight:900;
+}
+
+.invoice-modal-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.invoice-modal-header .btn-close{
+  position:absolute;
+  top:1.15rem;
+  right:1.15rem;
+}
+
+.invoice-modal-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.55rem;
+  flex-shrink:0;
+}
+
+.invoice-modal-body{
+  padding:1.6rem;
+}
+
+.invoice-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1rem;
+}
+
+.invoice-field label{
+  display:block;
+  margin-bottom:.45rem;
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:800;
+}
+
+.invoice-field .form-control,
+.invoice-field .form-select{
+  background:rgba(255,255,255,.04)!important;
+  border:1px solid var(--border)!important;
+  color:var(--text)!important;
+  border-radius:16px!important;
+  min-height:52px;
+  box-shadow:none!important;
+}
+
+.invoice-field textarea{
+  min-height:120px;
+}
+
+.invoice-field .form-control:focus,
+.invoice-field .form-select:focus{
+  border-color:rgba(20,104,245,.45)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.12)!important;
+}
+
+.invoice-options{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:.8rem;
+  margin-top:1rem;
+}
+
+.invoice-option{
+  display:flex;
+  align-items:flex-start;
+  gap:.85rem;
+  padding:1rem;
+  border-radius:18px;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.06);
+  cursor:pointer;
+}
+
+.invoice-option:hover{
+  border-color:rgba(20,104,245,.25);
+  background:rgba(20,104,245,.05);
+}
+
+.invoice-option .form-check-input{
+  margin-top:.25rem;
+  width:20px;
+  height:20px;
+  border-color:var(--border);
+  background-color:rgba(255,255,255,.04);
+}
+
+.invoice-option .form-check-input:checked{
+  background-color:#1468f5;
+  border-color:#1468f5;
+}
+
+.invoice-option strong{
+  display:block;
+  color:var(--text);
+  font-size:.9rem;
+}
+
+.invoice-option small{
+  display:block;
+  color:var(--muted);
+  margin-top:.15rem;
+  font-size:.8rem;
+}
+
+.invoice-help{
+  margin-top:.45rem;
+  color:var(--muted);
+  font-size:.8rem;
+}
+
+.invoice-modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:.8rem;
+  padding:0 1.6rem 1.6rem;
+}
+
+.invoice-btn-secondary,
+.invoice-btn-primary{
+  border-radius:16px;
+  padding:.9rem 1.25rem;
+  font-weight:800;
+}
+
+.invoice-btn-secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+}
+
+.invoice-btn-primary{
+  border:0;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  gap:.5rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 16px 38px rgba(20,104,245,.22);
+}
+
+@media(max-width:768px){
+  .invoice-modal-header{
+    padding:1.2rem;
+    align-items:flex-start;
+  }
+
+  .invoice-modal-icon{
+    width:56px;
+    height:56px;
+    border-radius:18px;
+    font-size:1.3rem;
+  }
+
+  .invoice-modal-header h4{
+    font-size:1.1rem;
+    padding-right:1.8rem;
+  }
+
+  .invoice-modal-body{
+    padding:1rem;
+  }
+
+  .invoice-grid{
+    grid-template-columns:1fr;
+  }
+
+  .invoice-modal-footer{
+    padding:0 1rem 1rem;
+    flex-direction:column;
+  }
+
+  .invoice-btn-secondary,
+  .invoice-btn-primary{
+    width:100%;
+    justify-content:center;
+  }
+}
+
+@media(max-width:768px){
+  .detail-card{
+    border-radius:20px;
+  }
+
+  .detail-card-header{
+    padding:1rem;
+    align-items:flex-start;
+  }
+
+  .detail-card-body{
+    padding:1rem;
+  }
+
+  .info-list{
+    grid-template-columns:1fr;
+  }
+
+  .media-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .protocol-table{
+    min-width:650px;
+  }
+}
+.detail-tabs{
+  margin-bottom:1.25rem;
+}
+
+.detail-tabs .nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:.6rem;
+}
+
+.detail-tabs .nav-item{
+  margin:0;
+}
+
+.detail-tabs .nav-link{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--muted);
+  border-radius:999px;
+  font-weight:800;
+  font-size:.86rem;
+  padding:.65rem 1rem;
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+}
+
+.detail-tabs .nav-link:hover{
+  color:var(--text);
+  background:rgba(255,255,255,.07);
+  border-color:rgba(20,104,245,.25);
+}
+
+.detail-tabs .nav-link.active{
+  color:#fff;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  border-color:transparent;
+  box-shadow:0 12px 28px rgba(20,104,245,.22);
+}
+
+.detail-tabs .nav-link .badge{
+  background:rgba(255,255,255,.18)!important;
+  color:#fff;
+  border-radius:999px;
+  font-size:.7rem;
+  padding:.25rem .45rem;
+}
+
+@media(max-width:768px){
+  .detail-tabs .nav{
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    padding-bottom:.35rem;
+    scrollbar-width:none;
+  }
+
+  .detail-tabs .nav::-webkit-scrollbar{
+    display:none;
+  }
+
+  .detail-tabs .nav-link{
+    white-space:nowrap;
+    font-size:.8rem;
+    padding:.58rem .9rem;
+  }
+}
+
+.preview-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.45);
+}
+
+.preview-modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:1.4rem 1.5rem;
+
+  border-bottom:1px solid var(--border);
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(20,104,245,.15),
+      transparent 45%),
+    rgba(255,255,255,.02);
+}
+
+.preview-modal-info{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.preview-modal-icon{
+  width:58px;
+  height:58px;
+
+  border-radius:18px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+
+  color:#1468f5;
+  font-size:1.35rem;
+}
+
+.preview-modal-header h5{
+  color:var(--text);
+  font-weight:900;
+}
+
+.preview-modal-meta{
+  margin-top:.2rem;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.preview-modal-body{
+  padding:1.5rem;
+}
+
+.preview-image-wrap{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+
+  min-height:300px;
+
+  border-radius:22px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.03),
+      rgba(255,255,255,.01)
+    );
+
+  border:1px solid var(--border);
+
+  overflow:hidden;
+}
+
+.preview-image{
+  width:100%;
+  max-height:75vh;
+  object-fit:contain;
+}
+
+.preview-caption{
+  margin-top:1rem;
+
+  padding:1rem;
+
+  border-radius:16px;
+
+  background:rgba(255,255,255,.03);
+  border:1px solid var(--border);
+
+  color:var(--text);
+  font-size:.9rem;
+}
+
+@media(max-width:768px){
+
+  .preview-modal-header{
+    padding:1rem;
+  }
+
+  .preview-modal-icon{
+    width:48px;
+    height:48px;
+    border-radius:15px;
+    font-size:1.1rem;
+  }
+
+  .preview-modal-body{
+    padding:1rem;
+  }
+
+  .preview-image{
+    max-height:60vh;
+  }
+
+}
+.delete-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,.45);
+}
+
+.delete-modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  padding:1.4rem 1.5rem;
+
+  border-bottom:1px solid var(--border);
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(220,53,69,.18),
+      transparent 45%),
+    rgba(255,255,255,.02);
+}
+
+.delete-modal-info{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.delete-modal-icon{
+  width:58px;
+  height:58px;
+
+  border-radius:18px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  background:rgba(220,53,69,.12);
+  border:1px solid rgba(220,53,69,.25);
+
+  color:#dc3545;
+  font-size:1.35rem;
+}
+
+.delete-modal-header h5{
+  font-weight:900;
+  color:var(--text);
+}
+
+.delete-modal-subtitle{
+  color:var(--muted);
+  font-size:.85rem;
+  margin-top:.15rem;
+}
+
+.delete-modal-body{
+  padding:1.5rem;
+}
+
+.delete-warning-box{
+  padding:1rem 1.15rem;
+
+  border-radius:18px;
+
+  background:rgba(220,53,69,.05);
+  border:1px solid rgba(220,53,69,.15);
+}
+
+.delete-file-name{
+  color:var(--text);
+  font-weight:800;
+  font-size:1rem;
+
+  word-break:break-word;
+}
+
+.delete-modal-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+
+  padding:1.25rem 1.5rem;
+
+  border-top:1px solid var(--border);
+}
+
+.btn-danger-custom{
+  border:none;
+
+  padding:.85rem 1.2rem;
+
+  border-radius:14px;
+
+  font-weight:800;
+  color:#fff;
+
+  background:linear-gradient(
+    135deg,
+    #dc3545,
+    #ff5b6b
+  );
+
+  box-shadow:0 14px 30px rgba(220,53,69,.25);
+}
+
+.btn-danger-custom:hover{
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+@media(max-width:768px){
+
+  .delete-modal-header{
+    padding:1rem;
+  }
+
+  .delete-modal-body{
+    padding:1rem;
+  }
+
+  .delete-modal-footer{
+    flex-direction:column;
+  }
+
+  .delete-modal-footer button{
+    width:100%;
+  }
+
+  .delete-modal-icon{
+    width:48px;
+    height:48px;
+    border-radius:15px;
+    font-size:1.1rem;
+  }
+}
+.cost-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding:.85rem 0;
+
+  border-bottom:1px solid var(--border);
+}
+
+.cost-row:last-of-type{
+  border-bottom:0;
+}
+
+.cost-row span{
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.cost-value{
+  font-size:1rem;
+  font-weight:800;
+}
+
+.cost-total{
+  margin-top:1rem;
+  padding:1rem 1.1rem;
+
+  border-radius:18px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  background:
+    radial-gradient(circle at top left,
+      rgba(20,104,245,.14),
+      transparent 45%),
+    rgba(255,255,255,.03);
+
+  border:1px solid rgba(20,104,245,.15);
+}
+
+.cost-total span{
+  color:var(--text);
+  font-weight:700;
+}
+
+.cost-total strong{
+  color:#22c55e;
+  font-size:1.35rem;
+  font-weight:900;
+}
+
+.delete-danger-note{
+  margin-top:1rem;
+
+  padding:.9rem 1rem;
+
+  border-radius:16px;
+
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+
+  background:rgba(20,104,245,.08);
+  border:1px solid rgba(20,104,245,.15);
+
+  color:#ffb347;
+  font-size:.85rem;
+}
+
+.delete-danger-note i{
+  font-size:1rem;
+  flex-shrink:0;
+}
+</style>
+
+<!-- HEADER -->
+<div class="protocol-detail-header">
+  <div class="protocol-detail-title">
+    <div class="protocol-detail-icon">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+
+    <div>
+      <h1>Szczegóły protokołu</h1>
+
+      <div class="protocol-detail-sub">
+        <span class="detail-badge detail-badge-orange">
+          <i class="bi bi-hash"></i>
+          {{ protocol.number }}
+        </span>
+
+        <span class="detail-badge">
+          <i class="bi bi-buildings"></i>
+          {{ protocol.client }}
+        </span>
+
+        <span class="detail-badge detail-badge-success">
+          <i class="bi bi-activity"></i>
+          {{ protocol.get_status_display }}
+        </span>
+
+        <span class="detail-badge detail-badge-danger">
+          <i class="bi bi-tools"></i>
+          {{ protocol.get_rodzaj_prac_display }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-actions">
+    <a href="{% url 'protokol_nowe' %}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>
+      Wróć
+    </a>
+
+    {% if can_manage_protocols %}
+    <a href="{% url 'protocol_edit' protocol.pk %}" class="btn-soft">
+      <i class="bi bi-pencil-square me-1"></i>
+      Edytuj
+    </a>
+
+    <button type="button"
+            class="btn-danger-custom"
+            data-bs-toggle="modal"
+            data-bs-target="#deleteProtocolModal"
+            data-delete-url="{% url 'protocol_delete' protocol.pk %}"
+            data-title="{{ protocol.number }} – {{ protocol.title|escape }}">
+      <i class="bi bi-trash me-1"></i>
+      Usuń
+    </button>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <!-- ================= LEWA KOLUMNA ================= -->
+<div class="{% if can_manage_protocols %}col-12 col-xxl-8{% else %}col-12{% endif %}">
+
+  <!-- KARTA GŁÓWNA -->
+  <div class="detail-card mb-4">
+    <div class="detail-card-header">
+      <div class="detail-card-icon">
+        <i class="bi bi-file-earmark-text"></i>
+      </div>
+
+      <div>
+        <h3>{{ protocol.title|default:"Protokół" }} – {{ protocol.number }}</h3>
+        <p>Główne informacje o protokole.</p>
+      </div>
+    </div>
+
+    <div class="detail-card-body">
+
+      <div class="info-list">
+        <div class="info-item">
+          <div class="info-label">Data zakończenia</div>
+          <div class="info-value">{{ protocol.end_time|date:"d.m.Y H:i" }}</div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">Numer</div>
+          <div class="info-value">{{ protocol.number }}</div>
+        </div>
+
+        {% if protocol.address %}
+          <div class="info-item" style="grid-column:1/-1;">
+            <div class="info-label">Adres</div>
+            <div class="info-value">
+              <i class="bi bi-geo-alt me-1" style="color:#1468f5;"></i>
+              {{ protocol.address }}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- PRZYCISKI ZAKŁADEK -->
+  <div class="detail-tabs mb-4">
+    <ul class="nav nav-pills" role="tablist">
+      <li class="nav-item">
+        <button class="nav-link active"
+                data-bs-toggle="pill"
+                data-bs-target="#tab-overview"
+                type="button">
+          Przegląd
+        </button>
+      </li>
+
+      <li class="nav-item">
+        <button class="nav-link"
+                data-bs-toggle="pill"
+                data-bs-target="#tab-history"
+                type="button">
+          Historia
+          {% if protocol.activities.count %}
+            <span class="badge text-bg-secondary ms-1">
+              {{ protocol.activities.count }}
+            </span>
+          {% endif %}
+        </button>
+      </li>
+
+      <li class="nav-item">
+        <button class="nav-link"
+                data-bs-toggle="pill"
+                data-bs-target="#tab-media"
+                type="button">
+          Załączniki
+          {% if protocol.protokolimg.count %}
+            <span class="badge text-bg-secondary ms-1">
+              {{ protocol.protokolimg.count }}
+            </span>
+          {% endif %}
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="tab-content">
+
+    <!-- PRZEGLĄD -->
+    <div class="tab-pane fade show active" id="tab-overview">
+
+      <div class="detail-card mb-4">
+        <div class="detail-card-header">
+          <div class="detail-card-icon">
+            <i class="bi bi-info-circle"></i>
+          </div>
+
+          <div>
+            <h3>Informacje</h3>
+            <p>Czas pracy, pracownicy i dojazdy.</p>
+          </div>
+        </div>
+<div class="detail-card-body">
+        <div class="row g-3">
+
+  <div class="col-md-4">
+    <div class="info-box">
+      <div class="info-icon">
+        <i class="bi bi-clock-history"></i>
+      </div>
+
+      <div>
+        <div class="info-label">Czas pracy</div>
+        <div class="info-value">
+          {{ protocol.robocizna|default:0 }} h
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="info-box">
+      <div class="info-icon">
+        <i class="bi bi-people"></i>
+      </div>
+
+      <div>
+        <div class="info-label">Pracownicy</div>
+        <div class="info-value">
+          {{ protocol.pracownicy_szt|default:1 }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="info-box">
+      <div class="info-icon">
+        <i class="bi bi-truck"></i>
+      </div>
+
+      <div>
+        <div class="info-label">Dojazdy</div>
+        <div class="info-value">
+          {{ protocol.dojazdy_szt|default:0 }}
+          ({{ protocol.distance_km|default:"0.00"|floatformat:2 }} km)
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+      </div></div>
+
+      <div class="detail-card mb-4">
+        <div class="detail-card-header">
+          <div class="detail-card-icon">
+            <i class="bi bi-clipboard-data"></i>
+          </div>
+
+          <div>
+            <h3>Opis serwisu</h3>
+            <p>Opis powiązanego zgłoszenia serwisowego.</p>
+          </div>
+        </div>
+
+        <div class="detail-card-body">
+          {% if protocol.serwis %}
+            <div class="detail-badge mb-3">
+              <i class="bi bi-wrench-adjustable"></i>
+              Serwis: {{ protocol.serwis.number }}
+            </div>
+          {% endif %}
+
+          {% if protocol.protocol_description %}
+            <div class="work-description">
+              {{ protocol.protocol_description|linebreaks }}
+            </div>
+          {% else %}
+            <div class="placeholder-box">
+              <i class="bi bi-journal-text"></i>
+              Brak opisu serwisu.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="detail-card mb-4">
+        <div class="detail-card-header">
+          <div class="detail-card-icon">
+            <i class="bi bi-journal-text"></i>
+          </div>
+
+          <div>
+            <h3>Wykonane prace</h3>
+            <p>Zakres wykonanych czynności.</p>
+          </div>
+        </div>
+
+        <div class="detail-card-body">
+          {% if protocol.wykonane_prace %}
+            <div class="work-description">
+              {{ protocol.wykonane_prace|linebreaks }}
+            </div>
+          {% else %}
+            <div class="placeholder-box">
+              <i class="bi bi-tools"></i>
+              Brak opisu wykonanych prac.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="detail-card mb-4">
+        <div class="detail-card-header">
+          <div class="detail-card-icon">
+            <i class="bi bi-box-seam"></i>
+          </div>
+
+          <div>
+            <h3>Wykorzystane urządzenia / materiały</h3>
+            <p>Lista produktów użytych w protokole.</p>
+          </div>
+        </div>
+
+        <div class="detail-card-body">
+          {% with items=protocol.protokolurz.all %}
+            {% if items %}
+              <div class="table-responsive scroll-table">
+                <table class="table align-middle mb-0 protocol-table">
+                  <thead>
+                    <tr>
+                      <th>Produkt</th>
+                      <th class="text-center">Ilość</th>
+                        {% if can_manage_protocols %}
+                        <th class="text-end">Cena netto</th>
+                        <th class="text-end">Suma</th>
+                        {% endif %}
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {% for item in items %}
+                      <tr>
+                        <td>
+                          <strong>{{ item.urzadzenia.name }}</strong>
+                        </td>
+
+                        <td class="text-center">
+                          {{ item.sztuki }}
+                        </td>
+
+                        {% if can_manage_protocols %}
+                        <td class="text-end">
+                          {% if item.cena %}
+                            {{ item.cena|floatformat:2 }} zł
+                          {% else %}
+                            {{ item.urzadzenia.net_price|floatformat:2 }} zł
+                          {% endif %}
+                        </td>
+
+                        <td class="text-end fw-bold">
+                          {% widthratio item.sztuki 1 item.urzadzenia.net_price as line_total %}
+                          {{ line_total|floatformat:2 }} zł
+                        </td>
+                        {% endif %}
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <div class="placeholder-box">
+                <i class="bi bi-box-seam"></i>
+                Brak wykorzystanych materiałów.
+              </div>
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-card-header">
+          <div class="detail-card-icon">
+            <i class="bi bi-card-text"></i>
+          </div>
+
+          <div>
+            <h3>Dodatkowe materiały</h3>
+            <p>Materiały dopisane ręcznie poza listą produktów.</p>
+          </div>
+        </div>
+
+        <div class="detail-card-body">
+          {% if protocol.dodatkowe_materialy %}
+            <div class="work-description">
+              {{ protocol.dodatkowe_materialy|linebreaks }}
+            </div>
+          {% else %}
+            <div class="placeholder-box">
+              <i class="bi bi-card-text"></i>
+              Brak dodatkowych materiałów.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- HISTORIA -->
+    <div class="tab-pane fade" id="tab-history">
+
+      <div class="detail-card">
+        <div class="detail-card-header">
+          <div class="detail-card-icon">
+            <i class="bi bi-clock-history"></i>
+          </div>
+
+          <div>
+            <h3>Historia</h3>
+            <p>Zmiany statusu i aktywności protokołu.</p>
+          </div>
+        </div>
+
+        <div class="detail-card-body">
+          {% if protocol.activities.all %}
+            <div class="crm-timeline crm-timeline-scroll">
+              {% for a in protocol.activities.all %}
+                <div class="crm-item">
+                  <div class="crm-dot status">
+                    <i class="bi bi-arrow-repeat"></i>
+                  </div>
+
+                  <div class="crm-card">
+                    <div class="d-flex justify-content-between gap-3">
+                      <div>
+                        <span class="detail-badge">{{ a.get_type_display }}</span>
+
+                        <div class="fw-bold mt-2">
+                          {{ a.title|default:"Zmiana" }}
+                        </div>
+
+                        {% if a.description %}
+                          <div class="text-muted mt-1">
+                            {{ a.description }}
+                          </div>
+                        {% endif %}
+                      </div>
+
+                      <div class="small text-muted text-end">
+                        {{ a.created_at|date:"d.m.Y H:i" }}
+                        <br>
+                        {% if a.created_by %}
+                          {{ a.created_by }}
+                        {% else %}
+                          System
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="placeholder-box">
+              <i class="bi bi-clock-history"></i>
+              Brak historii.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ZAŁĄCZNIKI -->
+    <div class="tab-pane fade" id="tab-media">
+
+      <div class="detail-card">
+        <div class="detail-card-header">
+          <div class="detail-card-icon">
+            <i class="bi bi-paperclip"></i>
+          </div>
+
+          <div>
+            <h3>Załączniki</h3>
+            <p>Zdjęcia i pliki dodane do protokołu.</p>
+          </div>
+        </div>
+
+        <div class="detail-card-body">
+          {% with media=protocol.protokolimg.all %}
+            {% if media|length %}
+
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold m-0">Zdjęcia</h6>
+                <span class="small text-muted">Kliknij aby powiększyć</span>
+              </div>
+
+              <div class="media-grid">
+                {% for m in media %}
+                  {% if m.kind == "image" %}
+                    <div class="media-tile-wrap">
+                      <button type="button"
+                              class="media-tile"
+                              data-bs-toggle="modal"
+                              data-bs-target="#imagePreviewModal"
+                              data-src="{{ m.file.url }}"
+                              data-caption="{{ m.original_name|default:''|escape }}"
+                              data-date="{{ m.uploaded_at|date:'d.m.Y H:i' }}">
+                        <img src="{{ m.file.url }}" alt="{{ m.original_name|default:'Zdjęcie' }}">
+                        <span class="media-badge"><i class="bi bi-image"></i></span>
+                      </button>
+
+                      {% if can_manage_protocols %}
+                      <button type="button"
+                              class="media-del"
+                              title="Usuń"
+                              data-bs-toggle="modal"
+                              data-bs-target="#deleteMediaModal"
+                              data-delete-url="{% url 'protocol_media_delete' m.pk %}"
+                              data-preview="{{ m.original_name|default:'Zdjęcie'|escape }}">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+
+              <hr class="my-4" style="border-color:var(--border)">
+
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold m-0">Pliki</h6>
+                <span class="small text-muted">Kliknij aby otworzyć</span>
+              </div>
+
+              <div class="d-flex flex-column gap-2">
+                {% for m in media %}
+                  {% if m.kind != "image" %}
+                    <div class="file-row">
+                      <a href="{{ m.file.url }}" target="_blank" class="file-main">
+                        <div class="file-ico">
+                          <i class="bi bi-paperclip"></i>
+                        </div>
+
+                        <div class="file-meta">
+                          <div class="file-name">
+                            {{ m.original_name|default:"Plik" }}
+                          </div>
+                          <div class="file-sub text-muted">
+                            Dodano: {{ m.uploaded_at|date:"d.m.Y H:i" }}
+                          </div>
+                        </div>
+                      </a>
+
+                      <div class="file-cta">
+                        {% if can_manage_protocols %}
+                        <button type="button"
+                                class="icon-btn icon-btn-danger"
+                                title="Usuń"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteMediaModal"
+                                data-delete-url="{% url 'protocol_media_delete' m.pk %}"
+                                data-preview="{{ m.original_name|default:'Plik'|escape }}">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                        {% endif %}
+
+                        <a href="{{ m.file.url }}" target="_blank" class="icon-btn" title="Otwórz">
+                          <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                      </div>
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+
+            {% else %}
+              <div class="placeholder-box">
+                <i class="bi bi-paperclip"></i>
+                Brak załączników.
+              </div>
+            {% endif %}
+          {% endwith %}
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+  <!-- ================= PRAWA KOLUMNA ================= -->
+  {% if can_manage_protocols %}
+  <div class="col-12 col-xxl-4">
+    {% if can_manage_protocols %}
+        {# DESKTOP: Szybkie akcje (ukryte na mobile) #}
+        <div class="card mb-3 d-none d-md-block">
+            <div class="card-body">
+              <h6 class="fw-bold mb-2">Szybkie akcje</h6>
+              <div class="d-flex flex-wrap gap-2">
+                <a href="#" class="btn btn-brand btn-sm"><i class="bi bi-plus-lg me-1"></i>Wystaw fakturę</a>
+                <a href="{% url 'protocol_pdf' protocol.pk %}" target='_blank' class="btn btn-brand btn-sm"><i class="bi bi-file-earmark-pdf me-2"></i>Pobierz PDF</a>
+                <a href="#" class="btn btn-brand btn-sm"><i class="bi bi-file-earmark-pdf me-2"></i>Pobierz PDF bez cen</a>
+              </div>
+            </div>
+        </div>
+
+        {# DESKTOP: Statusy (ukryte na mobile) #}
+        <div class="card mb-3 d-none d-md-block">
+          <div class="card-body p-4">
+            <h6 class="fw-bold mb-3">Statusy</h6>
+        
+            <div class="d-flex flex-wrap gap-2">
+        
+              {% for key, label in protocol.Status.choices %}
+
+                {% if key == "do_zafakturowania" %}
+
+                  <!-- TEN STATUS OTWIERA MODAL -->
+                  <button type="button"
+                          class="chip btn btn-sm 
+                            {% if protocol.status == key %}
+                              btn-brand
+                            {% else %}
+                              btn-outline-secondary
+                            {% endif %}"
+                          data-bs-toggle="modal"
+                          data-bs-target="#invoiceModal">
+                    {{ label }}
+                  </button>
+
+                {% else %}
+
+                  <!-- POZOSTAŁE STATUSY = NORMALNY POST -->
+                  <form method="post"
+                        action="{% url 'protocol_change_status' protocol.pk %}"
+                        class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="{{ key }}">
+
+                    <button type="submit"
+                            class="chip btn btn-sm 
+                              {% if protocol.status == key %}
+                                btn-brand
+                              {% else %}
+                                btn-outline-secondary
+                              {% endif %}"
+                            {% if protocol.status == key %}disabled{% endif %}>
+                      {{ label }}
+                    </button>
+                  </form>
+
+                {% endif %}
+
+              {% endfor %}
+        
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-card mb-4">
+
+  <div class="detail-card-header">
+    <div class="detail-card-icon">
+      <i class="bi bi-cash-stack"></i>
+    </div>
+
+    <div>
+      <h3>Koszty netto</h3>
+      <p>Podsumowanie kosztów protokołu.</p>
+    </div>
+  </div>
+
+  <div class="detail-card-body">
+
+    <div class="cost-row">
+      <span>Robocizna</span>
+      <strong class="cost-value text-primary">
+        {{ protocol.labor_cost|default:0 }} zł
+      </strong>
+    </div>
+
+    <div class="cost-row">
+      <span>Materiały</span>
+      <strong class="cost-value text-warning">
+        {{ protocol.materials_cost|default:0 }} zł
+      </strong>
+    </div>
+
+    <div class="cost-row">
+      <span>Dojazd</span>
+      <strong class="cost-value text-info">
+        {{ protocol.travel_cost|default:0 }} zł
+      </strong>
+    </div>
+
+    <div class="cost-total">
+      <span>Suma netto</span>
+      <strong>
+        {{ protocol.net_total|default:0 }} zł
+      </strong>
+    </div>
+
+  </div>
+
+</div>
+
+        <div class="detail-card mb-4">
+
+  <div class="detail-card-header">
+    <div class="detail-card-icon">
+      <i class="bi bi-receipt"></i>
+    </div>
+
+    <div>
+      <h3>Informacje do faktury</h3>
+      <p>Dane zapisane podczas oznaczania protokołu do fakturowania.</p>
+    </div>
+  </div>
+
+  <div class="detail-card-body">
+
+    <div class="invoice-row">
+      <span>VAT</span>
+      <strong>
+        {% if protocol.ile_vat %}
+          {{ protocol.get_ile_vat_display }}
+        {% else %}
+          —
+        {% endif %}
+      </strong>
+    </div>
+
+    <div class="invoice-row">
+      <span>Sposób wysyłki</span>
+      <strong>
+        {% if protocol.sposob_wysylki %}
+          {{ protocol.get_sposob_wysylki_display }}
+        {% else %}
+          —
+        {% endif %}
+      </strong>
+    </div>
+
+    <div class="invoice-row">
+      <span>Typ faktury</span>
+      <strong>
+        {% if protocol.czy_powykonawcza %}
+          Powykonawcza
+        {% else %}
+          Standardowa
+        {% endif %}
+      </strong>
+    </div>
+
+    <div class="invoice-row">
+      <span>Wersja protokołu</span>
+      <strong>
+        {% if protocol.protokol_bez_ceny %}
+          Bez cen
+        {% elif protocol.protokol_ceny %}
+          Z cenami
+        {% else %}
+          —
+        {% endif %}
+      </strong>
+    </div>
+
+    <div class="invoice-note">
+      <div class="invoice-note-label">
+        Dodatkowe informacje
+      </div>
+
+      <div class="invoice-note-content">
+        {% if protocol.dodatkowe_info_pracownik %}
+          {{ protocol.dodatkowe_info_pracownik|linebreaks }}
+        {% else %}
+          —
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+        <div class="detail-card">
+  <div class="detail-card-header">
+    <div class="detail-card-icon">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+
+    <div>
+      <h3>Oferta</h3>
+      <p>Powiązane koszty z oferty.</p>
+    </div>
+  </div>
+
+  <div class="detail-card-body">
+    {% if oferty and oferty|length > 0 %}
+
+      {% if oferty|length > 1 %}
+        <div class="mb-3">
+          <label class="invoice-note-label" for="offerSelect">Wybierz ofertę</label>
+          <select id="offerSelect" class="form-select">
+            {% for oferta in oferty %}
+              <option
+                value="{{ oferta.id }}"
+                data-material="{{ oferta.suma_materialow_netto }}"
+                data-labor="{{ oferta.suma_robocizny_netto }}"
+                data-acc="{{ oferta.suma_akcesoriow_netto }}"
+                data-profit="{{ oferta.zysk_netto }}">
+                {{ oferta.numer }} – {{ oferta.tytul|default:"Bez tytułu" }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      {% endif %}
+
+      {% with pierwsza=oferty.0 %}
+        <div class="invoice-row">
+          <span>Materiały</span>
+          <strong id="pvOfferMaterial">{{ pierwsza.suma_materialow_netto|default:0 }} zł</strong>
+        </div>
+
+        <div class="invoice-row">
+          <span>Robocizna</span>
+          <strong id="pvOfferLabor">{{ pierwsza.suma_robocizny_netto|default:0 }} zł</strong>
+        </div>
+
+        <div class="invoice-row">
+          <span>Akcesoria</span>
+          <strong id="pvOfferAcc">{{ pierwsza.suma_akcesoriow_netto|default:0 }} zł</strong>
+        </div>
+
+        <div class="invoice-row">
+          <span>Zysk</span>
+          <strong id="pvOfferProfit">{{ pierwsza.zysk_netto|default:0 }} zł</strong>
+        </div>
+      {% endwith %}
+
+    {% else %}
+      <div class="placeholder-box">
+        <i class="bi bi-file-earmark-x"></i>
+        Brak powiązanych ofert.
+      </div>
+    {% endif %}
+  </div>
+</div>
+    {% endif %}
+    </div>
+</div>
+  {% endif %}
+
+{% if can_manage_protocols %}
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content invoice-modal">
+
+      <form method="post" action="{% url 'protocol_change_status' protocol.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="do_zafakturowania">
+
+        <div class="invoice-modal-header">
+          <div class="invoice-modal-icon">
+            <i class="bi bi-receipt"></i>
+          </div>
+
+          <div>
+            <h4>Przygotowanie faktury</h4>
+            <p>Ustaw dane potrzebne do fakturowania protokołu.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="invoice-modal-body">
+
+          <div class="invoice-grid">
+            <div class="invoice-field">
+              <label>VAT</label>
+              <select name="vat" class="form-select" required>
+                {% for key,label in protocol.VAT.choices %}
+                  <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="invoice-field">
+              <label>Sposób wysyłki</label>
+              <select name="sposob_wysylki" class="form-select" required>
+                {% for key,label in protocol.Wysylka.choices %}
+                  <option value="{{ key }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="invoice-options">
+            <label class="invoice-option">
+              <input class="form-check-input"
+                     type="checkbox"
+                     name="czy_powykonawcza"
+                     id="powykonawczaCheck">
+              <span>
+                <strong>Faktura powykonawcza</strong>
+                <small>Oznacz protokół jako podstawę do faktury powykonawczej.</small>
+              </span>
+            </label>
+
+            <label class="invoice-option">
+              <input class="form-check-input"
+                     type="radio"
+                     name="protokol_typ"
+                     value="z_cena">
+              <span>
+                <strong>Protokół z cenami</strong>
+                <small>Dołącz protokół z widocznymi cenami.</small>
+              </span>
+            </label>
+
+            <label class="invoice-option">
+              <input class="form-check-input"
+                     type="radio"
+                     name="protokol_typ"
+                     value="bez_ceny">
+              <span>
+                <strong>Protokół bez cen</strong>
+                <small>Dołącz wersję bez cen dla klienta.</small>
+              </span>
+            </label>
+          </div>
+
+          <div class="invoice-field mt-3">
+            <label>Dodatkowe informacje</label>
+            <textarea name="dodatkowe_info_pracownik"
+                      class="form-control"
+                      rows="4"
+                      maxlength="250"
+                      placeholder="Opcjonalnie...">{{ protocol.dodatkowe_info_pracownik }}</textarea>
+            <div class="invoice-help">
+              Maksymalnie 250 znaków. Informacja zapisze się przy protokole.
+            </div>
+          </div>
+
+        </div>
+
+        <div class="invoice-modal-footer">
+          <button type="button"
+                  class="invoice-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit" class="invoice-btn-primary">
+            <i class="bi bi-check2-circle"></i>
+            Zapisz i zmień status
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Przełącznik motywu (zapisywany w localStorage)
+  (function(){
+    const root = document.documentElement;
+    const key = 'dashboard-theme';
+    const saved = localStorage.getItem(key) || 'dark';
+    root.setAttribute('data-theme', saved);
+    const btn = document.getElementById('themeToggle');
+    const setIcon = () => {
+      btn.innerHTML = root.getAttribute('data-theme') === 'light'
+        ? '<i class="bi bi-sun"></i>'
+        : '<i class="bi bi-moon-stars"></i>';
+    };
+    setIcon();
+    btn.addEventListener('click', ()=>{
+      const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem(key, next);
+      setIcon();
+      // odśwież kolory wykresu bez przeładowania
+      if (typeof renderPL === 'function') {
+        renderPL(document.querySelector('[data-range].active')?.getAttribute('data-range') || 'mtd');
+      }
+    });
+  })();
+</script>
+{% endif %}
+<div class="modal fade" id="imagePreviewModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content preview-modal">
+
+      <div class="preview-modal-header">
+
+        <div class="preview-modal-info">
+          <div class="preview-modal-icon">
+            <i class="bi bi-image"></i>
+          </div>
+
+          <div>
+            <h5 class="mb-0">Podgląd zdjęcia</h5>
+            <div class="preview-modal-meta" id="imgMeta">—</div>
+          </div>
+        </div>
+
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="modal">
+        </button>
+
+      </div>
+
+      <div class="preview-modal-body">
+
+        <div class="preview-image-wrap">
+          <img id="imgPreview"
+               src=""
+               class="preview-image"
+               alt="">
+        </div>
+
+        <div class="preview-caption" id="imgCaption"></div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+<script>
+  (function () {
+    const offerSelect = document.getElementById('offerSelect');
+    if (!offerSelect) return;
+
+    const materialEl = document.getElementById('pvOfferMaterial');
+    const laborEl = document.getElementById('pvOfferLabor');
+    const accEl = document.getElementById('pvOfferAcc');
+    const profitEl = document.getElementById('pvOfferProfit');
+
+    const formatPLN = (value) => {
+      const num = parseFloat(value || 0);
+      if (isNaN(num)) return '0 zł';
+      return num.toFixed(2).replace('.', ',') + ' zł';
+    };
+
+    const updateOfferFields = (option) => {
+      if (!option) return;
+      materialEl.textContent = formatPLN(option.dataset.material);
+      laborEl.textContent   = formatPLN(option.dataset.labor);
+      accEl.textContent     = formatPLN(option.dataset.acc);
+      profitEl.textContent  = formatPLN(option.dataset.profit);
+    };
+
+    // pierwszy raz – ustaw z wybranej opcji
+    updateOfferFields(offerSelect.options[offerSelect.selectedIndex]);
+
+    offerSelect.addEventListener('change', function () {
+      const selected = this.options[this.selectedIndex];
+      updateOfferFields(selected);
+    });
+  })();
+</script>
+<script>
+  document.querySelectorAll('[data-bs-target="#protocolStatusModal"]').forEach(btn => {
+    btn.addEventListener("click", function(){
+      const status = this.getAttribute("data-status");
+      const label = this.getAttribute("data-label");
+  
+      document.getElementById("protocolStatusInput").value = status;
+  
+      const info = document.getElementById("protocolStatusInfo");
+      if (info) {
+        info.innerText = "Nowy status: " + label;
+      }
+    });
+  });
+  </script>
+
+  <script>
+    (function(){
+      const modal = document.getElementById('imagePreviewModal');
+      if(!modal) return;
+    
+      const img = document.getElementById('imgPreview');
+      const cap = document.getElementById('imgCaption');
+      const meta = document.getElementById('imgMeta');
+    
+      modal.addEventListener('show.bs.modal', (ev)=>{
+        const btn = ev.relatedTarget;
+        const src = btn?.getAttribute('data-src') || '';
+        const caption = btn?.getAttribute('data-caption') || '';
+        const date = btn?.getAttribute('data-date') || '';
+    
+        if(img) img.src = src;
+        if(cap) cap.textContent = caption || '';
+        if(meta) meta.textContent = date ? `Dodano: ${date}` : '—';
+      });
+    
+      modal.addEventListener('hidden.bs.modal', ()=>{
+        if(img) img.src = '';
+      });
+    })();
+    </script>
+
+    <div class="modal fade" id="deleteMediaModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-modal">
+
+      <form method="post" id="deleteMediaForm">
+        {% csrf_token %}
+
+        <div class="delete-modal-header">
+
+          <div class="delete-modal-info">
+            <div class="delete-modal-icon">
+              <i class="bi bi-trash"></i>
+            </div>
+
+            <div>
+              <h5 class="mb-0">Usuń załącznik</h5>
+              <div class="delete-modal-subtitle">
+                Operacja jest nieodwracalna
+              </div>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal">
+          </button>
+
+        </div>
+
+        <div class="delete-modal-body">
+
+          <div class="delete-warning-box">
+            <div class="small text-muted mb-2">
+              Czy na pewno chcesz usunąć:
+            </div>
+
+            <div id="deleteMediaName"
+                 class="delete-file-name">
+              —
+            </div>
+          </div>
+
+        </div>
+
+        <div class="delete-modal-footer">
+
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            <i class="bi bi-x-lg me-2"></i>
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-custom">
+            <i class="bi bi-trash me-2"></i>
+            Usuń załącznik
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+    <script>
+      (function(){
+        const modal = document.getElementById('deleteMediaModal');
+        if(!modal) return;
+      
+        const form = document.getElementById('deleteMediaForm');
+        const nameEl = document.getElementById('deleteMediaName');
+      
+        modal.addEventListener('show.bs.modal', function(event){
+          const btn = event.relatedTarget;
+          const url = btn.getAttribute('data-delete-url');
+          const name = btn.getAttribute('data-preview');
+      
+          form.action = url;
+          nameEl.textContent = name;
+        });
+      })();
+      </script>
+
+      <div class="modal fade" id="deleteProtocolModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-modal">
+
+      <form method="post" id="deleteProtocolForm">
+        {% csrf_token %}
+
+        <div class="delete-modal-header">
+
+          <div class="delete-modal-info">
+            <div class="delete-modal-icon">
+              <i class="bi bi-trash"></i>
+            </div>
+
+            <div>
+              <h5 class="mb-0">Usuń protokół</h5>
+              <div class="delete-modal-subtitle">
+                Operacja jest nieodwracalna
+              </div>
+            </div>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal">
+          </button>
+
+        </div>
+
+        <div class="delete-modal-body">
+
+          <div class="delete-warning-box">
+            <div class="small text-muted mb-2">
+              Czy na pewno chcesz usunąć:
+            </div>
+
+            <div id="deleteProtocolName"
+                 class="delete-file-name">
+              —
+            </div>
+          </div>
+
+          <div class="delete-danger-note">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            Usunięty zostanie protokół wraz z historią i załącznikami.
+          </div>
+
+        </div>
+
+        <div class="delete-modal-footer">
+
+          <button type="button"
+                  class="btn-soft"
+                  data-bs-dismiss="modal">
+            <i class="bi bi-x-lg me-2"></i>
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-danger-custom">
+            <i class="bi bi-trash me-2"></i>
+            Usuń protokół
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+      <script>
+        (function(){
+          const modal = document.getElementById('deleteProtocolModal');
+          if(!modal) return;
+        
+          const form = document.getElementById('deleteProtocolForm');
+          const nameEl = document.getElementById('deleteProtocolName');
+        
+          modal.addEventListener('show.bs.modal', function(event){
+            const btn = event.relatedTarget;
+        
+            const url = btn.getAttribute('data-delete-url');
+            const title = btn.getAttribute('data-title') || '';
+            const number = btn.getAttribute('data-number') || '';
+        
+            form.action = url;
+            nameEl.textContent = title + " – " + number;
+          });
+        
+        })();
+        </script>
+{% endblock %}

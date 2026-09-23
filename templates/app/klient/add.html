@@ -1,0 +1,924 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.client-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.client-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.client-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.client-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.client-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.client-actions{
+  display:flex;
+  gap:.75rem;
+  flex-wrap:wrap;
+}
+
+.client-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.client-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.client-section-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+  flex-shrink:0;
+}
+
+.client-card-header h2{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.client-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.client-card-body{
+  padding:1.5rem;
+}
+
+.client-form-section{
+  padding:1.25rem;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.025);
+  border-radius:22px;
+  margin-bottom:1.25rem;
+}
+
+.client-form-head{
+  display:flex;
+  align-items:center;
+  gap:.9rem;
+  margin-bottom:1.25rem;
+}
+
+.client-mini-icon{
+  width:46px;
+  height:46px;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.11);
+  border:1px solid rgba(20,104,245,.17);
+  color:#1468f5;
+  font-size:1.15rem;
+  flex-shrink:0;
+}
+
+.client-form-head h3{
+  margin:0;
+  color:var(--text);
+  font-size:1rem;
+  font-weight:900;
+}
+
+.client-form-head p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.84rem;
+}
+
+.client-label{
+  display:block;
+  color:var(--text);
+  font-size:.82rem;
+  font-weight:800;
+  margin-bottom:.45rem;
+}
+
+.client-card .form-control,
+.client-card .form-select,
+.client-card select,
+.client-card textarea{
+  background:rgba(255,255,255,.035)!important;
+  color:var(--text)!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px!important;
+  min-height:50px;
+  box-shadow:none!important;
+}
+
+.client-card textarea{
+  min-height:120px;
+}
+
+.client-card .input-group-text{
+  background:rgba(255,255,255,.035)!important;
+  color:#1468f5!important;
+  border:1px solid var(--border)!important;
+  border-radius:15px 0 0 15px!important;
+}
+
+.client-card .input-group .form-control{
+  border-radius:0 15px 15px 0!important;
+}
+
+.client-card .form-control:focus,
+.client-card .form-select:focus,
+.client-card select:focus,
+.client-card textarea:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+
+.client-check{
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+}
+
+.client-check .form-check-input{
+  width:20px;
+  height:20px;
+  margin:0;
+  border-radius:7px;
+  background-color:rgba(255,255,255,.04);
+  border:1px solid var(--border);
+}
+
+.client-check .form-check-input:checked{
+  background-color:#1468f5;
+  border-color:#1468f5;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.78rem 1.15rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+
+.client-preview{
+  position:sticky;
+  top:90px;
+}
+
+.preview-box{
+  padding:1.25rem;
+  border-radius:22px;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 42%),
+    rgba(255,255,255,.03);
+  border:1px solid var(--border);
+}
+
+.preview-title{
+  color:var(--text);
+  font-size:1.2rem;
+  font-weight:900;
+}
+
+.preview-muted{
+  color:var(--muted);
+  font-size:.86rem;
+}
+
+.preview-list{
+  display:grid;
+  gap:.75rem;
+  margin-top:1rem;
+}
+
+.preview-item{
+  display:flex;
+  justify-content:space-between;
+  gap:1rem;
+  padding:.85rem .95rem;
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--border);
+  font-size:.86rem;
+}
+
+.preview-item span:first-child{
+  color:var(--muted);
+}
+
+.preview-item span:last-child{
+  color:var(--text);
+  font-weight:800;
+  text-align:right;
+  word-break:break-word;
+}
+
+.client-form-footer{
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+  flex-wrap:wrap;
+  margin-top:1.25rem;
+}
+
+@media(max-width:991px){
+  .client-preview{
+    position:static;
+  }
+}
+
+@media(max-width:768px){
+  .client-page-head{
+    flex-direction:column;
+  }
+
+  .client-actions,
+  .client-form-footer{
+    width:100%;
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .client-actions a,
+  .client-actions button,
+  .client-form-footer a,
+  .client-form-footer button{
+    width:100%;
+  }
+
+  .client-title{
+    font-size:1.3rem;
+  }
+
+  .client-title-icon{
+    width:54px;
+    height:54px;
+    border-radius:18px;
+  }
+
+  .client-card-body{
+    padding:1rem;
+  }
+
+  .client-form-section{
+    padding:1rem;
+    border-radius:18px;
+  }
+}
+</style>
+
+<div class="client-page-head">
+  <div class="client-title-wrap">
+    <div class="client-title-icon">
+      <i class="bi bi-person-plus"></i>
+    </div>
+
+    <div>
+      <h1 class="client-title">Dodaj klienta</h1>
+      <div class="client-subtitle">
+        Uzupełnij dane klienta i adresy serwisowe / rozliczeniowe.
+      </div>
+    </div>
+  </div>
+
+  <div class="client-actions">
+    <a href="{% url 'klient' %}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>
+      Wróć
+    </a>
+
+    <button form="clientForm" class="btn-orange" type="submit">
+      <i class="bi bi-save me-1"></i>
+      Zapisz
+    </button>
+  </div>
+</div>
+
+<div class="row g-4">
+
+  <div class="col-12 col-xl-8">
+    <div class="client-card">
+      <div class="client-card-header">
+        <div class="client-section-icon">
+          <i class="bi bi-person-vcard"></i>
+        </div>
+
+        <div>
+          <h2>Dane klienta</h2>
+          <p>Podstawowe dane, adresy, kontakt i informacje wewnętrzne.</p>
+        </div>
+      </div>
+
+      <div class="client-card-body">
+
+        <form id="clientForm"
+              class="needs-validation"
+              novalidate
+              method="post"
+              action="{% url 'klient_add' %}">
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          <div class="client-form-section">
+            <div class="client-form-head">
+              <div class="client-mini-icon">
+                <i class="bi bi-person-badge"></i>
+              </div>
+              <div>
+                <h3>Typ i tożsamość</h3>
+                <p>Wybierz, czy klient jest osobą prywatną czy firmą.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="client-label">Typ klienta</label>
+                <select name="client_type"
+                        id="{{ form.client_type.id_for_label }}"
+                        class="form-select{% if form.client_type.errors %} is-invalid{% endif %}">
+                  {% for value, label in form.client_type.field.choices %}
+                    <option value="{{ value }}" {% if form.client_type.value == value %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+                {% for error in form.client_type.errors %}
+                  <div class="invalid-feedback">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-12" id="personIdentityRow">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="client-label">Imię</label>
+                    <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}"
+                           value="{{ form.first_name.value|default_if_none:'' }}"
+                           class="form-control{% if form.first_name.errors %} is-invalid{% endif %}"
+                           placeholder="np. Jan">
+                    {% for error in form.first_name.errors %}
+                      <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="client-label">Nazwisko</label>
+                    <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}"
+                           value="{{ form.last_name.value|default_if_none:'' }}"
+                           class="form-control{% if form.last_name.errors %} is-invalid{% endif %}"
+                           placeholder="np. Kowalski">
+                    {% for error in form.last_name.errors %}
+                      <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 d-none" id="companyIdentityRow">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label class="client-label">Nazwa firmy</label>
+                    <input type="text" name="name" id="{{ form.name.id_for_label }}"
+                           value="{{ form.name.value|default_if_none:'' }}"
+                           class="form-control{% if form.name.errors %} is-invalid{% endif %}"
+                           placeholder="np. ACME Sp. z o.o.">
+                    {% for error in form.name.errors %}
+                      <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                  </div>
+
+                  <div class="col-md-6">
+                    <label class="client-label">NIP</label>
+                    <input type="text" name="nip" id="{{ form.nip.id_for_label }}"
+                           value="{{ form.nip.value|default_if_none:'' }}"
+                           class="form-control{% if form.nip.errors %} is-invalid{% endif %}"
+                           placeholder="np. 5250000000">
+                    {% for error in form.nip.errors %}
+                      <div class="invalid-feedback">{{ error }}</div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="client-form-section">
+            <div class="client-form-head">
+              <div class="client-mini-icon">
+                <i class="bi bi-telephone"></i>
+              </div>
+              <div>
+                <h3>Dane kontaktowe</h3>
+                <p>E-mail i telefon klienta.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="client-label required">E-mail</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                  <input type="email" name="email" id="{{ form.email.id_for_label }}"
+                         value="{{ form.email.value|default_if_none:'' }}"
+                         class="form-control{% if form.email.errors %} is-invalid{% endif %}"
+                         placeholder="np. kontakt@firma.pl" required>
+                </div>
+                {% for error in form.email.errors %}
+                  <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="client-label required">Telefon</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                  <input type="tel" name="phone" id="{{ form.phone.id_for_label }}"
+                         value="{{ form.phone.value|default_if_none:'' }}"
+                         class="form-control{% if form.phone.errors %} is-invalid{% endif %}"
+                         placeholder="np. +48 600 000 000" required>
+                </div>
+                {% for error in form.phone.errors %}
+                  <div class="invalid-feedback d-block">{{ error }}</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <div class="client-form-section">
+            <div class="client-form-head">
+              <div class="client-mini-icon">
+                <i class="bi bi-geo-alt"></i>
+              </div>
+              <div>
+                <h3>Adres serwisowy</h3>
+                <p>Adres, pod którym będą realizowane serwisy.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-8">
+                <label class="client-label required">Ulica</label>
+                <input type="text" name="shipping_street"
+                       value="{{ form.shipping_street.value|default_if_none:'' }}"
+                       class="form-control{% if form.shipping_street.errors %} is-invalid{% endif %}"
+                       placeholder="np. Prosta">
+              </div>
+
+              <div class="col-md-4">
+                <label class="client-label required">Nr domu / lokalu</label>
+                <input type="text" name="shipping_street_no"
+                       value="{{ form.shipping_street_no.value|default_if_none:'' }}"
+                       class="form-control{% if form.shipping_street_no.errors %} is-invalid{% endif %}"
+                       placeholder="np. 12/4">
+              </div>
+
+              <div class="col-md-4">
+                <label class="client-label required">Kod pocztowy</label>
+                <input type="text" name="shipping_zip"
+                       value="{{ form.shipping_zip.value|default_if_none:'' }}"
+                       class="form-control{% if form.shipping_zip.errors %} is-invalid{% endif %}"
+                       placeholder="np. 00-000">
+              </div>
+
+              <div class="col-md-5">
+                <label class="client-label required">Miejscowość</label>
+                <input type="text" name="shipping_city"
+                       value="{{ form.shipping_city.value|default_if_none:'' }}"
+                       class="form-control{% if form.shipping_city.errors %} is-invalid{% endif %}"
+                       placeholder="np. Warszawa">
+              </div>
+
+              <div class="col-md-3">
+                <label class="client-label required">Kraj</label>
+                <input type="text" name="shipping_country"
+                       value="{{ form.shipping_country.value|default_if_none:'Polska' }}"
+                       class="form-control{% if form.shipping_country.errors %} is-invalid{% endif %}"
+                       placeholder="np. Polska">
+              </div>
+            </div>
+          </div>
+
+          <div class="client-form-section">
+            <div class="client-form-head">
+              <div class="client-mini-icon">
+                <i class="bi bi-receipt"></i>
+              </div>
+              <div>
+                <h3>Adres rozliczeniowy</h3>
+                <p>Uzupełnij tylko wtedy, gdy jest inny niż serwisowy.</p>
+              </div>
+            </div>
+
+            <label class="client-check">
+              <input class="form-check-input"
+                     type="checkbox"
+                     id="id_billing_other"
+                     name="billing_other"
+                     {% if form.billing_other.value %}checked{% endif %}>
+              <span>Inny adres rozliczeniowy</span>
+            </label>
+
+            <div id="billingAddressSection" class="row g-3 mt-2 d-none">
+              <div class="col-md-8">
+                <label class="client-label">Ulica</label>
+                <input type="text" name="billing_street"
+                       value="{{ form.billing_street.value|default_if_none:'' }}"
+                       class="form-control{% if form.billing_street.errors %} is-invalid{% endif %}"
+                       placeholder="np. Prosta">
+              </div>
+
+              <div class="col-md-4">
+                <label class="client-label">Nr domu / lokalu</label>
+                <input type="text" name="billing_street_no"
+                       value="{{ form.billing_street_no.value|default_if_none:'' }}"
+                       class="form-control{% if form.billing_street_no.errors %} is-invalid{% endif %}"
+                       placeholder="np. 12/4">
+              </div>
+
+              <div class="col-md-4">
+                <label class="client-label">Kod pocztowy</label>
+                <input type="text" name="billing_zip"
+                       value="{{ form.billing_zip.value|default_if_none:'' }}"
+                       class="form-control{% if form.billing_zip.errors %} is-invalid{% endif %}"
+                       placeholder="np. 00-000">
+              </div>
+
+              <div class="col-md-5">
+                <label class="client-label">Miejscowość</label>
+                <input type="text" name="billing_city"
+                       value="{{ form.billing_city.value|default_if_none:'' }}"
+                       class="form-control{% if form.billing_city.errors %} is-invalid{% endif %}"
+                       placeholder="np. Warszawa">
+              </div>
+
+              <div class="col-md-3">
+                <label class="client-label">Kraj</label>
+                <input type="text" name="billing_country"
+                       value="{{ form.billing_country.value|default_if_none:'Polska' }}"
+                       class="form-control{% if form.billing_country.errors %} is-invalid{% endif %}"
+                       placeholder="np. Polska">
+              </div>
+            </div>
+          </div>
+
+          <div class="client-form-section d-none" id="contactPersonSection">
+            <div class="client-form-head">
+              <div class="client-mini-icon">
+                <i class="bi bi-person-lines-fill"></i>
+              </div>
+              <div>
+                <h3>Osoba kontaktowa</h3>
+                <p>Dane osoby kontaktowej po stronie firmy.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="client-label">Imię osoby kontaktowej</label>
+                <input type="text" name="contact_first_name" class="form-control" placeholder="np. Anna">
+              </div>
+
+              <div class="col-md-6">
+                <label class="client-label">Nazwisko osoby kontaktowej</label>
+                <input type="text" name="contact_last_name" class="form-control" placeholder="np. Nowak">
+              </div>
+
+              <div class="col-md-6">
+                <label class="client-label">E-mail osoby kontaktowej</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                  <input type="email" name="contact_email" class="form-control" placeholder="np. anna.nowak@firma.pl">
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="client-label">Telefon osoby kontaktowej</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                  <input type="tel" name="contact_phone" class="form-control" placeholder="np. +48 700 000 000">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="client-form-section">
+            <div class="client-form-head">
+              <div class="client-mini-icon">
+                <i class="bi bi-journal-text"></i>
+              </div>
+              <div>
+                <h3>Dane dla pracowników</h3>
+                <p>Notatki wewnętrzne i opiekun klienta.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="client-label">Notatki</label>
+                <textarea name="notes"
+                          id="{{ form.notes.id_for_label }}"
+                          rows="3"
+                          class="form-control"
+                          placeholder="Wewnętrzne informacje o kliencie...">{{ form.notes.value|default_if_none:'' }}</textarea>
+              </div>
+
+              <div class="col-md-6">
+                <label class="client-label">Opiekun</label>
+                <select name="caretaker"
+                        id="{{ form.caretaker.id_for_label }}"
+                        class="form-select">
+                  <option value="">— wybierz —</option>
+                  {% for u in form.caretaker.field.queryset %}
+                    <option value="{{ u.pk }}" {% if form.caretaker.value == u.pk|stringformat:"s" %}selected{% endif %}>
+                      {{ u.first_name }} {{ u.last_name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="client-form-footer">
+            <a href="{% url 'klient' %}" class="btn-soft">Anuluj</a>
+            <button class="btn-orange" type="submit">
+              <i class="bi bi-save me-1"></i>
+              Zapisz klienta
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-xl-4">
+    <div class="client-preview">
+      <div class="client-card">
+        <div class="client-card-header">
+          <div class="client-section-icon">
+            <i class="bi bi-eye"></i>
+          </div>
+
+          <div>
+            <h2>Podsumowanie</h2>
+            <p>Dane aktualizują się na żywo.</p>
+          </div>
+        </div>
+
+        <div class="client-card-body">
+          <div class="preview-box">
+            <div class="preview-title" id="pvCompany">—</div>
+            <div class="preview-muted mt-1">
+              Podgląd klienta
+            </div>
+          </div>
+
+          <div class="preview-list">
+            <div class="preview-item"><span>Imię</span><span id="pvFirst_name">—</span></div>
+            <div class="preview-item"><span>Nazwisko</span><span id="pvLast_name">—</span></div>
+            <div class="preview-item"><span>Typ klienta</span><span id="pvType">—</span></div>
+            <div class="preview-item"><span>E-mail</span><span id="pvEmail">—</span></div>
+            <div class="preview-item"><span>Telefon</span><span id="pvPhone">—</span></div>
+            <div class="preview-item"><span>Adres serwisowy</span><span id="pvAddress">—</span></div>
+            <div class="preview-item"><span>NIP</span><span id="pvNIP">—</span></div>
+            <div class="preview-item"><span>Adres rozliczeniowy</span><span id="pvAddressf">—</span></div>
+          </div>
+
+          <button form="clientForm" type="submit" class="btn-orange w-100 mt-3">
+            <i class="bi bi-save me-1"></i>
+            Zapisz klienta
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  (function(){
+    const checkbox = document.getElementById('id_billing_other');
+    const section = document.getElementById('billingAddressSection');
+
+    const billingFieldNames = [
+      'billing_street',
+      'billing_street_no',
+      'billing_zip',
+      'billing_city',
+      'billing_country',
+    ];
+
+    const billingFields = billingFieldNames.map(name => document.querySelector(`[name="${name}"]`));
+
+    function toggleBilling(){
+      if(!checkbox || !section) return;
+
+      const show = checkbox.checked;
+      section.classList.toggle('d-none', !show);
+
+      billingFields.forEach(field => {
+        if(!field) return;
+        if(show){
+          field.removeAttribute('disabled');
+        }else{
+          field.setAttribute('disabled', 'disabled');
+        }
+      });
+
+      if(typeof updatePreview === 'function'){
+        updatePreview();
+      }
+    }
+
+    checkbox?.addEventListener('change', toggleBilling);
+    toggleBilling();
+  })();
+</script>
+
+<script>
+function updatePreview(){
+  const get = (name) => document.querySelector(`[name="${name}"]`);
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    value = value || '';
+    el.textContent = value.trim() ? value : '—';
+  };
+
+  const shipStreet = get('shipping_street')?.value || '';
+  const shipNo = get('shipping_street_no')?.value || '';
+  const shipZip = get('shipping_zip')?.value || '';
+  const shipCity = get('shipping_city')?.value || '';
+  const shipCountry = get('shipping_country')?.value || '';
+
+  const shipAddressLine = [shipStreet, shipNo].filter(Boolean).join(' ');
+  const shipCityLine = [shipZip, shipCity].filter(Boolean).join(' ');
+  const shipFull = [shipAddressLine, shipCityLine, shipCountry].filter(Boolean).join(', ');
+
+  const billStreet = get('billing_street')?.value || '';
+  const billNo = get('billing_street_no')?.value || '';
+  const billZip = get('billing_zip')?.value || '';
+  const billCity = get('billing_city')?.value || '';
+  const billCountry = get('billing_country')?.value || '';
+
+  const billAddressLine = [billStreet, billNo].filter(Boolean).join(' ');
+  const billCityLine = [billZip, billCity].filter(Boolean).join(' ');
+  let billFull = [billAddressLine, billCityLine, billCountry].filter(Boolean).join(', ');
+
+  if(!document.getElementById('id_billing_other')?.checked || !billFull){
+    billFull = shipFull;
+  }
+
+  setText('pvFirst_name', get('first_name')?.value);
+  setText('pvLast_name', get('last_name')?.value);
+
+  const typeSelect = get('client_type');
+  setText('pvType', typeSelect?.selectedOptions?.[0]?.text || '—');
+
+  setText('pvEmail', get('email')?.value);
+  setText('pvPhone', get('phone')?.value);
+  setText('pvAddress', shipFull);
+  setText('pvCompany', get('name')?.value || `${get('first_name')?.value || ''} ${get('last_name')?.value || ''}`);
+  setText('pvNIP', get('nip')?.value);
+  setText('pvAddressf', billFull);
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const form = document.getElementById('clientForm');
+  if(form){
+    form.addEventListener('input', updatePreview);
+    form.addEventListener('change', updatePreview);
+  }
+  updatePreview();
+});
+</script>
+
+<script>
+  (function(){
+    const typeSelect = document.querySelector('[name="client_type"]');
+    const personRow = document.getElementById('personIdentityRow');
+    const companyRow = document.getElementById('companyIdentityRow');
+    const contactSection = document.getElementById('contactPersonSection');
+
+    const nameField = document.querySelector('[name="name"]');
+    const nipField = document.querySelector('[name="nip"]');
+    const firstNameField = document.querySelector('[name="first_name"]');
+    const lastNameField = document.querySelector('[name="last_name"]');
+
+    if(!typeSelect || !personRow || !companyRow) return;
+
+    function updateTypeUI(){
+      const isCompany = typeSelect.value === 'company';
+
+      personRow.classList.toggle('d-none', isCompany);
+      companyRow.classList.toggle('d-none', !isCompany);
+      contactSection?.classList.toggle('d-none', !isCompany);
+
+      if(nameField && nipField){
+        if(isCompany){
+          nameField.setAttribute('required', 'required');
+          nipField.setAttribute('required', 'required');
+        }else{
+          nameField.removeAttribute('required');
+          nipField.removeAttribute('required');
+        }
+      }
+
+      if(firstNameField) firstNameField.setAttribute('required', 'required');
+      if(lastNameField) lastNameField.setAttribute('required', 'required');
+
+      updatePreview();
+    }
+
+    typeSelect.addEventListener('change', updateTypeUI);
+    updateTypeUI();
+  })();
+</script>
+
+{% endblock %}

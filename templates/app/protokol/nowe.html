@@ -1,0 +1,576 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'assets/css/shared_dashboard.css' %}">
+{% endblock %}
+
+<style>
+  .btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.modern-btn-primary{
+  background:var(--brand-gradient)!important;
+  box-shadow:0 10px 30px rgba(20,104,245,.26)!important;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+  .icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-orange{
+  color:#ff9f2f;
+  border-color:rgba(20,104,245,.25);
+}
+
+.icon-btn-green{
+  color:#00ff2a;
+  border-color:rgba(0,255,42,.18);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+  .protocol-filter-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+}
+
+.protocol-filter-card .form-control,
+.protocol-filter-card .form-select{
+  min-height:50px;
+  background:var(--body);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:14px;
+}
+
+.protocol-list-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+}
+
+.protocol-list-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background: radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02)
+}
+
+.protocol-list-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+}
+
+.table thead th{
+  color:var(--muted);
+  font-size:.78rem;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  border-color:var(--border);
+  padding:1rem;
+}
+
+.protocol-list-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.protocol-list-header p{
+  margin: .15rem 0 0;
+  color:var(--muted);
+  font-size: .85rem;
+}
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.72rem 1rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+</style>
+<div class="page-header">
+  <div class="page-title">
+    <div class="page-title-icon">
+      <i class="bi bi-file-earmark-text"></i>
+    </div>
+
+    <div>
+      <h1>Lista protokołów</h1>
+      <p>Podgląd wszystkich nowo dodanych protokołów.</p>
+    </div>
+  </div>
+
+  <div class="top-actions">
+    <a href="{% url 'protokol_add' %}" class="modern-btn modern-btn-primary">
+      <i class="bi bi-plus-lg"></i>
+      Nowy protokół
+    </a>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Łącznie protokołów</div>
+    <div class="stat-value">{{ protocols|length }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Aktualny filtr</div>
+    <div class="stat-value">
+      {% if active_status == "all" %}
+        Wszystkie
+      {% else %}
+        {{ protocols|length }}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Do zafakturowania</div>
+    <div class="stat-value">{{ do_zafakturowania_count|default:"0" }}</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-label">Wysłane</div>
+    <div class="stat-value">{{ sent_count|default:"0" }}</div>
+  </div>
+</div>
+<div class="protocol-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+
+      <div class="col-12 col-md">
+        <input type="text"
+               name="q"
+               class="form-control"
+               placeholder="Szukaj protokołu..."
+               value="{{ q }}">
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="status" class="form-select">
+          <option value="all">Wszystkie statusy</option>
+          <option value="new" {% if active_status == "new" %}selected{% endif %}>
+            Nowe
+          </option>
+          <option value="do_zafakturowania" {% if active_status == "do_zafakturowania" %}selected{% endif %}>
+            Do zafakturowania
+          </option>
+          <option value="sent" {% if active_status == "sent" %}selected{% endif %}>
+            Wysłane
+          </option>
+          <option value="gwarancja" {% if active_status == "gwarancja" %}selected{% endif %}>
+            Gwarancja
+          </option>
+          <option value="obsluga" {% if active_status == "obsluga" %}selected{% endif %}>
+            Obsługa
+          </option>
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-auto d-flex gap-2">
+        <button class="btn-orange w-100">
+          <i class="bi bi-search"></i>
+          Szukaj
+        </button>
+
+        <a href="{% url 'protokol_nowe' %}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<div class="protocols-card">
+<div class="protocol-list-card">
+  <div class="protocol-list-header">
+    <div class="protocol-list-icon">
+      <i class="bi bi-file-earmark-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista protokołów</h3>
+      <p>Protokoły wykonanych prac, gwarancji i obsług technicznych.</p>
+    </div>
+
+  </div>
+
+  {% if protocols %}
+
+    <div class="table-responsive desktop-table">
+      <table class="table table-modern align-middle">
+        <thead>
+          <tr>
+            <th>Protokół</th>
+            <th>Data wykonania</th>
+            <th>Rodzaj prac</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for protocol in protocols %}
+            <tr>
+              <td style="min-width:320px;">
+                <div class="protocol-main">
+                  <div class="protocol-icon">
+                    <i class="bi bi-file-earmark-check"></i>
+                  </div>
+
+                  <div>
+                    <a href="{% url 'protokol_detail' protocol.pk %}" class="protocol-title">
+                      {{ protocol.client }}
+                    </a>
+
+                    <div class="protocol-subtitle">
+                      {{ protocol.title|default:"Brak tytułu" }}
+                    </div>
+
+                    <div class="protocol-subtitle">
+                      {{ protocol.number|default:"Brak numeru" }}
+                    </div>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                <div class="info-stack">
+                  <div class="info-label">Utworzono</div>
+                  <div class="info-value">
+                    {% if protocol.created_at %}
+                      {{ protocol.created_at|date:"d.m.Y H:i" }}
+                    {% else %}
+                      —
+                    {% endif %}
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                {% if protocol.rodzaj_prac == "naprawa" %}
+                  <span class="badge-soft badge-repair">🔧 {{ protocol.get_rodzaj_prac_display }}</span>
+                {% elif protocol.rodzaj_prac == "rozbudowa" %}
+                  <span class="badge-soft badge-expand">🏗 {{ protocol.get_rodzaj_prac_display }}</span>
+                {% elif protocol.rodzaj_prac == "montaz" %}
+                  <span class="badge-soft badge-install">🛠 {{ protocol.get_rodzaj_prac_display }}</span>
+                {% elif protocol.rodzaj_prac == "przeglad" %}
+                  <span class="badge-soft badge-review">🔎 {{ protocol.get_rodzaj_prac_display }}</span>
+                {% elif protocol.rodzaj_prac == "zgranie" %}
+                  <span class="badge-soft badge-download">💾 {{ protocol.get_rodzaj_prac_display }}</span>
+                {% elif protocol.rodzaj_prac == "praca" %}
+                  <span class="badge-soft badge-work">👷 {{ protocol.get_rodzaj_prac_display }}</span>
+                {% elif protocol.rodzaj_prac == "dostawa" %}
+                  <span class="badge-soft badge-delivery">🚚 {{ protocol.get_rodzaj_prac_display }}</span>
+                {% else %}
+                  <span class="badge-soft badge-work">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if can_manage_protocols %}
+                <div>
+
+                  <a href="{% url 'protocol_edit' protocol.pk %}"
+                    class="icon-btn icon-btn-green">
+                    <i class="fa-solid fa-pen-to-square"
+                      style="color:#00ff2a;"></i>
+                  </a>
+
+                  <button type="button"
+                          class="icon-btn icon-btn-danger"
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteProtocolModal"
+                          data-delete-url="{% url 'protocol_delete' protocol.pk %}"
+                          data-title="{{ protocol.title|default:'Brak tytułu'|escape }}"
+                          data-number="{{ protocol.number|default:'Brak numeru'|escape }}"
+                          data-client="{{ protocol.client|escape }}">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+
+                </div>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mobile-protocol-list">
+
+  {% for protocol in protocols %}
+    <div class="mobile-protocol-card">
+
+      <div class="mobile-protocol-top">
+        <div class="protocol-icon">
+          <i class="bi bi-file-earmark-check"></i>
+        </div>
+
+        <div class="mobile-protocol-info">
+          <a href="{% url 'protokol_detail' protocol.pk %}" class="mobile-protocol-title">
+            {{ protocol.client }}
+          </a>
+
+          <div class="mobile-protocol-muted">
+            {{ protocol.title|default:"Brak tytułu" }}
+          </div>
+
+          <div class="mobile-protocol-number">
+            {{ protocol.number|default:"Brak numeru" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="mobile-protocol-meta">
+        <div>
+          <span>Data</span>
+          <strong>
+            {% if protocol.created_at %}
+              {{ protocol.created_at|date:"d.m.Y H:i" }}
+            {% else %}
+              —
+            {% endif %}
+          </strong>
+        </div>
+      </div>
+
+      <div class="mobile-protocol-badge">
+        {% if protocol.rodzaj_prac == "naprawa" %}
+          <span class="badge-soft badge-repair">🔧 {{ protocol.get_rodzaj_prac_display }}</span>
+        {% elif protocol.rodzaj_prac == "rozbudowa" %}
+          <span class="badge-soft badge-expand">🏗 {{ protocol.get_rodzaj_prac_display }}</span>
+        {% elif protocol.rodzaj_prac == "montaz" %}
+          <span class="badge-soft badge-install">🛠 {{ protocol.get_rodzaj_prac_display }}</span>
+        {% elif protocol.rodzaj_prac == "przeglad" %}
+          <span class="badge-soft badge-review">🔎 {{ protocol.get_rodzaj_prac_display }}</span>
+        {% elif protocol.rodzaj_prac == "zgranie" %}
+          <span class="badge-soft badge-download">💾 {{ protocol.get_rodzaj_prac_display }}</span>
+        {% elif protocol.rodzaj_prac == "praca" %}
+          <span class="badge-soft badge-work">👷 {{ protocol.get_rodzaj_prac_display }}</span>
+        {% elif protocol.rodzaj_prac == "dostawa" %}
+          <span class="badge-soft badge-delivery">🚚 {{ protocol.get_rodzaj_prac_display }}</span>
+        {% endif %}
+      </div>
+
+      {% if can_manage_protocols %}
+      <div class="mobile-protocol-actions">
+        <a href="{% url 'protocol_edit' protocol.pk %}" class="mobile-action edit">
+          <i class="fa-solid fa-pen-to-square"></i>
+          Edytuj
+        </a>
+
+        <button type="button"
+                class="mobile-action delete"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteProtocolModal"
+                data-delete-url="{% url 'protocol_delete' protocol.pk %}"
+                data-title="{{ protocol.title|default:'Brak tytułu'|escape }}"
+                data-number="{{ protocol.number|default:'Brak numeru'|escape }}"
+                data-client="{{ protocol.client|escape }}">
+          <i class="fa-solid fa-trash"></i>
+          Usuń
+        </button>
+      </div>
+      {% endif %}
+
+    </div>
+  {% endfor %}
+  {% else %}
+
+    <div class="empty-state">
+      <div class="empty-icon">
+        <i class="bi bi-file-earmark-x"></i>
+      </div>
+
+      <h4>Brak protokołów</h4>
+
+      <p>
+        Nie dodano jeszcze żadnych protokołów. Możesz utworzyć pierwszy protokół ręcznie
+        lub wygenerować go z serwisu albo pracy.
+      </p>
+
+      <a href="{% url 'protokol_add' %}" class="modern-btn modern-btn-primary">
+        <i class="bi bi-plus-lg"></i>
+        Dodaj pierwszy protokół
+      </a>
+    </div>
+
+</div>
+
+  {% endif %}
+
+</div>
+
+<div class="modal fade" id="deleteProtocolModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-content delete-modal">
+
+      <form method="post" id="deleteProtocolForm">
+        {% csrf_token %}
+
+        <div class="delete-modal-header">
+          <div class="delete-modal-icon">
+            <i class="bi bi-trash3"></i>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij">
+          </button>
+        </div>
+
+        <div class="delete-modal-body">
+          <h4 class="delete-modal-title">
+            Usunąć protokół?
+          </h4>
+
+          <p class="delete-modal-text">
+            Ta operacja jest nieodwracalna i usunie:
+          </p>
+
+          <div class="delete-list">
+            <div class="delete-list-item">
+              <i class="bi bi-check2-circle"></i>
+              Dane protokołu
+            </div>
+
+            <div class="delete-list-item">
+              <i class="bi bi-check2-circle"></i>
+              Pozycje i urządzenia
+            </div>
+
+            <div class="delete-list-item">
+              <i class="bi bi-check2-circle"></i>
+              Koszty i informacje do faktury
+            </div>
+
+            <div class="delete-list-item">
+              <i class="bi bi-check2-circle"></i>
+              Historię protokołu
+            </div>
+          </div>
+
+          <div class="delete-contract-box">
+            <div class="small text-muted mb-1">
+              Usuwasz:
+            </div>
+
+            <div class="fw-bold" id="deleteProtocolName">
+              —
+            </div>
+
+            <div class="small text-muted mt-1" id="deleteProtocolClient">
+              —
+            </div>
+          </div>
+        </div>
+
+        <div class="delete-modal-footer">
+          <button type="button"
+                  class="btn-cancel"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="btn-delete">
+            <i class="bi bi-trash3"></i>
+            Usuń protokół
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    const modal = document.getElementById('deleteProtocolModal');
+    if(!modal) return;
+
+    const form = document.getElementById('deleteProtocolForm');
+    const nameEl = document.getElementById('deleteProtocolName');
+    const clientEl = document.getElementById('deleteProtocolClient');
+
+    modal.addEventListener('show.bs.modal', function(event){
+      const btn = event.relatedTarget;
+      if(!btn) return;
+
+      const url = btn.getAttribute('data-delete-url');
+      const title = btn.getAttribute('data-title') || 'Brak tytułu';
+      const number = btn.getAttribute('data-number') || 'Brak numeru';
+      const client = btn.getAttribute('data-client') || '';
+
+      form.action = url;
+      nameEl.textContent = title + ' — ' + number;
+      clientEl.textContent = client;
+    });
+  })();
+</script>
+
+{% endblock %}

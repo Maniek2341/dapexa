@@ -1,0 +1,603 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+
+<style>
+.task-page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:1rem;
+  margin-bottom:1.5rem;
+  flex-wrap:wrap;
+}
+
+.task-title-wrap{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+.task-title-icon{
+  width:62px;
+  height:62px;
+  border-radius:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#1468f5;
+  font-size:1.6rem;
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+    linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+  border:1px solid rgba(20,104,245,.18);
+}
+
+.task-title{
+  margin:0;
+  font-size:1.6rem;
+  font-weight:900;
+  color:var(--text);
+}
+
+.task-subtitle{
+  margin-top:.25rem;
+  color:var(--muted);
+  font-size:.92rem;
+}
+
+.btn-orange{
+  border:0;
+  color:#fff;
+  font-weight:800;
+  border-radius:14px;
+  padding:.78rem 1.15rem;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+  box-shadow:0 14px 32px rgba(20,104,245,.22);
+  text-decoration:none;
+}
+
+.btn-orange:hover{
+  color:#fff;
+  filter:brightness(1.05);
+}
+
+.detail-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.detail-card-header{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.3rem 1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+    rgba(255,255,255,.02);
+}
+
+.detail-card-icon{
+  width:50px;
+  height:50px;
+  border-radius:17px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(20,104,245,.12);
+  border:1px solid rgba(20,104,245,.18);
+  color:#1468f5;
+  font-size:1.25rem;
+}
+
+.detail-card-header h3{
+  margin:0;
+  color:var(--text);
+  font-size:1.05rem;
+  font-weight:900;
+}
+
+.detail-card-header p{
+  margin:.15rem 0 0;
+  color:var(--muted);
+  font-size:.85rem;
+}
+
+.task-table{
+  color:var(--text);
+  margin:0;
+}
+
+.task-table thead th{
+  background: rgba(255, 255, 255, .03);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    border-top: 0;
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 1rem 1.25rem;
+    white-space: nowrap;
+}
+
+.task-table tbody td{
+  padding: 1.1rem 1.25rem;
+    border-color: var(--border);
+    vertical-align: middle;
+}
+
+.task-assignment{
+  font-weight:800;
+  color:var(--text);
+}
+
+.task-description{
+  max-width:420px;
+  color:var(--text);
+}
+
+.badge-soft{
+  display:inline-flex;
+  align-items:center;
+  gap:.35rem;
+  padding:.4rem .7rem;
+  border-radius:999px;
+  font-size:.75rem;
+  font-weight:800;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--muted);
+}
+
+.badge-open{
+  background:rgba(108,117,125,.15);
+  color:#adb5bd;
+  border-color:rgba(108,117,125,.25);
+}
+
+.badge-progress{
+  background:rgba(255,193,7,.13);
+  color:#ffcf66;
+  border-color:rgba(255,193,7,.22);
+}
+
+.badge-done{
+  background:rgba(25,135,84,.15);
+  color:#47d18c;
+  border-color:rgba(25,135,84,.22);
+}
+
+.icon-btn{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:transparent;
+  color:var(--text);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.icon-btn:hover{
+  background:rgba(255,255,255,.06);
+}
+
+.icon-btn-danger{
+  color:#ff6b6b;
+  border-color:rgba(220,53,69,.28);
+}
+
+.icon-btn-danger:hover{
+  background:rgba(220,53,69,.12);
+}
+
+.placeholder-box{
+  min-height:170px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:.6rem;
+  text-align:center;
+  color:var(--muted);
+  border:1px dashed var(--border);
+  border-radius:22px;
+  background:rgba(255,255,255,.02);
+}
+
+.placeholder-box i{
+  font-size:2rem;
+  color:#1468f5;
+}
+
+.delete-task-modal{
+  background:var(--card);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:28px;
+  overflow:hidden;
+  box-shadow:0 35px 90px rgba(0,0,0,.45);
+}
+
+.delete-task-header{
+  position:relative;
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  padding:1.5rem;
+  border-bottom:1px solid var(--border);
+  background:
+    radial-gradient(circle at top left, rgba(220,53,69,.18), transparent 45%),
+    linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+}
+
+.delete-task-header .btn-close{
+  position:absolute;
+  top:1rem;
+  right:1rem;
+}
+
+.delete-task-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:rgba(220,53,69,.13);
+  border:1px solid rgba(220,53,69,.25);
+  color:#ff6b6b;
+  font-size:1.55rem;
+}
+
+.delete-task-header h4{
+  margin:0;
+  font-size:1.25rem;
+  font-weight:900;
+}
+
+.delete-task-header p{
+  margin:.25rem 0 0;
+  color:var(--muted);
+  font-size:.9rem;
+}
+
+.delete-task-body{
+  padding:1.5rem;
+}
+
+.delete-task-preview{
+  padding:1rem;
+  border-radius:18px;
+  border:1px solid rgba(220,53,69,.22);
+  background:rgba(220,53,69,.08);
+}
+
+.delete-task-footer{
+  padding:0 1.5rem 1.5rem;
+  display:flex;
+  justify-content:flex-end;
+  gap:.75rem;
+}
+
+.delete-task-btn-secondary{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  border-radius:16px;
+  padding:.9rem 1.3rem;
+  font-weight:800;
+}
+
+.delete-task-btn-danger{
+  border:0;
+  border-radius:16px;
+  padding:.9rem 1.4rem;
+  font-weight:800;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:.55rem;
+  background:linear-gradient(135deg,#dc3545,#ff6b6b);
+}
+
+@media(max-width:768px){
+  .task-page-head{
+    flex-direction:column;
+  }
+
+  .task-page-head .btn-orange{
+    width:100%;
+    justify-content:center;
+    display:flex;
+  }
+
+  .detail-card-body{
+    padding:1rem;
+  }
+
+  .delete-task-footer{
+    flex-direction:column;
+  }
+
+  .delete-task-btn-secondary,
+  .delete-task-btn-danger{
+    width:100%;
+    justify-content:center;
+  }
+}
+
+.task-filter-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:26px;
+  padding:1.25rem;
+  margin-bottom:1.5rem;
+  box-shadow:0 18px 55px rgba(0,0,0,.14);
+}
+
+.task-filter-card .form-control,
+.task-filter-card .form-select{
+  min-height:50px;
+  background:var(--body);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:14px;
+}
+
+.task-filter-card .form-control:focus,
+.task-filter-card .form-select:focus{
+  border-color:rgba(20,104,245,.5)!important;
+  box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+}
+.btn-soft{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  border-radius:14px;
+  font-weight:800;
+  padding:.72rem 1rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.btn-soft:hover{
+  background:rgba(255,255,255,.07);
+  color:var(--text);
+}
+</style>
+
+<div class="task-page-head">
+  <div class="task-title-wrap">
+    <div class="task-title-icon">
+      <i class="bi bi-check2-square"></i>
+    </div>
+
+    <div>
+      <h1 class="task-title">Zadania</h1>
+      <div class="task-subtitle">Lista zadań w firmie.</div>
+    </div>
+  </div>
+
+  <a href="{% url 'task_create' %}" class="btn-orange">
+    <i class="bi bi-plus-lg me-1"></i>
+    Dodaj zadanie
+  </a>
+</div>
+
+<div class="task-filter-card">
+  <form method="get">
+    <div class="row g-3 align-items-center">
+
+      <div class="col-12 col-md">
+        <input type="text"
+               name="q"
+               class="form-control"
+               placeholder="Szukaj zadania..."
+               value="{{ q }}">
+      </div>
+
+      <div class="col-12 col-md">
+        <select name="status" class="form-select">
+          <option value="all" {% if active_status == "all" %}selected{% endif %}>
+            Wszystkie statusy
+          </option>
+
+          <option value="open" {% if active_status == "open" %}selected{% endif %}>
+            Otwarte
+          </option>
+
+          <option value="in_progress" {% if active_status == "in_progress" %}selected{% endif %}>
+            W trakcie
+          </option>
+
+          <option value="done" {% if active_status == "done" %}selected{% endif %}>
+            Zrobione
+          </option>
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-auto d-flex gap-2">
+        <button class="btn-orange w-100">
+          <i class="bi bi-search"></i>
+          Szukaj
+        </button>
+
+        <a href="{% url 'task_list' %}" class="btn-soft">
+          Wyczyść
+        </a>
+      </div>
+
+    </div>
+  </form>
+</div>
+
+<div class="detail-card">
+  <div class="detail-card-header">
+    <div class="detail-card-icon">
+      <i class="bi bi-list-check"></i>
+    </div>
+
+    <div>
+      <h3>Lista zadań</h3>
+      <p>Przypisanie, termin, opis i aktualny status.</p>
+    </div>
+  </div>
+
+  <div class="detail-card-body">
+
+    {% if tasks %}
+      <div class="table-responsive">
+        <table class="table table-modern align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Przypisanie</th>
+              <th>Termin</th>
+              <th>Opis</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for task in tasks %}
+              <tr>
+                <td>
+                  <div class="task-assignment">
+                    {% if task.assignment_type == "user" %}
+                      <i class="bi bi-person me-1" style="color:#1468f5;"></i>
+                      {{ task.assigned_user.get_full_name|default:task.assigned_user.email }}
+                    {% elif task.assignment_type == "role" %}
+                      <i class="bi bi-person-badge me-1" style="color:#1468f5;"></i>
+                      Rola: {{ task.get_assigned_role_display }}
+                    {% else %}
+                      <i class="bi bi-people me-1" style="color:#1468f5;"></i>
+                      Dla wszystkich
+                    {% endif %}
+                  </div>
+                </td>
+
+                <td>
+                  {% if task.due_date %}
+                    {{ task.due_date|date:"d.m.Y" }}
+                  {% else %}
+                    <span class="text-muted">Brak</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <div class="task-description">
+                    {{ task.description }}
+                  </div>
+                </td>
+
+                <td>
+                  {% if task.status == "open" %}
+                    <span class="badge-soft badge-open">Otwarte</span>
+                  {% elif task.status == "in_progress" %}
+                    <span class="badge-soft badge-progress">W trakcie</span>
+                  {% elif task.status == "done" %}
+                    <span class="badge-soft badge-done">Zrobione</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <button type="button"
+                          class="icon-btn icon-btn-danger "
+                          data-bs-toggle="modal"
+                          data-bs-target="#deleteTaskModal"
+                          data-task-id="{{ task.id }}"
+                          data-task-title="{{ task.title|default:task.description|truncatechars:80 }}">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="placeholder-box">
+        <i class="bi bi-check2-square"></i>
+        Brak zadań.
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content delete-task-modal">
+
+      <form id="deleteTaskForm" method="post" action="">
+        {% csrf_token %}
+
+        <div class="delete-task-header">
+          <div class="delete-task-icon">
+            <i class="bi bi-trash"></i>
+          </div>
+
+          <div>
+            <h4>Usunąć zadanie?</h4>
+            <p>Ta operacja jest nieodwracalna.</p>
+          </div>
+
+          <button type="button"
+                  class="btn-close btn-close-white"
+                  data-bs-dismiss="modal"
+                  aria-label="Zamknij"></button>
+        </div>
+
+        <div class="delete-task-body">
+          <div class="delete-task-preview">
+            <div class="small text-muted mb-1">Usuwasz:</div>
+            <strong id="deleteTaskTitle">—</strong>
+          </div>
+        </div>
+
+        <div class="delete-task-footer">
+          <button type="button"
+                  class="delete-task-btn-secondary"
+                  data-bs-dismiss="modal">
+            Anuluj
+          </button>
+
+          <button type="submit"
+                  class="delete-task-btn-danger">
+            <i class="bi bi-trash"></i>
+            Usuń zadanie
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const buttons = document.querySelectorAll(".open-delete-modal");
+  const title = document.getElementById("deleteTaskTitle");
+  const form = document.getElementById("deleteTaskForm");
+
+  buttons.forEach(button => {
+    button.addEventListener("click", function () {
+      const taskId = this.dataset.taskId;
+      const taskTitle = this.dataset.taskTitle || "—";
+
+      title.textContent = taskTitle;
+      form.action = `/zadania/${taskId}/usun/`;
+    });
+  });
+});
+</script>
+
+{% endblock %}

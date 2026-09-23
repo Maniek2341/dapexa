@@ -1,0 +1,138 @@
+<style>
+  .usage-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    flex-wrap:wrap;
+    margin-bottom:1.5rem;
+  }
+
+  .usage-title{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .usage-icon{
+    width:60px;
+    height:60px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+      linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+    border:1px solid rgba(20,104,245,.18);
+    color:#1468f5;
+    font-size:1.5rem;
+  }
+
+  .usage-title h1{
+    margin:0;
+    color:var(--text);
+    font-size:1.65rem;
+    font-weight:900;
+  }
+
+  .usage-title p{
+    margin:0;
+    color:var(--muted);
+    font-size:.9rem;
+  }
+
+  .usage-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:24px;
+    overflow:hidden;
+    box-shadow:0 18px 55px rgba(0,0,0,.14);
+  }
+
+  .usage-table{
+    margin:0;
+    color:var(--text);
+  }
+
+  .usage-table thead th{
+    padding:1rem;
+    background:rgba(255,255,255,.03);
+    color:var(--muted);
+    border-bottom:1px solid var(--border);
+    font-size:.76rem;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    white-space:nowrap;
+  }
+
+  .usage-table tbody td{
+    padding:1rem;
+    border-bottom:1px solid rgba(255,255,255,.06);
+    vertical-align:middle;
+  }
+
+  .btn-soft{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    border-radius:14px;
+    font-weight:800;
+    padding:.75rem 1.1rem;
+    text-decoration:none;
+  }
+
+  .btn-soft:hover{
+    color:var(--text);
+    background:rgba(255,255,255,.07);
+  }
+
+  .detail-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:.35rem;
+    padding:.45rem .75rem;
+    border-radius:999px;
+    font-size:.78rem;
+    font-weight:800;
+    background:rgba(255,255,255,.05);
+    border:1px solid var(--border);
+    color:var(--muted);
+  }
+
+  .detail-badge-active{
+    background:rgba(25,135,84,.15);
+    color:#47d18c;
+    border-color:rgba(25,135,84,.18);
+  }
+
+  .detail-badge-disabled{
+    background:rgba(220,53,69,.15);
+    color:#ff6b81;
+    border-color:rgba(220,53,69,.18);
+  }
+
+  .pagination-wrap{
+    display:flex;
+    justify-content:center;
+    gap:.5rem;
+    padding:1.25rem;
+    flex-wrap:wrap;
+  }
+
+  .pagination-wrap a,
+  .pagination-wrap span{
+    padding:.55rem .85rem;
+    border-radius:12px;
+    border:1px solid var(--border);
+    color:var(--text);
+    text-decoration:none;
+    font-weight:800;
+  }
+
+  .pagination-wrap .active{
+    background:#1468f5;
+    color:#fff;
+    border-color:#1468f5;
+  }
+</style>

@@ -1,0 +1,170 @@
+{% extends 'app/core/before_login_base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 1.5rem 0;
+        color: var(--gray-color);
+    }
+    
+    .divider::before,
+    .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background-color: #dee2e6;
+    }
+    
+    .divider span {
+        padding: 0 1rem;
+    }
+
+    .social-login {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .social-btn {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+    
+    .social-btn:hover {
+        background-color: #f8f9fa;
+        transform: translateY(-2px);
+    }
+    
+    .social-btn img {
+        width: 20px;
+        height: 20px;
+    }
+</style>
+<div class="auth-form-section">
+    <div class="container">
+        <!-- Logo -->
+        <img src="{% static 'assets/img/logo.png' %}" alt="Logo firmy" class="logo">
+        
+        <!-- Formularz logowania -->
+        <form id="loginForm" method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            {% if two_factor_required %}
+            <h1 class="form-title">Weryfikacja dwuetapowa</h1>
+            <p class="form-subtitle">Wpisz 6-cyfrowy kod wysłany na Twój adres e-mail</p>
+
+            <div class="mb-4">
+                <label for="{{ two_factor_form.code.id_for_label }}" class="form-label">Kod weryfikacyjny</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-shield-alt"></i></span>
+                    {{ two_factor_form.code }}
+                </div>
+                {% if two_factor_form.code.errors %}
+                    <div class="invalid-feedback d-block">{{ two_factor_form.code.errors|striptags }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mb-3">Potwierdź logowanie</button>
+            <div class="additional-options">
+                <p class="text-center mb-0">
+                    Kod nie dotarł?
+                    <a href="{% url 'login' %}?restart=1" class="text-primary text-decoration-none fw-semibold">Zaloguj się ponownie</a>
+                </p>
+            </div>
+            {% else %}
+            <h1 class="form-title">Witaj z powrotem!</h1>
+            <p class="form-subtitle">Zaloguj się do swojego konta</p>
+            
+            <div class="mb-4">
+                <label for="email" class="form-label">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    {{ login_form.username }}
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="password" class="form-label">Hasło</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    {{ login_form.password }}
+                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('id_password', this)">
+                        <i class="fa fa-eye"></i>
+                      </button>
+                </div>
+                <div class="form-text text-end">
+                    <a href="{% url 'forgot' %}" class="text-decoration-none">Zapomniałeś hasła?</a>
+                </div>
+            </div>
+            
+            <div class="form-check mb-4">
+                <input class="form-check-input" name="remember" type="checkbox" id="rememberMe">
+                <label class="form-check-label" for="rememberMe">
+                    Zapamiętaj mnie
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 mb-3">Zaloguj się</button>
+            
+            
+            <!-- Dodatkowe opcje -->
+            <div class="additional-options">
+                <p class="text-center mb-0">
+                    Nie masz jeszcze konta? 
+                    <a href="{% url 'register' %}" class="text-primary text-decoration-none fw-semibold">Zarejestruj się</a>
+                </p>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</div>
+
+<div class="auth-image-section d-none d-lg-block">
+    <!-- Tekst na zdjęciu -->
+    <div class="position-absolute top-50 start-50 translate-middle text-white text-center p-4" style="z-index: 2; width: 80%;">
+        <h2 class="display-5 fw-bold mb-4">Zaloguj się do swojego konta</h2>
+        <p class="fs-5">Miej pełną kontrolę nad swoją firmą i korzystaj ze wszystkich funkcji naszej platformy.</p>
+        <div class="mt-4">
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <i class="fas fa-chart-line fa-2x me-3"></i>
+                <span>Śledź wyniki swojej firmy</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-center mb-3">
+                <i class="fas fa-cogs fa-2x me-3"></i>
+                <span>Zarządzaj ustawieniami konta</span>
+            </div>
+            <div class="d-flex align-items-center justify-content-center">
+                <i class="fas fa-users fa-2x me-3"></i>
+                <span>Współpracuj z zespołem</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function togglePassword(inputId, button) {
+      const input = document.getElementById(inputId);
+      const icon = button.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+      }
+    }
+  </script>
+
+
+{% endblock %}

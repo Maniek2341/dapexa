@@ -1,0 +1,120 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+<style>
+.group-head { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+.group-title { margin:0; color:var(--text); font-size:1.55rem; font-weight:900; }
+.group-subtitle { color:var(--muted); margin-top:.25rem; }
+.group-card { background:var(--card); border:1px solid var(--border); border-radius:26px; overflow:hidden; box-shadow:0 18px 55px rgba(0,0,0,.14); }
+.group-basic { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; padding:1.5rem; border-bottom:1px solid var(--border); }
+.group-label { display:block; margin-bottom:.45rem; color:var(--text); font-weight:800; }
+.group-card .form-control, .group-card .form-select { min-height:50px; color:var(--text); background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:14px; }
+.group-permissions { padding:1.5rem; }
+.group-permissions-title { color:var(--text); font-weight:900; margin-bottom:1rem; }
+.perm-tools { display:flex; gap:.65rem; margin-bottom:1rem; flex-wrap:wrap; }
+.perm-search { flex:1; min-width:220px; min-height:44px; padding:.65rem .9rem; color:var(--text); background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:14px; }
+.perm-tool-btn { padding:.65rem .85rem; color:var(--text); background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:14px; font-weight:700; }
+#id_permissions { display:grid; gap:1rem; }
+.perm-module { overflow:hidden; border:1px solid var(--border); border-radius:20px; background:rgba(255,255,255,.018); }
+.perm-module-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.15rem; border-bottom:1px solid var(--border); background:rgba(255,255,255,.025); }
+.perm-module-title { color:var(--text); font-weight:900; }
+.perm-module-title i { color:#1468f5; margin-right:.55rem; }
+.perm-module-count { color:var(--muted); font-size:.78rem; }
+.perm-module-toggle { padding:.42rem .7rem; color:var(--muted); background:transparent; border:1px solid var(--border); border-radius:10px; font-size:.76rem; font-weight:700; }
+.perm-module-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; padding:1rem; }
+.permission-option { display:flex; align-items:flex-start; gap:.8rem; padding:1rem; color:var(--text); border:1px solid var(--border); border-radius:16px; background:rgba(255,255,255,.025); cursor:pointer; }
+.permission-option input { width:19px; height:19px; margin-top:.1rem; accent-color:#1468f5; }
+.group-actions { display:flex; justify-content:flex-end; gap:.75rem; padding:0 1.5rem 1.5rem; }
+.btn-orange,.btn-soft { border-radius:14px; padding:.78rem 1.1rem; font-weight:800; display:inline-flex; align-items:center; gap:.45rem; }
+.btn-orange { color:#fff; border:0; background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%); }
+.btn-soft { color:var(--text); border:1px solid var(--border); background:rgba(255,255,255,.04); }
+.field-errors { color:#ff6b6b; margin-top:.35rem; }
+@media(max-width:900px){.perm-module-options{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:650px){.group-basic,.perm-module-options{grid-template-columns:1fr;}}
+</style>
+
+<div class="group-head">
+  <div>
+    <h1 class="group-title">{% if role_group %}Edytuj grupę{% else %}Nowa grupa uprawnień{% endif %}</h1>
+    <div class="group-subtitle">Uprawnienia grupy otrzymają wszyscy pracownicy wybranej roli.</div>
+  </div>
+  <a href="{% url 'employee_permission_list' %}" class="btn-soft"><i class="bi bi-arrow-left"></i> Wróć</a>
+</div>
+
+<form method="post" class="group-card" novalidate>
+  {% csrf_token %}
+  <div class="group-basic">
+    <div>
+      <label class="group-label">{{ form.name.label }}</label>
+      {{ form.name }}
+      {% if form.name.errors %}<div class="field-errors">{{ form.name.errors }}</div>{% endif %}
+    </div>
+    <div>
+      <label class="group-label">{{ form.role.label }}</label>
+      {{ form.role }}
+      {% if form.role.errors %}<div class="field-errors">{{ form.role.errors }}</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="group-permissions">
+    <div class="group-permissions-title"><i class="bi bi-shield-check me-1"></i> Uprawnienia grupy</div>
+    {% if form.permissions.errors %}<div class="field-errors mb-3">{{ form.permissions.errors }}</div>{% endif %}
+    <div class="perm-tools">
+      <input type="search" id="permissionSearch" class="perm-search" placeholder="Szukaj modułu lub uprawnienia…">
+      <button type="button" id="selectVisiblePermissions" class="perm-tool-btn">Zaznacz widoczne</button>
+      <button type="button" id="clearVisiblePermissions" class="perm-tool-btn">Wyczyść widoczne</button>
+    </div>
+    <div id="id_permissions">
+      {% for group in permission_groups %}
+        <section class="perm-module">
+          <div class="perm-module-head">
+            <div>
+              <div class="perm-module-title"><i class="bi {{ group.icon }}"></i>{{ group.title }}</div>
+              <div class="perm-module-count">{{ group.permissions|length }} uprawnień</div>
+            </div>
+            <button type="button" class="perm-module-toggle">Zaznacz moduł</button>
+          </div>
+          <div class="perm-module-options">
+            {% for permission in group.permissions %}
+              <label class="permission-option">
+                <input type="checkbox" name="permissions" value="{{ permission.pk }}" {% if permission.pk in selected_permission_ids %}checked{% endif %}>
+                <span>{{ permission.name }}</span>
+              </label>
+            {% endfor %}
+          </div>
+        </section>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="group-actions">
+    <a href="{% url 'employee_permission_list' %}" class="btn-soft">Anuluj</a>
+    <button type="submit" class="btn-orange"><i class="bi bi-check2-circle"></i> Zapisz grupę</button>
+  </div>
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const container = document.getElementById("id_permissions");
+  const options = Array.from(container.querySelectorAll(".permission-option"));
+  const modules = Array.from(container.querySelectorAll(".perm-module"));
+  document.getElementById("permissionSearch").addEventListener("input", function () {
+    const query = this.value.trim().toLowerCase();
+    options.forEach(option => option.style.display = option.textContent.toLowerCase().includes(query) ? "" : "none");
+    modules.forEach(module => module.style.display = Array.from(module.querySelectorAll(".permission-option")).some(option => option.style.display !== "none") ? "" : "none");
+  });
+  function setVisible(value) {
+    options.forEach(option => {
+      if (option.style.display !== "none") option.querySelector('input[type="checkbox"]').checked = value;
+    });
+  }
+  document.getElementById("selectVisiblePermissions").addEventListener("click", () => setVisible(true));
+  document.getElementById("clearVisiblePermissions").addEventListener("click", () => setVisible(false));
+  modules.forEach(module => module.querySelector(".perm-module-toggle").addEventListener("click", function () {
+    const checkboxes = Array.from(module.querySelectorAll('input[type="checkbox"]'));
+    const select = checkboxes.some(checkbox => !checkbox.checked);
+    checkboxes.forEach(checkbox => checkbox.checked = select);
+    this.textContent = select ? "Wyczyść moduł" : "Zaznacz moduł";
+  }));
+});
+</script>
+{% endblock %}

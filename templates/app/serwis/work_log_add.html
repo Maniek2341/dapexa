@@ -1,0 +1,38 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+<style>
+  .work-log-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(290px,.92fr);gap:1.35rem;align-items:start}
+  .work-log-header{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.4rem;flex-wrap:wrap}
+  .work-log-title{display:flex;align-items:center;gap:1rem}.work-log-title-icon,.work-log-card-icon{width:60px;height:60px;border-radius:18px;display:grid;place-items:center;color:#1468f5;background:linear-gradient(135deg,rgba(20,104,245,.22),rgba(20,104,245,.08));border:1px solid rgba(20,104,245,.2);font-size:1.5rem;flex-shrink:0}
+  .work-log-title h1{margin:0;color:var(--text);font-size:1.7rem;font-weight:900}.work-log-title p{margin:.25rem 0 0;color:var(--muted);font-size:.9rem}
+  .work-log-header-actions{display:flex;gap:.65rem;flex-wrap:wrap}.work-log-btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;min-height:44px;padding:.7rem 1rem;border-radius:13px;font-weight:800;text-decoration:none}.work-log-btn-save{border:0;color:#fff;background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%)}.work-log-btn-save:hover{color:#fff;filter:brightness(1.06)}.work-log-btn-back{border:1px solid var(--border);color:var(--text);background:rgba(255,255,255,.05)}.work-log-btn-back:hover{color:var(--text);background:rgba(255,255,255,.09)}
+  .work-log-card{background:var(--card);border:1px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:0 18px 55px rgba(0,0,0,.14)}.work-log-card-head{display:flex;align-items:center;gap:1rem;padding:1.25rem 1.4rem;border-bottom:1px solid var(--border);background:radial-gradient(circle at top left,rgba(20,104,245,.14),transparent 42%),rgba(255,255,255,.02)}.work-log-card-icon{width:48px;height:48px;border-radius:15px;font-size:1.2rem}.work-log-card-head h2{margin:0;color:var(--text);font-size:1.05rem;font-weight:900}.work-log-card-head span{display:block;margin-top:.2rem;color:var(--muted);font-size:.82rem}.work-log-body{padding:1.4rem}
+  .work-log-label{display:block;margin-bottom:.4rem;color:var(--muted);font-size:.78rem;font-weight:800}.work-log-body .form-control,.work-log-body .form-select,.work-log-body select,.work-log-body textarea{min-height:50px;border-radius:15px;background:rgba(255,255,255,.035)!important;border:1px solid var(--border)!important;color:var(--text)!important;box-shadow:none!important}.work-log-body textarea.form-control{min-height:130px;resize:vertical}.work-log-body .form-control::placeholder{color:var(--muted)}.work-log-body .form-control:focus,.work-log-body .form-select:focus,.work-log-body select:focus,.work-log-body textarea:focus{border-color:rgba(20,104,245,.5)!important;box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important}
+  .work-log-preview{padding:1.3rem}.work-log-preview-value{padding:1rem;border-radius:18px;background:linear-gradient(135deg,rgba(20,104,245,.16),rgba(255,255,255,.03));border:1px solid rgba(20,104,245,.16);margin-bottom:.85rem}.work-log-preview-value strong{display:block;color:var(--text);font-size:1.15rem}.work-log-preview-value span{display:block;margin-top:.25rem;color:var(--muted);font-size:.82rem}.work-log-preview-row{display:flex;justify-content:space-between;gap:1rem;padding:.85rem 0;border-bottom:1px solid var(--border);color:var(--muted);font-size:.85rem}.work-log-preview-row strong{color:var(--text);text-align:right}.work-log-actions{display:flex;gap:.65rem;flex-wrap:wrap;margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid var(--border)}
+  @media(max-width:900px){.work-log-layout{grid-template-columns:1fr}.work-log-preview{padding:1.2rem}.work-log-title h1{font-size:1.4rem}}
+</style>
+
+<div class="work-log-header">
+  <div class="work-log-title"><div class="work-log-title-icon"><i class="bi bi-clock-history"></i></div><div><h1>Dzienne rozliczenie serwisu</h1><p>Uzupełnij godziny, osoby, dojazdy, materiały i wykonane prace.</p></div></div>
+  <div class="work-log-header-actions"><a href="{% url 'serwis_detail' service.pk %}" class="work-log-btn work-log-btn-back"><i class="bi bi-arrow-left"></i> Wróć</a><button form="work-log-form" type="submit" class="work-log-btn work-log-btn-save"><i class="bi bi-check2-square"></i> Zapisz wpis</button></div>
+</div>
+
+<div class="work-log-layout">
+  <div class="work-log-card">
+    <div class="work-log-card-head"><div class="work-log-card-icon"><i class="bi bi-journal-text"></i></div><div><h2>Dane rozliczenia</h2><span>Wpis zostanie automatycznie przypisany do zalogowanej osoby.</span></div></div>
+    <div class="work-log-body">
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <form id="work-log-form" method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          {% for field in form %}
+            <div class="{% if field.name == 'materials' or field.name == 'performed_work' %}col-12 col-md-6{% else %}col-12 col-md-3{% endif %}"><label class="work-log-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>
+          {% endfor %}
+        </div>
+        <div class="work-log-actions"><button class="work-log-btn work-log-btn-save" type="submit"><i class="bi bi-check2-square"></i> Zapisz wpis</button><a class="work-log-btn work-log-btn-back" href="{% url 'serwis_detail' service.pk %}">Anuluj</a></div>
+      </form>
+    </div>
+  </div>
+  <aside class="work-log-card"><div class="work-log-card-head"><div class="work-log-card-icon"><i class="bi bi-eye"></i></div><div><h2>Podgląd</h2><span>Podstawowe informacje serwisu.</span></div></div><div class="work-log-preview"><div class="work-log-preview-value"><strong>{{ service.number }}</strong><span>{{ service.title }}</span></div><div class="work-log-preview-row"><span>Klient</span><strong>{{ service.client }}</strong></div><div class="work-log-preview-row"><span>Rozliczenie</span><strong>{{ service.get_settlement_method_display }}</strong></div><div class="work-log-preview-row"><span>Wpisujący</span><strong>{{ request.user.get_full_name|default:request.user.email }}</strong></div><div class="work-log-preview-row"><span>Status</span><strong>{{ service.get_status_display }}</strong></div></div></aside>
+</div>
+{% endblock %}

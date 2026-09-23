@@ -1,0 +1,1093 @@
+{% extends 'app/core/base.html' %}
+{% load static %}
+{% block content %}
+
+{% if is_edit %}
+  {% url 'serwis_edit' service.pk as form_action %}
+  {% url 'serwis_detail' service.pk as cancel_url %}
+{% else %}
+  {% url 'serwis_add' as form_action %}
+  {% url 'serwis_nowe' as cancel_url %}
+{% endif %}
+
+<style>
+  .service-page-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:1rem;
+    margin-bottom:1.5rem;
+    flex-wrap:wrap;
+  }
+
+  .service-title-wrap{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+  }
+
+  .service-title-icon{
+    width:62px;
+    height:62px;
+    border-radius:20px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#1468f5;
+    font-size:1.55rem;
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.35), transparent 55%),
+      linear-gradient(135deg, rgba(20,104,245,.20), rgba(20,104,245,.08));
+    border:1px solid rgba(20,104,245,.18);
+    flex-shrink:0;
+  }
+
+  .service-title{
+    margin:0;
+    font-size:1.6rem;
+    font-weight:900;
+    color:var(--text);
+  }
+
+  .service-subtitle{
+    margin-top:.25rem;
+    color:var(--muted);
+    font-size:.92rem;
+  }
+
+  .service-actions{
+    display:flex;
+    gap:.75rem;
+    flex-wrap:wrap;
+  }
+
+  .service-form-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:26px;
+    overflow:hidden;
+    box-shadow:0 18px 55px rgba(0,0,0,.14);
+  }
+
+  .service-form-card-header{
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    padding:1.3rem 1.5rem;
+    border-bottom:1px solid var(--border);
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.12), transparent 40%),
+      rgba(255,255,255,.02);
+  }
+
+  .service-section-icon{
+    width:50px;
+    height:50px;
+    border-radius:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(20,104,245,.12);
+    border:1px solid rgba(20,104,245,.18);
+    color:#1468f5;
+    font-size:1.25rem;
+    flex-shrink:0;
+  }
+
+  .service-form-card-header h2{
+    margin:0;
+    color:var(--text);
+    font-size:1.05rem;
+    font-weight:900;
+  }
+
+  .service-form-card-header p{
+    margin:.15rem 0 0;
+    color:var(--muted);
+    font-size:.85rem;
+  }
+
+  .service-form-card-body{
+    padding:1.5rem;
+  }
+
+  .service-form-section{
+    padding:1.25rem;
+    border:1px solid rgba(255,255,255,.06);
+    background:rgba(255,255,255,.025);
+    border-radius:22px;
+    margin-bottom:1.25rem;
+  }
+
+  .service-form-section:last-child{
+    margin-bottom:0;
+  }
+
+  .service-form-section-head{
+    display:flex;
+    align-items:center;
+    gap:.9rem;
+    margin-bottom:1.25rem;
+  }
+
+  .service-mini-icon{
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(20,104,245,.11);
+    border:1px solid rgba(20,104,245,.17);
+    color:#1468f5;
+    font-size:1.15rem;
+    flex-shrink:0;
+  }
+
+  .service-form-section-head h3{
+    margin:0;
+    color:var(--text);
+    font-size:1rem;
+    font-weight:900;
+  }
+
+  .service-form-section-head p{
+    margin:.15rem 0 0;
+    color:var(--muted);
+    font-size:.84rem;
+  }
+
+  .service-label{
+    display:block;
+    color:var(--text);
+    font-size:.82rem;
+    font-weight:800;
+    margin-bottom:.45rem;
+  }
+
+  .service-form-card .form-control,
+  .service-form-card .form-select,
+  .service-form-card select,
+  .service-form-card textarea{
+    background:rgba(255,255,255,.035)!important;
+    color:var(--text)!important;
+    border:1px solid var(--border)!important;
+    border-radius:15px!important;
+    min-height:50px;
+    box-shadow:none!important;
+  }
+
+  .service-form-card textarea{
+    min-height:130px;
+  }
+
+  .service-form-card .form-control:focus,
+  .service-form-card .form-select:focus,
+  .service-form-card select:focus,
+  .service-form-card textarea:focus{
+    border-color:rgba(20,104,245,.5)!important;
+    box-shadow:0 0 0 .2rem rgba(20,104,245,.13)!important;
+  }
+
+  .btn-orange{
+    border:0;
+    color:#fff;
+    font-weight:800;
+    border-radius:14px;
+    padding:.78rem 1.15rem;
+    background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);
+    box-shadow:0 14px 32px rgba(20,104,245,.22);
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .btn-orange:hover{
+    color:#fff;
+    filter:brightness(1.05);
+  }
+
+  .btn-soft{
+    border:1px solid var(--border);
+    background:rgba(255,255,255,.04);
+    color:var(--text);
+    border-radius:14px;
+    font-weight:800;
+    padding:.78rem 1.15rem;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .btn-soft:hover{
+    background:rgba(255,255,255,.07);
+    color:var(--text);
+  }
+
+  .service-preview{
+    position:sticky;
+    top:90px;
+  }
+
+  .preview-box{
+    padding:1.25rem;
+    border-radius:22px;
+    background:
+      radial-gradient(circle at top left, rgba(20,104,245,.18), transparent 42%),
+      rgba(255,255,255,.03);
+    border:1px solid var(--border);
+  }
+
+  .preview-title{
+    color:var(--text);
+    font-size:1.2rem;
+    font-weight:900;
+    word-break:break-word;
+  }
+
+  .preview-muted{
+    color:var(--muted);
+    font-size:.86rem;
+  }
+
+  .preview-list{
+    display:grid;
+    gap:.75rem;
+    margin-top:1rem;
+  }
+
+  .preview-item{
+    display:flex;
+    justify-content:space-between;
+    gap:1rem;
+    padding:.85rem .95rem;
+    border-radius:16px;
+    background:rgba(255,255,255,.035);
+    border:1px solid var(--border);
+    font-size:.86rem;
+  }
+
+  .preview-item span:first-child{
+    color:var(--muted);
+  }
+
+  .preview-item span:last-child{
+    color:var(--text);
+    font-weight:800;
+    text-align:right;
+    word-break:break-word;
+  }
+
+  .workers-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:1rem;
+    margin-top:1rem;
+    flex-wrap:wrap;
+  }
+
+  .workers-chip{
+    border:1px solid rgba(20,104,245,.35);
+    background:rgba(20,104,245,.10);
+    color:#1468f5;
+    border-radius:999px;
+    font-weight:800;
+    padding:.45rem .75rem;
+  }
+
+  .workers-chip:hover{
+    background:rgba(20,104,245,.16);
+    color:#1468f5;
+  }
+
+  .upload-preview-img{
+    width:86px;
+    height:86px;
+    object-fit:cover;
+    border-radius:16px;
+    border:1px solid var(--border);
+  }
+
+  .upload-info{
+    margin-top:.9rem;
+    padding:.9rem 1rem;
+    border-radius:16px;
+    background:rgba(255,193,7,.08);
+    border:1px solid rgba(255,193,7,.15);
+    color:#ffcf66;
+    font-size:.84rem;
+    display:flex;
+    gap:.6rem;
+    align-items:flex-start;
+  }
+
+  .form-footer{
+    display:flex;
+    justify-content:flex-end;
+    gap:.75rem;
+    flex-wrap:wrap;
+    margin-top:1.25rem;
+  }
+
+  @media(max-width:991px){
+    .service-preview{
+      position:static;
+    }
+  }
+
+  @media(max-width:768px){
+    .service-page-head{
+      flex-direction:column;
+    }
+
+    .service-actions{
+      width:100%;
+      display:grid;
+      grid-template-columns:1fr;
+    }
+
+    .service-actions a,
+    .service-actions button{
+      width:100%;
+    }
+
+    .service-title-icon{
+      width:54px;
+      height:54px;
+      border-radius:18px;
+      font-size:1.35rem;
+    }
+
+    .service-title{
+      font-size:1.3rem;
+    }
+
+    .service-form-card-body{
+      padding:1rem;
+    }
+
+    .service-form-section{
+      padding:1rem;
+      border-radius:18px;
+    }
+
+    .service-form-section-head{
+      align-items:flex-start;
+    }
+
+    .form-footer{
+      display:grid;
+      grid-template-columns:1fr;
+    }
+
+    .form-footer a,
+    .form-footer button{
+      width:100%;
+    }
+  }
+</style>
+
+<div class="service-page-head">
+  <div class="service-title-wrap">
+    <div class="service-title-icon">
+      <i class="bi bi-wrench-adjustable"></i>
+    </div>
+
+    <div>
+      <h1 class="service-title">
+        {% if is_edit %}
+          Edytuj serwis
+        {% else %}
+          Dodaj nowe zgłoszenie
+        {% endif %}
+      </h1>
+
+      <div class="service-subtitle">
+        {% if is_edit %}
+          Edytuj wybrane zgłoszenie serwisowe.
+        {% else %}
+          Wybierz rodzaj zgłoszenia i uzupełnij dane, klienta, termin oraz pracowników.
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="service-actions">
+    <a href="{{ cancel_url }}" class="btn-soft">
+      <i class="bi bi-arrow-left me-1"></i>
+      Wróć
+    </a>
+
+    <button form="serviceForm" class="btn-orange">
+      <i class="bi bi-save me-1"></i>
+      Zapisz
+    </button>
+  </div>
+</div>
+
+<form id="serviceForm"
+      method="post"
+      action="{{ form_action }}"
+      enctype="multipart/form-data"
+      autocomplete="off"
+      class="needs-validation"
+      novalidate>
+  {% csrf_token %}
+
+  {% if form.non_field_errors %}
+    <div class="alert alert-danger mb-3">
+      {{ form.non_field_errors }}
+    </div>
+  {% endif %}
+
+  <div class="row g-4">
+
+    <div class="col-xl-8">
+      <div class="service-form-card">
+        <div class="service-form-card-header">
+          <div class="service-section-icon">
+            <i class="bi bi-clipboard-check"></i>
+          </div>
+
+          <div>
+            <h2>Dane zgłoszenia</h2>
+            <p>Temat, klient, lokalizacja, termin i opis zgłoszenia.</p>
+          </div>
+        </div>
+
+        <div class="service-form-card-body">
+
+          <div class="service-form-section">
+            <div class="service-form-section-head">
+              <div class="service-mini-icon">
+                <i class="bi bi-info-circle"></i>
+              </div>
+
+              <div>
+                <h3>Podstawowe informacje</h3>
+                <p>Nazwa zgłoszenia, klient i priorytet.</p>
+              </div>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="service-label required" for="{{ form.service_type.id_for_label }}">
+                  {{ form.service_type.label }}
+                </label>
+                {{ form.service_type }}
+                {% if form.service_type.errors %}
+                  <div class="invalid-feedback d-block">{{ form.service_type.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="service-label required" for="{{ form.title.id_for_label }}">
+                  Temat zgłoszenia
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                  <div class="invalid-feedback d-block">{{ form.title.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              {% if client_id %}
+                {{ form.client }}
+              {% else %}
+                <div class="col-md-6">
+                  <label class="service-label required" for="{{ form.client.id_for_label }}">
+                    Klient
+                  </label>
+                  {{ form.client }}
+                  {% if form.client.errors %}
+                    <div class="invalid-feedback d-block">{{ form.client.errors|striptags }}</div>
+                  {% endif %}
+                </div>
+              {% endif %}
+
+              <div class="col-md-12 d-none" id="locationWrapper">
+                <label class="service-label" for="{{ form.location.id_for_label }}">
+                  Lokalizacja
+                </label>
+                {{ form.location }}
+                {% if form.location.errors %}
+                  <div class="invalid-feedback d-block">{{ form.location.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="service-label required" for="{{ form.priority.id_for_label }}">
+                  Priorytet
+                </label>
+                {{ form.priority }}
+                {% if form.priority.errors %}
+                  <div class="invalid-feedback d-block">{{ form.priority.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="service-label required" for="{{ form.settlement_method.id_for_label }}">
+                  {{ form.settlement_method.label }}
+                </label>
+                {{ form.settlement_method }}
+                <div class="form-text">Wybierz rozliczenie godzinowe, aby prowadzić dzienne wpisy pracy.</div>
+                {% if form.settlement_method.errors %}
+                  <div class="invalid-feedback d-block">{{ form.settlement_method.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="service-form-section">
+            <div class="service-form-section-head">
+              <div class="service-mini-icon">
+                <i class="bi bi-calendar2-week"></i>
+              </div>
+
+              <div>
+                <h3>Termin realizacji</h3>
+                <p>Planowana data rozpoczęcia i zakończenia serwisu.</p>
+              </div>
+            </div>
+
+            {% if not is_edit and not form.is_bound %}
+              <button type="button" class="btn-soft mb-3" id="showServiceSchedule">
+                <i class="bi bi-calendar-plus me-1"></i>
+                Ustaw termin realizacji
+              </button>
+            {% endif %}
+
+            <div class="row g-3 {% if not is_edit and not form.is_bound %}d-none{% endif %}" id="serviceScheduleFields">
+              <div class="col-md-6">
+                <label class="service-label" for="{{ form.planned_start.id_for_label }}">
+                  Planowana data od
+                </label>
+                {{ form.planned_start }}
+                {% if form.planned_start.errors %}
+                  <div class="invalid-feedback d-block">{{ form.planned_start.errors|striptags }}</div>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <label class="service-label" for="{{ form.planned_end.id_for_label }}">
+                  Planowana data do
+                </label>
+                {{ form.planned_end }}
+                {% if form.planned_end.errors %}
+                  <div class="invalid-feedback d-block">{{ form.planned_end.errors|striptags }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="service-form-section">
+            <div class="service-form-section-head">
+              <div class="service-mini-icon">
+                <i class="bi bi-journal-text"></i>
+              </div>
+
+              <div>
+                <h3>Opis zgłoszenia</h3>
+                <p>Zakres prac, uwagi klienta lub informacje dla serwisantów.</p>
+              </div>
+            </div>
+
+            <label class="service-label" for="{{ form.description.id_for_label }}">
+              Opis serwisu
+            </label>
+            {{ form.description }}
+            {% if form.description.errors %}
+              <div class="invalid-feedback d-block">{{ form.description.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          <div class="service-form-section">
+            <div class="service-form-section-head">
+              <div class="service-mini-icon">
+                <i class="bi bi-people"></i>
+              </div>
+
+              <div>
+                <h3>Pracownicy</h3>
+                <p>Przypisz maksymalnie 3 osoby do realizacji serwisu.</p>
+              </div>
+            </div>
+
+            <label class="service-label" for="{{ form.assigned_to.id_for_label }}">
+              Pracownicy
+            </label>
+
+            {{ form.assigned_to }}
+
+            <div class="workers-toolbar">
+              <div class="small text-muted">
+                Wybrano: <span id="workersCount">0</span>/3
+              </div>
+
+              <button type="button" class="btn-soft btn-sm" id="workersClear">
+                Wyczyść
+              </button>
+            </div>
+
+            <div id="workersChips" class="d-flex flex-wrap gap-2 mt-3"></div>
+
+            <div class="small text-muted mt-2">
+              Kliknij w wybraną osobę, żeby ją odznaczyć.
+            </div>
+
+            {% if form.assigned_to.errors %}
+              <div class="invalid-feedback d-block">{{ form.assigned_to.errors|striptags }}</div>
+            {% endif %}
+          </div>
+
+          {% if form.images or form.attachments %}
+            <div class="service-form-section">
+              <div class="service-form-section-head">
+                <div class="service-mini-icon">
+                  <i class="bi bi-paperclip"></i>
+                </div>
+
+                <div>
+                  <h3>Zdjęcia i załączniki</h3>
+                  <p>Dodaj dokumentację zdjęciową lub pliki do zgłoszenia.</p>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                {% if form.images %}
+                  <div class="col-12">
+                    <label class="service-label" for="{{ form.images.id_for_label }}">
+                      Zdjęcia
+                    </label>
+                    {{ form.images }}
+                    {% if form.images.errors %}
+                      <div class="invalid-feedback d-block">{{ form.images.errors|striptags }}</div>
+                    {% endif %}
+                    <div id="imgPreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+                  </div>
+                {% endif %}
+
+                {% if form.attachments %}
+                  <div class="col-12">
+                    <label class="service-label" for="{{ form.attachments.id_for_label }}">
+                      Załączniki
+                    </label>
+                    {{ form.attachments }}
+                    {% if form.attachments.errors %}
+                      <div class="invalid-feedback d-block">{{ form.attachments.errors|striptags }}</div>
+                    {% endif %}
+                    <ul id="fileList" class="small text-muted mt-3 mb-0"></ul>
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="upload-info">
+                <i class="bi bi-info-circle"></i>
+                Możesz dodać zdjęcia, PDF-y lub inne dokumenty powiązane z serwisem.
+              </div>
+            </div>
+          {% endif %}
+
+          <div class="form-footer">
+            <a href="{{ cancel_url }}" class="btn-soft">
+              Anuluj
+            </a>
+
+            <button type="submit" class="btn-orange">
+              <i class="bi bi-save me-1"></i>
+              {% if is_edit %}
+                Zapisz zmiany
+              {% else %}
+                Zapisz serwis
+              {% endif %}
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="service-preview">
+        <div class="service-form-card">
+          <div class="service-form-card-header">
+            <div class="service-section-icon">
+              <i class="bi bi-eye"></i>
+            </div>
+
+            <div>
+              <h2>Podgląd</h2>
+              <p>Szybkie podsumowanie serwisu.</p>
+            </div>
+          </div>
+
+          <div class="service-form-card-body">
+            <div class="preview-box">
+              <div class="preview-title" id="pvTitle">—</div>
+              <div class="preview-muted mt-1">
+                Podgląd serwisu
+              </div>
+
+              <div class="preview-muted mt-3" id="pvDescription">
+                —
+              </div>
+            </div>
+
+            <div class="preview-list">
+              <div class="preview-item">
+                <span>Klient</span>
+                <span id="pvClient">—</span>
+              </div>
+
+              <div class="preview-item">
+                <span>Priorytet</span>
+                <span id="pvPriority">—</span>
+              </div>
+
+              <div class="preview-item">
+                <span>Pracownicy</span>
+                <span id="pvWorkers">—</span>
+              </div>
+
+              <div class="preview-item">
+                <span>Termin</span>
+                <span id="pvDates">—</span>
+              </div>
+            </div>
+
+            <button type="submit" class="btn-orange w-100 mt-3">
+              <i class="bi bi-save me-1"></i>
+              {% if is_edit %}
+                Zapisz zmiany
+              {% else %}
+                Zapisz serwis
+              {% endif %}
+            </button>
+
+            <a href="{{ cancel_url }}" class="btn-soft w-100 mt-2">
+              Anuluj
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</form>
+
+{% if not is_edit and not form.is_bound %}
+<script>
+(function () {
+  let userInteracted = false;
+  let clearTimer = null;
+
+  function dateInputs() {
+    return document.querySelectorAll('[data-empty-on-create="true"]');
+  }
+
+  function clearNewServiceDates() {
+    if (userInteracted) return;
+    dateInputs().forEach(function (input) {
+      input.value = "";
+      input.removeAttribute("value");
+    });
+  }
+
+  function enableDateInputs() {
+    clearNewServiceDates();
+    dateInputs().forEach(function (input) {
+      input.readOnly = false;
+    });
+  }
+
+  function beginUserInteraction(event) {
+    clearNewServiceDates();
+    userInteracted = true;
+    event.currentTarget.readOnly = false;
+    if (clearTimer) window.clearInterval(clearTimer);
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    clearNewServiceDates();
+    dateInputs().forEach(function (input) {
+      input.addEventListener("pointerdown", beginUserInteraction, { once: true });
+      input.addEventListener("keydown", beginUserInteraction, { once: true });
+    });
+    clearTimer = window.setInterval(clearNewServiceDates, 50);
+    window.setTimeout(function () {
+      if (clearTimer) window.clearInterval(clearTimer);
+      enableDateInputs();
+    }, 1500);
+  });
+  window.addEventListener("pageshow", function () {
+    userInteracted = false;
+    clearNewServiceDates();
+    window.setTimeout(enableDateInputs, 100);
+  });
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const button = document.getElementById("showServiceSchedule");
+  const fields = document.getElementById("serviceScheduleFields");
+  if (!button || !fields) return;
+
+  button.addEventListener("click", function () {
+    fields.querySelectorAll('input[type="datetime-local"]').forEach(function (input) {
+      input.value = "";
+      input.removeAttribute("value");
+      input.readOnly = false;
+    });
+    fields.classList.remove("d-none");
+    button.remove();
+
+    const firstInput = fields.querySelector('input[type="datetime-local"]');
+    if (firstInput) firstInput.focus();
+  });
+});
+</script>
+{% endif %}
+
+<script>
+(function(){
+  const f = document.getElementById('serviceForm');
+  if (!f) return;
+
+  const byName = (n) => f.querySelector(`[name="${n}"]`);
+
+  const pv = {
+    title: document.getElementById('pvTitle'),
+    client: document.getElementById('pvClient'),
+    priority: document.getElementById('pvPriority'),
+    workers: document.getElementById('pvWorkers'),
+    dates: document.getElementById('pvDates'),
+    description: document.getElementById('pvDescription'),
+  };
+
+  function updatePreview(){
+    const title = byName('title')?.value || '—';
+    const desc = byName('description')?.value || '—';
+
+    if (pv.title) pv.title.textContent = title;
+    if (pv.description) pv.description.textContent = desc;
+
+    const clientSel = byName('client');
+
+    if (pv.client) {
+      if (clientSel?.tagName === 'SELECT') {
+        pv.client.textContent = clientSel.selectedOptions?.[0]?.text || '—';
+      } else {
+        pv.client.textContent = "{{ client.name|default:'—' }}";
+      }
+    }
+
+    const prSel = byName('priority');
+    if (pv.priority) {
+      pv.priority.textContent = prSel?.selectedOptions?.[0]?.text || '—';
+    }
+
+    const start = byName('planned_start')?.value || '';
+    const end = byName('planned_end')?.value || '';
+
+    if (pv.dates) {
+      pv.dates.textContent = start ? (end ? `${start} → ${end}` : start) : '—';
+    }
+
+    const workersSel = byName('assigned_to');
+
+    if (pv.workers) {
+      if (workersSel && workersSel.selectedOptions) {
+        const names = [...workersSel.selectedOptions].map(o => o.text).filter(Boolean);
+        pv.workers.textContent = names.length ? names.join(', ') : '—';
+      } else {
+        pv.workers.textContent = '—';
+      }
+    }
+  }
+
+  f.addEventListener('input', updatePreview);
+  f.addEventListener('change', updatePreview);
+  updatePreview();
+
+  f.addEventListener('submit', (e) => {
+    if (!f.checkValidity()) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    f.classList.add('was-validated');
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const f = document.getElementById('serviceForm');
+  if (!f) return;
+
+  const imgInput = f.querySelector('input[name="images"]');
+  const attInput = f.querySelector('input[name="attachments"]');
+  const imgPreview = document.getElementById('imgPreview');
+  const fileList = document.getElementById('fileList');
+
+  imgInput?.addEventListener('change', () => {
+    if (!imgPreview) return;
+    imgPreview.innerHTML = '';
+
+    [...imgInput.files].forEach(file => {
+      const url = URL.createObjectURL(file);
+      const img = document.createElement('img');
+      img.src = url;
+      img.className = 'upload-preview-img';
+      imgPreview.appendChild(img);
+    });
+  });
+
+  attInput?.addEventListener('change', () => {
+    if (!fileList) return;
+    fileList.innerHTML = '';
+
+    [...attInput.files].forEach(file => {
+      const li = document.createElement('li');
+      li.textContent = `${file.name} (${Math.round(file.size / 1024)} KB)`;
+      fileList.appendChild(li);
+    });
+  });
+})();
+</script>
+
+<script>
+(function(){
+  const form = document.getElementById('serviceForm');
+  if (!form) return;
+
+  const sel = form.querySelector('[name="assigned_to"]');
+  if (!sel) return;
+
+  const max = parseInt(sel.getAttribute('data-max') || '3', 10);
+
+  const chipsWrap = document.getElementById('workersChips');
+  const countEl = document.getElementById('workersCount');
+  const clearBtn = document.getElementById('workersClear');
+
+  function selectedOptions(){
+    return [...sel.options].filter(o => o.selected);
+  }
+
+  function enforceMax(){
+    const selected = selectedOptions();
+    if (selected.length <= max) return;
+
+    selected.slice(max).forEach(opt => {
+      opt.selected = false;
+    });
+  }
+
+  function render(){
+    const selected = selectedOptions();
+
+    if (countEl) countEl.textContent = String(selected.length);
+
+    if (chipsWrap){
+      chipsWrap.innerHTML = '';
+
+      selected.forEach(opt => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'workers-chip';
+        chip.innerHTML = `${opt.text} <span class="ms-1">×</span>`;
+        chip.title = 'Kliknij, aby odznaczyć';
+
+        chip.addEventListener('click', () => {
+          opt.selected = false;
+          sel.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        chipsWrap.appendChild(chip);
+      });
+    }
+
+    const limitReached = selected.length >= max;
+
+    [...sel.options].forEach(opt => {
+      if (!opt.selected) opt.disabled = limitReached;
+    });
+  }
+
+  sel.addEventListener('change', () => {
+    [...sel.options].forEach(o => o.disabled = false);
+    enforceMax();
+    render();
+  });
+
+  clearBtn?.addEventListener('click', () => {
+    [...sel.options].forEach(o => {
+      o.selected = false;
+      o.disabled = false;
+    });
+
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+
+  render();
+})();
+</script>
+
+<script>
+(function(){
+  const form = document.getElementById('serviceForm');
+  if (!form) return;
+
+  const clientInput = form.querySelector('[name="client"]');
+  const locationSelect = form.querySelector('[name="location"]');
+  const locationWrapper = document.getElementById('locationWrapper');
+
+  if (!clientInput || !locationSelect || !locationWrapper) return;
+
+  function resetLocation(){
+    locationSelect.innerHTML = '<option value="">---------</option>';
+    locationWrapper.classList.add('d-none');
+  }
+
+  function loadLocations(clientId, selectedLocationId=null){
+    if (!clientId){
+      resetLocation();
+      return;
+    }
+
+    fetch(`/serwis/api/client-locations/?client=${clientId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (!data.length){
+          resetLocation();
+          return;
+        }
+
+        locationSelect.innerHTML = '<option value="">Wybierz lokalizację</option>';
+
+        data.forEach(loc => {
+          const selected = selectedLocationId && String(selectedLocationId) === String(loc.id) ? 'selected' : '';
+          locationSelect.innerHTML += `<option value="${loc.id}" ${selected}>${loc.name}</option>`;
+        });
+
+        locationWrapper.classList.remove('d-none');
+      })
+      .catch(() => resetLocation());
+  }
+
+  if (clientInput.tagName === "SELECT") {
+    clientInput.addEventListener('change', function(){
+      loadLocations(this.value);
+    });
+  }
+
+  if (clientInput.value) {
+    const selectedLocation = locationSelect.value || null;
+    loadLocations(clientInput.value, selectedLocation);
+  }
+})();
+</script>
+
+{% endblock %}
