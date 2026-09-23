@@ -1,6 +1,6 @@
 # Instalacja Dapexa na serwerze
 
-Skrypt jest przygotowany dla Ubuntu/Debian i zakłada, że PostgreSQL jest dostępny pod danymi z `.env` (lokalnie albo na osobnym serwerze).
+Skrypt jest przygotowany dla Ubuntu/Debian i korzysta z lokalnej bazy SQLite `db.sqlite3`.
 
 ```bash
 sudo bash deploy/install.sh

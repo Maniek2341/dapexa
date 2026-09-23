@@ -17,7 +17,7 @@ ENV_FILE="${APP_DIR}/.env"
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install -y python3 python3-venv python3-dev build-essential libpq-dev nginx redis-server openssl
+apt-get install -y python3 python3-venv python3-dev build-essential nginx redis-server openssl
 
 if ! id -u "${APP_USER}" >/dev/null 2>&1; then
   useradd --system --home-dir "${APP_DIR}" --shell /usr/sbin/nologin "${APP_USER}"
@@ -37,18 +37,13 @@ PANEL_DOMAIN=${PANEL_DOMAIN:-panel.dapexa.com}
 DOMAIN_URL=${DOMAIN_URL:-https://panel.dapexa.com}
 SESSION_COOKIE_SECURE=True
 CSRF_COOKIE_SECURE=True
-DB_ENGINE=${DB_ENGINE:-django.db.backends.postgresql}
-DB_NAME=${DB_NAME:-business_manager}
-DB_USER=${DB_USER:-business_manager}
-DB_PASSWORD=${DB_PASSWORD:-change-me}
-DB_HOST=${DB_HOST:-127.0.0.1}
-DB_PORT=${DB_PORT:-5432}
+DB_NAME=${DB_NAME:-${APP_DIR}/db.sqlite3}
 CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://127.0.0.1:6379/0}
 CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://127.0.0.1:6379/0}
 EOF
   chmod 600 "${ENV_FILE}"
   chown "${APP_USER}:${APP_GROUP}" "${ENV_FILE}"
-  echo "Utworzono ${ENV_FILE}. Uzupełnij DB_PASSWORD i dane usług zewnętrznych przed uruchomieniem produkcyjnym."
+  echo "Utworzono ${ENV_FILE}. Uzupełnij dane poczty, Stripe i pozostałych usług przed uruchomieniem produkcyjnym."
 fi
 
 python3 -m venv "${APP_DIR}/.venv"
