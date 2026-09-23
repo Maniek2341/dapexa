@@ -8,7 +8,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core import mail
 from django.core.cache import cache
 from django.db import models
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
@@ -555,3 +555,21 @@ class SubscriptionCancellationTests(TestCase):
         self.owner.refresh_from_db()
         self.assertFalse(self.owner.is_active)
         self.assertIsNone(self.owner.company_id)
+
+
+class StripeCompatibilityTests(SimpleTestCase):
+    def test_sdk_preserves_existing_api_contract(self):
+        import stripe
+
+        http_client = stripe.RequestsClient()
+        with patch.object(stripe, "default_http_client", http_client), patch.object(
+            http_client, "request", return_value=(
+                '{"id":"sub_test","object":"subscription","current_period_end":1790000000}',
+                200,
+                {},
+            ),
+        ) as request:
+            subscription = stripe.Subscription.retrieve("sub_test", api_key="sk_test_local")
+
+        self.assertEqual(subscription.current_period_end, 1790000000)
+        self.assertEqual(request.call_args.args[2]["Stripe-Version"], "2024-09-30.acacia")

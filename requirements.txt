@@ -1,46 +1,28 @@
-# --- Django core ---
-Django==5.0.4
-django-environ==0.11.2
-psycopg2-binary==2.9.9
+# Python 3.14 / Django 6.0
+Django==6.0.8
+psycopg[binary]==3.3.6
 
-# --- Django features ---
-django-filter==24.2
-django-crispy-forms==2.1
-crispy-bootstrap5==2024.2
-django-cors-headers==4.4.0
+# Authentication, including Google/Facebook providers
+django-allauth[socialaccount]==65.19.4
+argon2-cffi==25.1.0
 
-# --- Django REST Framework ---
-djangorestframework==3.15.2
-djangorestframework-simplejwt==5.3.1
+# Payments: preserve the existing API version in settings.py
+stripe==15.6.1
 
-# --- Authentication / Password validation ---
-argon2-cffi==23.1.0
+# Background tasks (Kombu requires redis < 6.5)
+celery[redis]==5.6.3
+kombu==5.6.2
+billiard==4.3.0
+redis==6.4.0
 
-# --- Stripe / Payments ---
-stripe==11.1.0
+# Images and WSGI server
+Pillow==12.3.0
+gunicorn==26.2.0
 
-# --- Background tasks ---
-celery==5.4.0
-redis==5.0.6
-
-# --- File handling / Images ---
-Pillow==10.3.0
-
-# --- Gunicorn for production ---
-gunicorn==22.0.0
-
-# --- PDF generation (for faktury, protokoły) ---
-reportlab==4.2.2
-xhtml2pdf==0.2.15
-
-# --- Useful utilities ---
+# Calendar and HTTP integrations
+holidays==0.105
 python-dateutil==2.9.0.post0
-python-dotenv==1.0.1
-requests==2.32.3
+requests==2.34.2
 
-# --- Postgres optimization ---
-psycopg[binary]==3.2.1
-
-# --- Websocket / async (opcjonalnie) ---
-channels==4.1.0
-channels-redis==4.2.0
+# PDF rendering also requires the system wkhtmltopdf executable
+pdfkit==1.0.0

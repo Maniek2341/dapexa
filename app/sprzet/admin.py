@@ -316,11 +316,13 @@ class ToolAssignmentAdmin(admin.ModelAdmin):
     def is_active_badge(self, obj):
         if obj.is_active:
             return format_html(
-                '<span style="color:#0d6efd;font-weight:600;">Aktywne</span>'
+                '<span style="color:#0d6efd;font-weight:600;">{}</span>',
+                'Aktywne',
             )
 
         return format_html(
-            '<span style="color:#6c757d;">Zakończone</span>'
+            '<span style="color:#6c757d;">{}</span>',
+            'Zakończone',
         )
 
     is_active_badge.short_description = "Status"

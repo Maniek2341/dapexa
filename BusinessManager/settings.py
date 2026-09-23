@@ -192,8 +192,6 @@ TIME_ZONE = 'Europe/Warsaw'
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
 AUTHENTICATION_BACKENDS = (
@@ -234,6 +232,8 @@ MEDIA_URL = "/files/"
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
+# Preserve the API contract used by stripe-python 11.1.0.
+STRIPE_API_VERSION = "2024-09-30.acacia"
 
 # przyda się do budowania success/cancel URL
 DOMAIN_URL = os.getenv("DOMAIN_URL", f"https://{PANEL_DOMAIN}").rstrip("/")

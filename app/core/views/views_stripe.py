@@ -23,6 +23,7 @@ from app.core.validators import is_valid_polish_nip, normalize_nip
 logger = logging.getLogger(__name__)
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_version = settings.STRIPE_API_VERSION
 
 # price_id z Twojego panelu Stripe
 STRIPE_PRICE_IDS = {
