@@ -1,4 +1,3 @@
-from datetime import date
 from decimal import Decimal
 
 from django.views import View
@@ -13,22 +12,20 @@ from app.urlop.services import (
     get_leave_type_usage,
     used_vacation_days,
 )
-from app.core.models import PanelUser
 from app.urlop.models import LeaveAllowance, LeaveType, LeaveRequest
+from app.urlop.access import LeavePermissionMixin
+from app.urlop.allowance_generator import ensure_year_allowances, eligible_leave_users
 
 
-class LeaveAllowanceListView(LoginRequiredMixin, View):
+class LeaveAllowanceListView(LeavePermissionMixin, View):
+    leave_permission = "leave_allowance_list"
     login_url = reverse_lazy("login")
     template_name = "app/urlop/allowance_list.html"
 
     def get(self, request, *args, **kwargs):
-        year = timezone.now().year
+        year = timezone.localdate().year
 
-        employees = PanelUser.objects.filter(
-            company=request.user.company,
-            is_active=True,
-            is_active_employee=True,
-        ).order_by("first_name", "last_name")
+        employees = eligible_leave_users(request.user.company).order_by("first_name", "last_name")
 
         leave_types = LeaveType.objects.filter(
             company=request.user.company,
@@ -38,8 +35,10 @@ class LeaveAllowanceListView(LoginRequiredMixin, View):
         data = []
 
         for employee in employees:
+            base_limit = Decimal("0")
             try:
                 allowance = get_allowance(request.user.company, employee, year)
+                base_limit = allowance.vacation_limit
 
                 vacation_limit = (
                     allowance.vacation_limit
@@ -54,9 +53,6 @@ class LeaveAllowanceListView(LoginRequiredMixin, View):
                 )
 
                 vacation_remaining = vacation_limit - vacation_used
-                if vacation_remaining < 0:
-                    vacation_remaining = Decimal("0")
-
                 carryover = allowance.carryover_days
                 adjustment = allowance.adjustment_days
 
@@ -93,6 +89,7 @@ class LeaveAllowanceListView(LoginRequiredMixin, View):
                 "limit": vacation_limit,
                 "carryover": carryover,
                 "adjustment": adjustment,
+                "base_limit": base_limit,
                 "used": vacation_used,
                 "remaining": vacation_remaining,
                 "leave_types": employee_leave_types,
@@ -104,68 +101,14 @@ class LeaveAllowanceListView(LoginRequiredMixin, View):
         })
 
 
-class GenerateLeaveAllowancesView(LoginRequiredMixin, View):
-    def get(self, request):
-        if request.user.role != "owner":
-            return redirect("dashboard")
+class GenerateLeaveAllowancesView(LeavePermissionMixin, View):
+    leave_permission = "generate_leave_allowances"
 
-        company = request.user.company
-        year = timezone.now().year
-        previous_year = year - 1
-
-        employees = PanelUser.objects.filter(
-            company=company,
-            role__in=["owner", "manager", "employee"],
-            is_active_employee=True,
-        )
-
-        for emp in employees:
-            # 1. podstawowy limit 20/26 × etat
-            limit = emp.get_vacation_entitlement()
-
-            # 2. zaległy z poprzedniego roku - tylko wypoczynkowy
-            carryover = Decimal("0")
-
-            try:
-                prev_allowance = LeaveAllowance.objects.get(
-                    company=company,
-                    user=emp,
-                    year=previous_year,
-                )
-
-                used_last_year = used_vacation_days(
-                    company,
-                    emp,
-                    previous_year,
-                )
-
-                total_last_year = (
-                    prev_allowance.vacation_limit
-                    + prev_allowance.carryover_days
-                    + prev_allowance.adjustment_days
-                )
-
-                remaining = total_last_year - used_last_year
-
-                if remaining > 0:
-                    carryover = remaining
-
-            except LeaveAllowance.DoesNotExist:
-                pass
-
-            # 3. zapis nowego roku
-            LeaveAllowance.objects.update_or_create(
-                company=company,
-                user=emp,
-                year=year,
-                defaults={
-                    "vacation_limit": limit,
-                    "carryover_days": carryover,
-                    "adjustment_days": Decimal("0"),
-                    "on_demand_limit": Decimal("4"),
-                    "carryover_deadline": date(year, 9, 30),
-                }
-            )
-
+    def post(self, request):
+        year = int(request.POST.get("year") or timezone.localdate().year)
+        if year < 2000 or year > 2200:
+            messages.error(request, "Nieprawidłowy rok limitu.")
+            return redirect("leave_allowance_list")
+        ensure_year_allowances(request.user.company, year)
         messages.success(request, "Limity urlopowe zostały wygenerowane.")
         return redirect("leave_allowance_list")

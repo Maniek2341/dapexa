@@ -529,6 +529,18 @@
               {% endif %}
             </div>
 
+            <div class="col-md-6 d-flex align-items-end">
+              <div class="form-check mb-2">
+                {{ form.is_active_employee }}
+                <label class="form-check-label" for="{{ form.is_active_employee.id_for_label }}">
+                  {{ form.is_active_employee.label }}
+                </label>
+                {% if form.is_active_employee.errors %}
+                  <div class="field-errors">{{ form.is_active_employee.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
             <div class="col-md-6">
               <label class="form-label emp-label">{{ form.wyksztalcenie.label }}</label>
               {{ form.wyksztalcenie }}

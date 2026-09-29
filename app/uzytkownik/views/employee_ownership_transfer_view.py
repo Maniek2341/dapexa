@@ -17,6 +17,7 @@ from django.utils import timezone
 from django.utils.crypto import constant_time_compare
 from django.views import View
 
+from app.core.emails import build_email_url
 from app.core.models import Subscription
 from app.uzytkownik.models import OwnershipTransfer
 
@@ -70,7 +71,7 @@ class EmployeeOwnershipTransferView(LoginRequiredMixin, View):
                     token_hash=_hash_token(raw_token),
                     expires_at=expires_at,
                 )
-                confirmation_url = request.build_absolute_uri(
+                confirmation_url = build_email_url(
                     reverse(
                         "employee_ownership_transfer_confirm",
                         kwargs={"transfer_id": transfer.pk, "token": raw_token},
@@ -84,13 +85,15 @@ class EmployeeOwnershipTransferView(LoginRequiredMixin, View):
                         "expires_at": expires_at,
                     },
                 )
-                send_mail(
+                sent = send_mail(
                     subject=f"Potwierdź przekazanie firmy {current_owner.company.name}",
                     message=message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[current_owner.email],
                     fail_silently=False,
                 )
+                if sent != 1:
+                    raise RuntimeError("Email backend did not accept the ownership confirmation")
         except PermissionDenied:
             raise
         except Exception:
@@ -204,7 +207,7 @@ class EmployeeOwnershipTransferConfirmView(View):
             if transfer.status == OwnershipTransfer.Status.OWNER_PENDING:
                 recipient_token = secrets.token_urlsafe(32)
                 recipient_expires_at = timezone.now() + timedelta(hours=24)
-                confirmation_url = request.build_absolute_uri(
+                confirmation_url = build_email_url(
                     reverse(
                         "employee_ownership_transfer_confirm",
                         kwargs={
@@ -222,13 +225,15 @@ class EmployeeOwnershipTransferConfirmView(View):
                     },
                 )
                 try:
-                    send_mail(
+                    sent = send_mail(
                         subject=f"Potwierdź przejęcie firmy {transfer.company.name}",
                         message=message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[new_owner.email],
                         fail_silently=False,
                     )
+                    if sent != 1:
+                        raise RuntimeError("Email backend did not accept the ownership confirmation")
                 except Exception:
                     logger.exception(
                         "Nie udało się wysłać potwierdzenia przyszłemu właścicielowi"

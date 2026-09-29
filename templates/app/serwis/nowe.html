@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'assets/css/shared_dashboard.css' %}">
-<link rel="stylesheet" href="{% static 'assets/css/service_list.css' %}">
+<link rel="stylesheet" href="{% static 'assets/css/shared_dashboard.css' %}?v=20260923-2">
+<link rel="stylesheet" href="{% static 'assets/css/service_list.css' %}?v=20260923-2">
 {% endblock %}
 
 {% block content %}
@@ -73,7 +73,8 @@
   align-items:center;
   justify-content:center;
   background:rgba(20,104,245,.12);
-  border:1px solid rgba(20,104,245,.18);
+  border:1px solid rgba(20,104,245,.30);
+  box-shadow:0 8px 22px rgba(20,104,245,.16), inset 0 1px 0 rgba(255,255,255,.10);
   color:#1468f5;
   font-size:1.3rem;
   flex-shrink:0;
@@ -1314,30 +1315,6 @@
   })();
   </script>
 <script>
-(function(){
-  const root = document.documentElement;
-  const key = 'dashboard-theme';
-  const saved = localStorage.getItem(key) || 'dark';
-  root.setAttribute('data-theme', saved);
-
-  const btn = document.getElementById('themeToggle');
-  if (!btn) return;
-
-  const setIcon = () => {
-    btn.innerHTML = root.getAttribute('data-theme') === 'light'
-      ? '<i class="bi bi-sun"></i>'
-      : '<i class="bi bi-moon-stars"></i>';
-  };
-
-  setIcon();
-
-  btn.addEventListener('click', ()=>{
-    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    root.setAttribute('data-theme', next);
-    localStorage.setItem(key, next);
-    setIcon();
-  });
-})();
 </script>
 <script>
 (function(){

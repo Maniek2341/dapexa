@@ -6,6 +6,7 @@ from django.views import View
 
 from .forms import SupportReplyForm, SupportTicketForm
 from .models import SupportReply, SupportTicket
+from .notifications import notify_support_ticket
 
 
 class SupportAccessMixin:
@@ -48,6 +49,7 @@ class SupportTicketCreateView(SupportAccessMixin, LoginRequiredMixin, View):
             ticket.company = request.user.company
             ticket.created_by = request.user
             ticket.save()
+            notify_support_ticket(ticket)
             messages.success(request, "Zgłoszenie zostało wysłane do wsparcia.")
             return redirect("support_detail", pk=ticket.pk)
         return render(request, "app/wsparcie/form.html", {"form": form})

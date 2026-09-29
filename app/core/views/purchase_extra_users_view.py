@@ -15,6 +15,7 @@ from app.core.views.views_stripe import (
     get_extra_user_price_id,
     sync_extra_users_from_stripe,
     sync_stripe_customer_billing_data,
+    stripe_data,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,7 +33,7 @@ class PurchaseExtraUsersView(LoginRequiredMixin, View):
         except (TypeError, ValueError):
             quantity = 0
         if quantity < 1 or quantity > 100:
-            messages.error(request, "Wybierz od 1 do 100 dodatkowych użytkowników.")
+            messages.error(request, "Wybierz od 1 do 100 dodatkowych pracowników.")
             return redirect("profile")
 
         try:
@@ -45,8 +46,10 @@ class PurchaseExtraUsersView(LoginRequiredMixin, View):
                 )
                 if (
                     not subscription
-                    or subscription.package == Subscription.Package.TRIAL
-                    or subscription.base_max_users is None
+                    or subscription.package not in {
+                        Subscription.Package.START,
+                        Subscription.Package.STANDARD,
+                    }
                     or subscription.cancel_at_period_end
                     or subscription.status not in {
                         Subscription.STATUS_ACTIVE,
@@ -55,7 +58,7 @@ class PurchaseExtraUsersView(LoginRequiredMixin, View):
                 ):
                     messages.error(
                         request,
-                        "Dodatkowych użytkowników można dokupić do aktywnego pakietu Start lub Standard.",
+                        "Dodatkowych pracowników można dokupić tylko do aktywnego pakietu Start lub Standard. Pakiet Pro ma nielimitowaną liczbę pracowników.",
                     )
                     return redirect("profile")
                 if not subscription.stripe_subscription_id or not subscription.billing_period:
@@ -76,10 +79,10 @@ class PurchaseExtraUsersView(LoginRequiredMixin, View):
                     return redirect("company_settings")
 
                 stripe.api_key = settings.STRIPE_SECRET_KEY
-                stripe_subscription = stripe.Subscription.retrieve(
+                stripe_subscription = stripe_data(stripe.Subscription.retrieve(
                     subscription.stripe_subscription_id,
                     expand=["items.data.price", "latest_invoice.payment_intent"],
-                )
+                ))
                 stripe_customer_id = stripe_subscription.get("customer")
                 if isinstance(stripe_customer_id, str):
                     subscription.stripe_customer_id = stripe_customer_id
@@ -123,6 +126,7 @@ class PurchaseExtraUsersView(LoginRequiredMixin, View):
                     proration_behavior="always_invoice",
                     expand=["items.data.price", "latest_invoice.payment_intent"],
                 )
+                updated_subscription = stripe_data(updated_subscription)
                 sync_extra_users_from_stripe(subscription, updated_subscription)
                 subscription.save(update_fields=[
                     "stripe_price_id",

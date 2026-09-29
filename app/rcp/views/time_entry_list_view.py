@@ -7,6 +7,7 @@ from django.views import View
 from django.utils import timezone
 
 from app.rcp.models import TimeEntry
+from app.rcp.forms import get_default_work_hours
 from app.core.models import PanelUser
 
 
@@ -132,6 +133,7 @@ class TimeEntryListView(LoginRequiredMixin, CompanyQuerysetMixin, View):
         is_viewing_own_entries = viewed_user.id == user.id
         can_edit_delete_directly = can_direct_manage_own_entries and is_viewing_own_entries
         should_request_edit = user.role == PanelUser.Role.EMPLOYEE and is_viewing_own_entries
+        default_work_start_time, default_work_end_time = get_default_work_hours(user)
 
         context = {
             "entries": entries_list,
@@ -151,6 +153,8 @@ class TimeEntryListView(LoginRequiredMixin, CompanyQuerysetMixin, View):
 
             "can_edit_delete_directly": can_edit_delete_directly,
             "should_request_edit": should_request_edit,
+            "default_work_start_time": default_work_start_time,
+            "default_work_end_time": default_work_end_time,
         }
 
         return render(request, self.template_name, context)

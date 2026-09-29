@@ -696,7 +696,9 @@
               </td>
 
               <td>
-                {% if employee.is_active_employee %}
+                {% if not employee.has_usable_password %}
+                  <span class="badge-soft badge-inactive"><i class="bi bi-envelope"></i> Brak ustawionego hasła</span>
+                {% elif employee.is_active_employee %}
                   <span class="badge-soft badge-active">
                     <i class="bi bi-check-circle-fill"></i>
                     Aktywny
@@ -721,12 +723,9 @@
                     {% endif %}
 
                     {% if employee.pk != request.user.pk and employee.role != "owner" %}
-                      <form method="post" action="{% url 'employee_status_toggle' employee.pk %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="icon-btn icon-btn-status{% if employee.is_active_employee %} off{% endif %}" title="{% if employee.is_active_employee %}Dezaktywuj{% else %}Aktywuj{% endif %}">
-                          <i class="bi {% if employee.is_active_employee %}bi-person-slash{% else %}bi-person-check{% endif %}"></i>
-                        </button>
-                      </form>
+                      {% if can_manage_employee_status %}
+                      {% include "app/pracownik/status_actions.html" %}
+                      {% endif %}
                     {% endif %}
 
                     {% if request.user.role == "owner" or perms.core.access_employee_delete %}
@@ -793,7 +792,9 @@
               </div>
             </div>
 
-            {% if employee.is_active_employee %}
+            {% if not employee.has_usable_password %}
+              <span class="badge-soft badge-inactive"><i class="bi bi-envelope"></i> Brak ustawionego hasła</span>
+            {% elif employee.is_active_employee %}
               <span class="badge-soft badge-active">
                 <i class="bi bi-check-circle-fill"></i>
                 Aktywny
@@ -830,10 +831,9 @@
               {% endif %}
 
               {% if employee.pk != request.user.pk and employee.role != "owner" %}
-                <form method="post" action="{% url 'employee_status_toggle' employee.pk %}" class="d-inline">
-                  {% csrf_token %}
-                  <button type="submit" class="icon-btn icon-btn-status{% if employee.is_active_employee %} off{% endif %}" title="{% if employee.is_active_employee %}Dezaktywuj{% else %}Aktywuj{% endif %}"><i class="bi {% if employee.is_active_employee %}bi-person-slash{% else %}bi-person-check{% endif %}"></i></button>
-                </form>
+                {% if can_manage_employee_status %}
+                  {% include "app/pracownik/status_actions.html" %}
+                {% endif %}
               {% endif %}
 
               {% if request.user.role == "owner" or perms.core.access_employee_delete %}

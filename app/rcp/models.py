@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.utils import timezone
 
-from app.core.models import CompanyOwnedModel
+from app.core.models import CompanyOwnedModel, PanelUser
 from app.core.view_permissions import view_permissions
 
 
@@ -234,6 +234,27 @@ class TimeEntryRequest(CompanyOwnedModel):
             })
 
     def approve(self, decided_by):
+        from django.db import transaction
+        from django.core.exceptions import ValidationError
+        from app.core.models import PanelUser
+        from app.urlop.models import LeaveRequest
+
+        with transaction.atomic():
+            PanelUser.objects.select_for_update().get(pk=self.user_id)
+            work_date = self.date if self.request_type == TimeEntryRequestType.MISSING else (
+                self.entry.date if self.request_type == TimeEntryRequestType.EDIT and self.entry_id else None
+            )
+            if work_date and LeaveRequest.objects.filter(
+                company_id=self.company_id,
+                user_id=self.user_id,
+                status=LeaveRequest.Status.APPROVED,
+                date_from__lte=work_date,
+                date_to__gte=work_date,
+            ).exists():
+                raise ValidationError("Nie można zatwierdzić czasu pracy w dniu urlopu.")
+            return self._approve_locked(decided_by)
+
+    def _approve_locked(self, decided_by):
         self.status = TimeEntryRequestStatus.APPROVED
         self.decided_by = decided_by
         self.decided_at = timezone.now()
@@ -246,7 +267,11 @@ class TimeEntryRequest(CompanyOwnedModel):
                 date=self.date,
                 start_time=self.new_start_time,
                 end_time=self.new_end_time,
-                work_mode=WorkMode.OFFICE,
+                work_mode=(
+                    WorkMode.FIELD
+                    if self.user.role == PanelUser.Role.EMPLOYEE
+                    else WorkMode.OFFICE
+                ),
                 status=TimeEntryStatus.APPROVED,
                 submitted_at=timezone.now(),
                 approved_at=timezone.now(),

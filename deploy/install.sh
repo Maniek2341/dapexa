@@ -1,85 +1,62 @@
 #!/usr/bin/env bash
+# Install reviewed service files after dependencies, .env and migrations are ready.
 set -Eeuo pipefail
-
-# Instalacja Dapexa na Ubuntu/Debian. Uruchom jako root z katalogu projektu:
-#   sudo bash deploy/install.sh
-
-if [[ "${EUID}" -ne 0 ]]; then
-  echo "Uruchom skrypt jako root: sudo bash deploy/install.sh" >&2
-  exit 1
+if [[ ${EUID} -ne 0 ]]; then
+    echo 'Run as root: sudo bash deploy/install.sh domain.example panel.domain.example' >&2
+    exit 1
 fi
-
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-APP_DIR="${APP_DIR:-$(cd "${SCRIPT_DIR}/.." && pwd)}"
-APP_USER="${APP_USER:-dapexa}"
-APP_GROUP="${APP_GROUP:-www-data}"
-ENV_FILE="${APP_DIR}/.env"
-
-export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install -y python3 python3-venv python3-dev build-essential libpq-dev nginx redis-server openssl
-
-if ! id -u "${APP_USER}" >/dev/null 2>&1; then
-  useradd --system --home-dir "${APP_DIR}" --shell /usr/sbin/nologin "${APP_USER}"
+if [[ $# -ne 2 ]]; then
+    echo 'Supply the public domain and panel subdomain. See deploy/README.md.' >&2
+    exit 1
 fi
-
-install -d -o "${APP_USER}" -g "${APP_GROUP}" "${APP_DIR}/files" "${APP_DIR}/static"
-
-if [[ ! -f "${ENV_FILE}" ]]; then
-  DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY:-$(openssl rand -hex 48)}"
-  cat > "${ENV_FILE}" <<EOF
-DJANGO_DEBUG=False
-DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-DJANGO_ALLOWED_HOSTS=${DJANGO_ALLOWED_HOSTS:-dapexa.com,panel.dapexa.com}
-DJANGO_CSRF_TRUSTED_ORIGINS=${DJANGO_CSRF_TRUSTED_ORIGINS:-https://dapexa.com,https://panel.dapexa.com}
-PUBLIC_DOMAIN=${PUBLIC_DOMAIN:-dapexa.com}
-PANEL_DOMAIN=${PANEL_DOMAIN:-panel.dapexa.com}
-DOMAIN_URL=${DOMAIN_URL:-https://panel.dapexa.com}
-SESSION_COOKIE_SECURE=True
-CSRF_COOKIE_SECURE=True
-DB_ENGINE=${DB_ENGINE:-django.db.backends.postgresql}
-DB_NAME=${DB_NAME:-business_manager}
-DB_USER=${DB_USER:-business_manager}
-DB_PASSWORD=${DB_PASSWORD:-change-me}
-DB_HOST=${DB_HOST:-127.0.0.1}
-DB_PORT=${DB_PORT:-5432}
-CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://127.0.0.1:6379/0}
-CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://127.0.0.1:6379/0}
-EOF
-  chmod 600 "${ENV_FILE}"
-  chown "${APP_USER}:${APP_GROUP}" "${ENV_FILE}"
-  echo "Utworzono ${ENV_FILE}. Uzupełnij DB_PASSWORD i dane usług zewnętrznych przed uruchomieniem produkcyjnym."
-fi
-
-python3 -m venv "${APP_DIR}/.venv"
-"${APP_DIR}/.venv/bin/pip" install --upgrade pip wheel
-"${APP_DIR}/.venv/bin/pip" install -r "${APP_DIR}/requirements.txt"
-
-set -a
-source "${ENV_FILE}"
-set +a
-cd "${APP_DIR}"
-"${APP_DIR}/.venv/bin/python" manage.py check
-"${APP_DIR}/.venv/bin/python" manage.py migrate --noinput
-"${APP_DIR}/.venv/bin/python" manage.py collectstatic --noinput
-
-chown -R "${APP_USER}:${APP_GROUP}" "${APP_DIR}/files" "${APP_DIR}/static"
-
-for service in dapexa-gunicorn dapexa-celery dapexa-celery-beat; do
-  sed -e "s|%APP_DIR%|${APP_DIR}|g" -e "s|%APP_USER%|${APP_USER}|g" \
-    "${SCRIPT_DIR}/${service}.service" > "/etc/systemd/system/${service}.service"
+for domain in "$@"; do
+    if [[ ! "$domain" =~ ^[a-zA-Z0-9]([a-zA-Z0-9.-]*[a-zA-Z0-9])?$ ]]; then
+        echo 'Invalid server name.' >&2
+        exit 1
+    fi
 done
-
-sed "s|%APP_DIR%|${APP_DIR}|g" "${SCRIPT_DIR}/nginx-dapexa.conf" > /etc/nginx/sites-available/dapexa.conf
-ln -sfn /etc/nginx/sites-available/dapexa.conf /etc/nginx/sites-enabled/dapexa.conf
-rm -f /etc/nginx/sites-enabled/default
+cd /var/www/dapexa
+for domain in "$1" "$2"; do
+    if [[ ! -r "/etc/letsencrypt/live/$domain/fullchain.pem" || ! -r "/etc/letsencrypt/live/$domain/privkey.pem" ]]; then
+        echo "A certificate for $domain is required before installing the HTTPS sites." >&2
+        exit 1
+    fi
+done
+runuser -u deploy -- .venv/bin/python manage.py check
+runuser -u deploy -- .venv/bin/python manage.py migrate --check
+backup_dir="/var/backups/dapexa/$(date -u +%Y%m%dT%H%M%SZ)-services"
+install -d -m 0700 "$backup_dir"
+for unit in dapexa dapexa-celery dapexa-celery-beat; do
+    if [[ -f "/etc/systemd/system/$unit.service" ]]; then
+        cp -a "/etc/systemd/system/$unit.service" "$backup_dir/"
+    fi
+    install -m 0644 "deploy/$unit.service" "/etc/systemd/system/$unit.service"
+done
+if [[ -f /etc/nginx/sites-available/dapexa ]]; then
+    cp -a /etc/nginx/sites-available/dapexa "$backup_dir/nginx-dapexa"
+fi
+for config in /etc/nginx/conf.d/dapexa-log-format.conf /etc/letsencrypt/renewal-hooks/deploy/10-reload-nginx; do
+    if [[ -f "$config" ]]; then
+        cp -a "$config" "$backup_dir/$(basename "$config")"
+    fi
+done
+sed -e "s/%PUBLIC_DOMAIN%/$1/g" -e "s/%PANEL_DOMAIN%/$2/g" deploy/nginx-dapexa.conf > /etc/nginx/sites-available/dapexa
+install -m 0644 deploy/dapexa-log-format.conf /etc/nginx/conf.d/dapexa-log-format.conf
+install -d -m 0755 /etc/letsencrypt/renewal-hooks/deploy
+sed -e "s|%PUBLIC_DOMAIN%|$1|g" -e "s|%PANEL_DOMAIN%|$2|g" deploy/letsencrypt-renew-hook.sh > /etc/letsencrypt/renewal-hooks/deploy/10-reload-nginx
+chmod 0755 /etc/letsencrypt/renewal-hooks/deploy/10-reload-nginx
+if [[ ! -e /etc/nginx/sites-enabled/dapexa ]]; then
+    ln -s /etc/nginx/sites-available/dapexa /etc/nginx/sites-enabled/dapexa
+fi
+# No reload is permitted unless validation succeeds.
 nginx -t
-
 systemctl daemon-reload
-systemctl enable --now redis-server
-systemctl enable --now dapexa-gunicorn dapexa-celery dapexa-celery-beat nginx
-systemctl restart dapexa-gunicorn dapexa-celery dapexa-celery-beat nginx
-
-echo
-echo "Instalacja zakończona. Sprawdź: systemctl status dapexa-gunicorn"
-echo "Przed ruchem produkcyjnym skonfiguruj DNS i certyfikat SSL (np. certbot)."
+systemctl enable postgresql redis-server dapexa nginx
+systemctl start postgresql redis-server
+systemctl restart dapexa
+systemctl is-active --quiet dapexa
+curl --fail --silent --output /dev/null --retry 10 --retry-connrefused --retry-delay 1 \
+    --unix-socket /run/dapexa/gunicorn.sock http://localhost/uzytkownik/login
+systemctl reload nginx
+# Beat is intentionally opt-in: review the retention task before enabling it.
+echo 'Web service installed. Review Celery retention and integrations before enabling worker/beat.'

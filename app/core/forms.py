@@ -138,7 +138,8 @@ class CompanyOperationalSettingsForm(forms.ModelForm):
             "travel_cost_per_km", "labor_price_1_worker",
             "labor_price_2_workers", "labor_price_3_workers", "default_vat",
             "default_protocol_valid_days", "default_work_start_time",
-            "default_work_end_time", "protocol_number_prefix",
+            "default_work_end_time", "default_employee_work_start_time",
+            "default_employee_work_end_time", "protocol_number_prefix",
             "protocol_number_digits", "service_number_prefix",
             "service_number_digits", "maintenance_number_prefix",
         ]
@@ -151,6 +152,8 @@ class CompanyOperationalSettingsForm(forms.ModelForm):
             "default_protocol_valid_days": "Domyślna ważność protokołu (dni)",
             "default_work_start_time": "Domyślna godzina rozpoczęcia pracy",
             "default_work_end_time": "Domyślna godzina zakończenia pracy",
+            "default_employee_work_start_time": "Godzina rozpoczęcia pracy pracownika",
+            "default_employee_work_end_time": "Godzina zakończenia pracy pracownika",
             "protocol_number_prefix": "Prefiks numeru protokołu",
             "protocol_number_digits": "Liczba cyfr numeru protokołu",
             "service_number_prefix": "Prefiks numeru zgłoszenia",
@@ -166,6 +169,8 @@ class CompanyOperationalSettingsForm(forms.ModelForm):
             "default_protocol_valid_days": forms.NumberInput(attrs={"step": "1", "min": "1"}),
             "default_work_start_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "default_work_end_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "default_employee_work_start_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
+            "default_employee_work_end_time": forms.TimeInput(attrs={"type": "time"}, format="%H:%M"),
             "protocol_number_prefix": forms.TextInput(attrs={"placeholder": "PROT", "maxlength": "12"}),
             "protocol_number_digits": forms.NumberInput(attrs={"min": "2", "max": "8"}),
             "service_number_prefix": forms.TextInput(attrs={"placeholder": "SER", "maxlength": "12"}),
@@ -195,6 +200,18 @@ class CompanyOperationalSettingsForm(forms.ModelForm):
             self.add_error(
                 "default_work_end_time",
                 "Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia.",
+            )
+
+        employee_start_time = cleaned_data.get("default_employee_work_start_time")
+        employee_end_time = cleaned_data.get("default_employee_work_end_time")
+        if employee_start_time and employee_end_time and employee_start_time >= employee_end_time:
+            self.add_error(
+                "default_employee_work_start_time",
+                "Godzina rozpoczęcia pracy pracownika musi być wcześniejsza niż godzina zakończenia.",
+            )
+            self.add_error(
+                "default_employee_work_end_time",
+                "Godzina zakończenia pracy pracownika musi być późniejsza niż godzina rozpoczęcia.",
             )
 
         for field_name in ("protocol_number_digits", "service_number_digits"):

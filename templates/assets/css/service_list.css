@@ -147,7 +147,9 @@
     width: 52px;
     height: 52px;
     border-radius: 16px;
-    background: rgba(255, 122, 0, .12);
+    background: rgba(20, 104, 245, .12);
+    border: 1px solid rgba(20, 104, 245, .30);
+    box-shadow: 0 8px 22px rgba(20, 104, 245, .16), inset 0 1px 0 rgba(255, 255, 255, .10);
     color: #1468f5;
     display: flex;
     align-items: center;
@@ -157,13 +159,15 @@
 }
 
 .service-icon-progress {
-    background: rgba(255, 193, 7, .13);
-    color: #ffb400;
+    background: rgba(20, 104, 245, .12);
+    border-color: rgba(20, 104, 245, .18);
+    color: #1468f5;
 }
 
 .service-icon-new {
-    background: rgba(108, 117, 125, .13);
-    color: #adb5bd;
+    background: rgba(20, 104, 245, .12);
+    border-color: rgba(20, 104, 245, .18);
+    color: #1468f5;
 }
 
 .service-title {
@@ -495,7 +499,9 @@
     width: 52px;
     height: 52px;
     border-radius: 16px;
-    background: rgba(255, 122, 0, .12);
+    background: rgba(20, 104, 245, .12);
+    border: 1px solid rgba(20, 104, 245, .30);
+    box-shadow: 0 8px 22px rgba(20, 104, 245, .16), inset 0 1px 0 rgba(255, 255, 255, .10);
     color: #1468f5;
     display: flex;
     align-items: center;

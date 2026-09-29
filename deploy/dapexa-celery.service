@@ -1,15 +1,32 @@
 [Unit]
 Description=Dapexa Celery worker
-After=network.target redis-server.service
+After=network.target postgresql.service redis-server.service
+Requires=postgresql.service redis-server.service
 
 [Service]
-User=%APP_USER%
+Type=simple
+User=deploy
 Group=www-data
-WorkingDirectory=%APP_DIR%
-EnvironmentFile=%APP_DIR%/.env
-ExecStart=%APP_DIR%/.venv/bin/celery -A BusinessManager worker --loglevel=INFO
-Restart=always
+WorkingDirectory=/var/www/dapexa
+EnvironmentFile=/var/www/dapexa/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/var/www/dapexa/.venv/bin/celery -A BusinessManager worker --loglevel=INFO --concurrency=2 --hostname=dapexa@%%h
+Restart=on-failure
 RestartSec=5
+TimeoutStopSec=300
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/www/dapexa/files
 
 [Install]
 WantedBy=multi-user.target

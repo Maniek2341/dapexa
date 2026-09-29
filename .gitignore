@@ -10,6 +10,9 @@ venv/
 *.log
 db.sqlite3
 staticfiles/
+/static/
+celerybeat-schedule*
+*.pid
 
 # Uploaded/private data
 files/*

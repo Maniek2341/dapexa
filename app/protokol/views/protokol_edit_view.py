@@ -83,6 +83,7 @@ class ProtocolEditView(LoginRequiredMixin, View):
             # 🔹 zapisz podstawowe dane
             protocol = form.save(commit=False)
             protocol.save()
+            form.save_attachments(protocol)
 
             # 🔹 zapisz materiały (usuń/dodaj/zmień)
             formset.instance = protocol

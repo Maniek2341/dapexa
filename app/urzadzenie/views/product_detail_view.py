@@ -6,6 +6,7 @@ from app.urzadzenie.models import Product, ProductActivity
 from app.magazyn.models import StockItem, StockMovement
 from app.oferta_praca.models import OfferVariantItem
 from app.protokol.models import ProtokolUrzadzenia
+from app.dostawcy.models import SupplierCompanyProduct
 from django.core.exceptions import PermissionDenied
 from app.urzadzenie.permissions import can_view_product_detail
 
@@ -61,6 +62,12 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
             )
             .select_related("warehouse")
             .order_by("-id")
+        )
+        supplier_availability = (
+            SupplierCompanyProduct.objects
+            .filter(company=company, local_product=product)
+            .select_related("integration__supplier", "supplier_product")
+            .order_by("integration__supplier__name")
         )
         product_activities_qs = (
             ProductActivity.objects
@@ -125,6 +132,7 @@ class ProductDetailView(LoginRequiredMixin, DetailView):
             "gross_price": gross_price,
 
             "stock_items": stock_items_qs,
+            "supplier_availability": supplier_availability,
             "stock_movements": stock_movements,
             "stock_movements_count": stock_movements_count,
             "total_quantity": stock_summary["total_quantity"] or 0,

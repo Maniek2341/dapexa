@@ -1,10 +1,12 @@
 from django.urls import path
 
-from app.urlop.views import (LeaveRequestCreateView, LeaveTypeCreateView, LeaveTypeUpdateView, LeaveTypeListView, LeaveAllowanceListView, 
-GenerateLeaveAllowancesView, HRLeaveListView, HRLeaveApproveView, HRLeaveRejectView, HRLeaveCancelView, HRLeavePDFView, LeaveTypeUpdateView, LeaveTypeDeleteView)
+from app.urlop.views import (LeaveRequestCreateView, LeaveTypeCreateView, LeaveTypeUpdateView, LeaveTypeListView, LeaveAllowanceListView,
+GenerateLeaveAllowancesView, HRLeaveListView, HRLeaveApproveView, HRLeaveRejectView, HRLeaveCancelView, HRLeavePDFView, LeaveTypeDeleteView)
+from app.urlop.views.urlop_request_create_view import MyLeaveCancelView
 
 urlpatterns = [
     path("add/", LeaveRequestCreateView.as_view(), name="urlop_add"),
+    path("mine/<int:pk>/cancel/", MyLeaveCancelView.as_view(), name="my_leave_cancel"),
     path("types/add/", LeaveTypeCreateView.as_view(), name="leave_type_add"),
     path("types/<int:pk>/edit/", LeaveTypeUpdateView.as_view(), name="leave_type_edit"),
     path("types/<int:pk>/delete/", LeaveTypeDeleteView.as_view(), name="leave_type_delete"),

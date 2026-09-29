@@ -13,8 +13,14 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 
+import environ
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Existing process variables (including systemd EnvironmentFile) take precedence.
+environ.Env.read_env(BASE_DIR / '.env', overwrite=False)
 
 
 # Quick-start development settings - unsuitable for production
@@ -28,6 +34,9 @@ SECRET_KEY = os.getenv(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DJANGO_DEBUG", "True").lower() in {"1", "true", "yes", "on"}
+
+if not DEBUG and (SECRET_KEY == "dev-only-change-me" or len(SECRET_KEY) < 50):
+    raise ImproperlyConfigured("Set a strong DJANGO_SECRET_KEY for production.")
 
 # Domena publiczna i domena panelu są konfigurowalne przez środowisko.
 # Domyślne wartości pozwalają nadal uruchamiać projekt lokalnie.
@@ -67,11 +76,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     
     'app.klient',
     'app.protokol',
     'app.core',
     'app.dokument',
+    'app.dostawcy',
     'app.faktura',
     'app.gwarancja',
     'app.kalendarz',
@@ -226,17 +237,61 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "templates"),
+    ("assets", BASE_DIR / "templates" / "assets"),
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "files")
 MEDIA_URL = "/files/"
+# Must match the internal-only Nginx location.
+PRIVATE_MEDIA_INTERNAL_URL = "/_protected_media/"
+FILE_UPLOAD_PERMISSIONS = 0o640
+FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o750
 
 # settings.py
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-# Preserve the API contract used by stripe-python 11.1.0.
+STRIPE_PRICE_IDS = {
+    "start": {
+        "monthly": os.getenv("STRIPE_PRICE_START_MONTHLY", ""),
+        "yearly": os.getenv("STRIPE_PRICE_START_YEARLY", ""),
+    },
+    "standard": {
+        "monthly": os.getenv("STRIPE_PRICE_STANDARD_MONTHLY", ""),
+        "yearly": os.getenv("STRIPE_PRICE_STANDARD_YEARLY", ""),
+    },
+    "pro": {
+        "monthly": os.getenv("STRIPE_PRICE_PRO_MONTHLY", ""),
+        "yearly": os.getenv("STRIPE_PRICE_PRO_YEARLY", ""),
+    },
+}
+STRIPE_PLAN_PRICE_AMOUNTS = {
+    "start": {
+        "monthly": int(os.getenv("STRIPE_AMOUNT_START_MONTHLY", "0") or 0),
+        "yearly": int(os.getenv("STRIPE_AMOUNT_START_YEARLY", "0") or 0),
+    },
+    "standard": {
+        "monthly": int(os.getenv("STRIPE_AMOUNT_STANDARD_MONTHLY", "0") or 0),
+        "yearly": int(os.getenv("STRIPE_AMOUNT_STANDARD_YEARLY", "0") or 0),
+    },
+    "pro": {
+        "monthly": int(os.getenv("STRIPE_AMOUNT_PRO_MONTHLY", "0") or 0),
+        "yearly": int(os.getenv("STRIPE_AMOUNT_PRO_YEARLY", "0") or 0),
+    },
+}
+if not DEBUG and any(
+    not price_id
+    for plan_prices in STRIPE_PRICE_IDS.values()
+    for price_id in plan_prices.values()
+):
+    raise ImproperlyConfigured("Set all six STRIPE_PRICE_* variables before production startup.")
+if not DEBUG and any(
+    amount <= 0
+    for plan_amounts in STRIPE_PLAN_PRICE_AMOUNTS.values()
+    for amount in plan_amounts.values()
+):
+    raise ImproperlyConfigured("Set all six STRIPE_AMOUNT_* variables before production startup.")
+# Pin outbound Stripe requests to the API contract used by this integration.
 STRIPE_API_VERSION = "2024-09-30.acacia"
 
 # przyda się do budowania success/cancel URL
@@ -250,6 +305,8 @@ STRIPE_EXTRA_USER_UNIT_AMOUNTS = {
 
 # Zadania okresowe subskrypcji. W środowisku produkcyjnym muszą działać
 # procesy Celery worker oraz Celery beat.
+from celery.schedules import crontab
+
 CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", CELERY_BROKER_URL)
 CELERY_TIMEZONE = TIME_ZONE
@@ -258,7 +315,19 @@ CELERY_BEAT_SCHEDULE = {
         "task": "app.core.tasks.process_subscription_lifecycle",
         "schedule": 24 * 60 * 60,
     },
+    "leave-allowances-yearly": {
+        "task": "app.urlop.tasks.generate_leave_allowances_for_year",
+        "schedule": crontab(minute=15, hour=0, day_of_month=1, month_of_year=1),
+    },
+    "supplier-integrations-sync": {
+        "task": "app.dostawcy.tasks.sync_active_supplier_integrations",
+        "schedule": crontab(minute=30, hour=3),
+    },
 }
+
+# Klucz dla zaszyfrowanych URL-i feedów. W środowisku produkcyjnym ustaw go
+# niezależnie od SECRET_KEY, aby rotacja klucza sesji nie unieważniała feedów.
+SUPPLIER_FEED_ENCRYPTION_KEY = os.getenv("SUPPLIER_FEED_ENCRYPTION_KEY", SECRET_KEY)
 
 
 EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "True").lower() in {"1", "true", "yes", "on"}

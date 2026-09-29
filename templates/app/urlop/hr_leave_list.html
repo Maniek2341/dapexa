@@ -460,17 +460,23 @@
               <td class="text-end">
                 <div class="leave-actions">
                   {% if leave.status == "submitted" %}
-                    <a href="{% url 'hr_leave_approve' leave.id %}"
+                    {% if leave.user_id != request.user.id or request.user.role == request.user.Role.OWNER %}
+                    <form method="post" action="{% url 'hr_leave_approve' leave.id %}" class="d-inline">{% csrf_token %}
+                    <button type="submit"
                        class="icon-btn icon-btn-success"
                        title="Zatwierdź">
                       <i class="bi bi-check-lg"></i>
-                    </a>
+                    </button></form>
+                    {% endif %}
 
-                    <a href="{% url 'hr_leave_reject' leave.id %}"
+                    {% if leave.user_id != request.user.id %}
+                    <form method="post" action="{% url 'hr_leave_reject' leave.id %}" class="d-inline">{% csrf_token %}
+                    <button type="submit"
                        class="icon-btn icon-btn-danger"
                        title="Odrzuć">
                       <i class="bi bi-x-lg"></i>
-                    </a>
+                    </button></form>
+                    {% endif %}
                   {% elif leave.status == "approved" %}
                     <form method="post" action="{% url 'hr_leave_cancel' leave.id %}" class="d-inline">
                       {% csrf_token %}
@@ -546,17 +552,23 @@
         <div class="mobile-bottom">
           <div class="mobile-actions">
             {% if leave.status == "submitted" %}
-              <a href="{% url 'hr_leave_approve' leave.id %}"
+              {% if leave.user_id != request.user.id or request.user.role == request.user.Role.OWNER %}
+              <form method="post" action="{% url 'hr_leave_approve' leave.id %}" class="d-inline">{% csrf_token %}
+              <button type="submit"
                  class="icon-btn icon-btn-success"
                  title="Zatwierdź">
                 <i class="bi bi-check-lg"></i>
-              </a>
+              </button></form>
+              {% endif %}
 
-              <a href="{% url 'hr_leave_reject' leave.id %}"
+              {% if leave.user_id != request.user.id %}
+              <form method="post" action="{% url 'hr_leave_reject' leave.id %}" class="d-inline">{% csrf_token %}
+              <button type="submit"
                  class="icon-btn icon-btn-danger"
                  title="Odrzuć">
                 <i class="bi bi-x-lg"></i>
-              </a>
+              </button></form>
+              {% endif %}
             {% elif leave.status == "approved" %}
               <form method="post" action="{% url 'hr_leave_cancel' leave.id %}" class="d-inline">
                 {% csrf_token %}

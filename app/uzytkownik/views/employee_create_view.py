@@ -1,15 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.sites.shortcuts import get_current_site
-from django.core.mail import send_mail
 from django.shortcuts import redirect
-from django.template.loader import render_to_string
-from django.urls import reverse, reverse_lazy
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
+from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView
+
+from app.core.emails import send_employee_activation_email
 
 from app.uzytkownik.forms import (
     EmployeeContractForm,
@@ -19,8 +15,6 @@ from app.uzytkownik.forms import (
 from app.uzytkownik.models import EmployeeContract, EmployeeTraining
 
 User = get_user_model()
-
-activation_token = PasswordResetTokenGenerator()
 
 
 class EmployeeCreateView(LoginRequiredMixin, CreateView):
@@ -61,7 +55,15 @@ class EmployeeCreateView(LoginRequiredMixin, CreateView):
         employee.save()
 
         # Wyślij email aktywacyjny z linkiem do ustawienia hasła
-        self._send_activation_email(employee)
+        try:
+            self._send_activation_email(employee)
+        except Exception:
+            messages.error(
+                self.request,
+                "Pracownik został dodany, ale nie udało się wysłać linku aktywacyjnego. "
+                "Wyślij aktywację ponownie z listy pracowników.",
+            )
+            return redirect(self.success_url)
 
         messages.success(
             self.request,
@@ -79,33 +81,7 @@ class EmployeeCreateView(LoginRequiredMixin, CreateView):
         return super().form_invalid(form)
 
     def _send_activation_email(self, employee):
-        request = self.request
-        site = get_current_site(request)
-        uid = urlsafe_base64_encode(force_bytes(employee.pk))
-        token = activation_token.make_token(employee)
-
-        activation_link = (
-            f"{request.scheme}://{site.domain}"
-            + reverse("employee_set_password", kwargs={"uidb64": uid, "token": token})
-        )
-
-        subject = "Aktywacja konta – ustaw hasło"
-        message = render_to_string(
-            "app/pracownik/activation_email.txt",
-            {
-                "employee": employee,
-                "activation_link": activation_link,
-                "company": self.request.user.company,
-            },
-        )
-
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=None,  # używa DEFAULT_FROM_EMAIL z settings
-            recipient_list=[employee.email],
-            fail_silently=True,
-        )
+        send_employee_activation_email(employee)
 
 
 class EmployeeUpdateView(LoginRequiredMixin, UpdateView):

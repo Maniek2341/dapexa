@@ -1111,35 +1111,6 @@
 </script>
 
 <script>
-  (function(){
-    const root = document.documentElement;
-    const key = 'dashboard-theme';
-    const saved = localStorage.getItem(key) || 'dark';
-    root.setAttribute('data-theme', saved);
-
-    const btn = document.getElementById('themeToggle');
-
-    if (btn) {
-      const setIcon = () => {
-        btn.innerHTML = root.getAttribute('data-theme') === 'light'
-          ? '<i class="bi bi-sun"></i>'
-          : '<i class="bi bi-moon-stars"></i>';
-      };
-
-      setIcon();
-
-      btn.addEventListener('click', ()=>{
-        const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-        root.setAttribute('data-theme', next);
-        localStorage.setItem(key, next);
-        setIcon();
-
-        if (typeof renderPL === "function") {
-          renderPL(document.querySelector('[data-range].active')?.getAttribute('data-range') || 'mtd');
-        }
-      });
-    }
-  })();
 </script>
 <!-- Modal: usuwanie wpisu -->
 <div class="modal fade" id="deleteEntryModal" tabindex="-1" aria-hidden="true">
@@ -1258,7 +1229,7 @@
                 type="time"
                 name="new_start_time"
                 class="form-control"
-                value="07:00"
+                value="{{ default_work_start_time }}"
                 required
               >
             </div>
@@ -1273,7 +1244,7 @@
                 type="time"
                 name="new_end_time"
                 class="form-control"
-                value="15:00"
+                value="{{ default_work_end_time }}"
                 required
               >
             </div>

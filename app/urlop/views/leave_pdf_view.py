@@ -1,15 +1,15 @@
-import pdfkit
 from django.template.loader import render_to_string
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404
 from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
+from app.urlop.access import LeavePermissionMixin
 
 from app.urlop.models import LeaveRequest
-from app.core.pdf_utils import get_company_logo_url
+from app.core.pdf_utils import get_company_logo_url, render_pdf
 
 
-class HRLeavePDFView(LoginRequiredMixin, View):
+class HRLeavePDFView(LeavePermissionMixin, View):
+    leave_permission = "hr_leave_pdf"
 
     def get(self, request, pk):
 
@@ -18,9 +18,6 @@ class HRLeavePDFView(LoginRequiredMixin, View):
             pk=pk,
             company=request.user.company
         )
-
-        if request.user.role not in ["owner", "manager"]:
-            return redirect("dashboard")
 
         html = render_to_string(
             "app/pdf/leave_request_pdf.html",
@@ -32,7 +29,7 @@ class HRLeavePDFView(LoginRequiredMixin, View):
             request=request,
         )
 
-        pdf = pdfkit.from_string(html, False)
+        pdf = render_pdf(html)
 
         response = HttpResponse(pdf, content_type="application/pdf")
         response["Content-Disposition"] = f'attachment; filename="wniosek_urlopowy_{leave.id}.pdf"'

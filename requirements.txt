@@ -1,5 +1,6 @@
 # Python 3.14 / Django 6.0
 Django==6.0.8
+django-environ==0.14.0
 psycopg[binary]==3.3.6
 
 # Authentication, including Google/Facebook providers
@@ -23,6 +24,7 @@ gunicorn==26.2.0
 holidays==0.105
 python-dateutil==2.9.0.post0
 requests==2.34.2
+cryptography==46.0.3
 
 # PDF rendering also requires the system wkhtmltopdf executable
 pdfkit==1.0.0

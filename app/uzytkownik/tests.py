@@ -1,13 +1,158 @@
+from datetime import timedelta
+from urllib.parse import urlsplit
+
+from django.contrib.auth.hashers import make_password
 from django.core import mail
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from unittest.mock import patch
 
 from app.core.models import Address, Company, PanelUser, Subscription
 from app.uzytkownik.models import OwnershipTransfer
 
 
-@override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+class TwoFactorLoginBackendTests(TestCase):
+    def test_completing_legacy_two_factor_session_uses_model_backend(self):
+        user = PanelUser.objects.create_user(
+            email="twofactor@example.test",
+            password="safe-test-password",
+        )
+        user.is_active = True
+        user.is_superuser = True
+        user.login_2fa_code_hash = make_password("123456")
+        user.login_2fa_expires_at = timezone.now() + timedelta(minutes=5)
+        user.save()
+
+        session = self.client.session
+        session["pending_2fa_user_id"] = user.pk
+        session["pending_2fa_next"] = "/"
+        session["pending_2fa_remember"] = True
+        # Simulate an in-progress session created before backend tracking.
+        session.save()
+
+        response = self.client.post(reverse("login"), {"code": "123456"})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            self.client.session.get("_auth_user_backend"),
+            "django.contrib.auth.backends.ModelBackend",
+        )
+        self.assertNotIn("pending_2fa_user_id", self.client.session)
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DOMAIN_URL="https://panel.dapexa.com",
+    PANEL_DOMAIN="panel.dapexa.com",
+    DEFAULT_FROM_EMAIL="Dapexa <no-reply@dapexa.com>",
+)
+class ForgotPasswordEmailTests(TestCase):
+    def setUp(self):
+        self.user = PanelUser.objects.create_user(
+            email="password-reset@example.test",
+            password="safe-test-password",
+        )
+
+    def test_reset_request_sends_https_link_to_panel_domain(self):
+        response = self.client.post(
+            reverse("forgot"),
+            {"email": self.user.email},
+        )
+
+        self.assertRedirects(response, reverse("login"))
+        self.assertEqual(len(mail.outbox), 1)
+        message = mail.outbox[0]
+        self.assertEqual(message.to, [self.user.email])
+        self.assertIn("https://panel.dapexa.com/uzytkownik/resetpassword/", message.body)
+        html_message = str(message.alternatives[0][0])
+        self.assertIn("https://panel.dapexa.com/uzytkownik/resetpassword/", html_message)
+        self.assertNotIn("http://panel.dapexa.com", html_message)
+        self.assertNotIn("Tradibis", html_message)
+
+    def test_unknown_email_gets_same_confirmation_without_sending(self):
+        response = self.client.post(
+            reverse("forgot"),
+            {"email": "unknown@example.test"},
+        )
+
+        self.assertRedirects(response, reverse("login"))
+        self.assertEqual(len(mail.outbox), 0)
+
+
+class RegistrationMailFailureTests(TestCase):
+    def _post_signup(self):
+        session = self.client.session
+        session["registration_started_at"] = timezone.now().timestamp() - 10
+        session.save()
+        return self.client.post(
+            reverse("register"),
+            {
+                "user-first_name": "Anna",
+                "user-last_name": "Nowak",
+                "user-email": "signup@example.test",
+                "user-password1": "S3cure!Horse9Blue",
+                "user-password2": "S3cure!Horse9Blue",
+                "company-name": "Firma Testowa",
+                "company-phone": "123456789",
+                "company-street": "Ulica Testowa 1",
+                "company-postcode": "00-001",
+                "company-city": "Warszawa",
+            },
+        )
+
+    @override_settings(EMAIL_HOST="smtp.example.test")
+    @patch(
+        "app.uzytkownik.views.user_register_view.send_activation_email",
+        side_effect=OSError("SMTP unavailable"),
+    )
+    @patch(
+        "app.core.geocoding.GeocodingService.get_coordinates",
+        return_value=(None, None),
+    )
+    def test_failed_activation_email_rolls_back_registration(self, _geocode, _send_email):
+        response = self._post_signup()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "nie można wysłać wiadomości aktywacyjnej")
+        self.assertFalse(PanelUser.objects.filter(email="signup@example.test").exists())
+        self.assertFalse(Company.objects.exists())
+        self.assertFalse(Address.objects.exists())
+        self.assertFalse(Subscription.objects.exists())
+
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
+    @patch(
+        "app.core.geocoding.GeocodingService.get_coordinates",
+        return_value=(None, None),
+    )
+    def test_signup_succeeds_without_geocoding_when_mail_is_available(self, _geocode):
+        response = self._post_signup()
+
+        self.assertEqual(response.status_code, 302)
+        user = PanelUser.objects.get(email="signup@example.test")
+        self.assertFalse(user.is_active)
+        self.assertIsNotNone(user.company)
+        self.assertEqual(Subscription.objects.filter(owner=user).count(), 1)
+        self.assertEqual(len(mail.outbox), 1)
+
+    @override_settings(EMAIL_HOST="")
+    @patch("app.uzytkownik.views.user_register_view.send_activation_email")
+    def test_missing_smtp_host_returns_message_without_creating_account(self, send_email):
+        response = self._post_signup()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "nie skonfigurowano wysyłki")
+        send_email.assert_not_called()
+        self.assertFalse(PanelUser.objects.filter(email="signup@example.test").exists())
+        self.assertFalse(Company.objects.exists())
+        self.assertFalse(Address.objects.exists())
+        self.assertFalse(Subscription.objects.exists())
+
+
+@override_settings(
+    EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend",
+    DOMAIN_URL="https://panel.dapexa.com/",
+)
 class OwnershipTransferTests(TestCase):
     def setUp(self):
         self.company = Company.objects.create(name="Firma testowa")
@@ -55,8 +200,9 @@ class OwnershipTransferTests(TestCase):
         owner_confirmation_url = next(
             line for line in mail.outbox[0].body.splitlines() if line.startswith("http")
         )
+        self.assertTrue(owner_confirmation_url.startswith("https://panel.dapexa.com/"))
         owner_confirmation_path = owner_confirmation_url.removeprefix(
-            "http://testserver"
+            "https://panel.dapexa.com"
         )
         anonymous_client = Client()
 
@@ -76,8 +222,9 @@ class OwnershipTransferTests(TestCase):
         recipient_confirmation_url = next(
             line for line in mail.outbox[1].body.splitlines() if line.startswith("http")
         )
+        self.assertTrue(recipient_confirmation_url.startswith("https://panel.dapexa.com/"))
         recipient_confirmation_path = recipient_confirmation_url.removeprefix(
-            "http://testserver"
+            "https://panel.dapexa.com"
         )
         self.assertEqual(
             anonymous_client.get(recipient_confirmation_path).status_code,
@@ -100,6 +247,68 @@ class OwnershipTransferTests(TestCase):
             anonymous_client.post(recipient_confirmation_path).status_code,
             400,
         )
+
+    def test_unsent_owner_email_preserves_existing_transfer(self):
+        self._login(self.owner)
+        url = reverse("employee_ownership_transfer", kwargs={"pk": self.employee.pk})
+        self.client.post(url)
+        transfer = OwnershipTransfer.objects.get()
+        original_hash = transfer.token_hash
+
+        with patch(
+            "app.uzytkownik.views.employee_ownership_transfer_view.send_mail",
+            return_value=0,
+        ), self.assertLogs(
+            "app.uzytkownik.views.employee_ownership_transfer_view", level="ERROR"
+        ):
+            response = self.client.post(url, follow=True)
+
+        self.assertContains(response, "Nie udało się wysłać wiadomości potwierdzającej.")
+        self.assertEqual(OwnershipTransfer.objects.count(), 1)
+        transfer.refresh_from_db()
+        self.assertEqual(transfer.status, OwnershipTransfer.Status.OWNER_PENDING)
+        self.assertEqual(transfer.token_hash, original_hash)
+
+    def test_unsent_recipient_email_preserves_link_for_retry(self):
+        self._login(self.owner)
+        self.client.post(
+            reverse("employee_ownership_transfer", kwargs={"pk": self.employee.pk})
+        )
+        transfer = OwnershipTransfer.objects.get()
+        original_hash = transfer.token_hash
+        original_expiry = transfer.expires_at
+        path = urlsplit(next(
+            line for line in mail.outbox[0].body.splitlines() if line.startswith("http")
+        )).path
+        anonymous_client = Client()
+        with patch(
+            "app.uzytkownik.views.employee_ownership_transfer_view.send_mail",
+            return_value=0,
+        ), self.assertLogs(
+            "app.uzytkownik.views.employee_ownership_transfer_view", level="ERROR"
+        ):
+            response = anonymous_client.post(path)
+
+        self.assertContains(
+            response, "Nie udało się wysłać wiadomości przyszłemu właścicielowi.",
+            status_code=503,
+        )
+        transfer.refresh_from_db()
+        self.assertEqual(transfer.status, OwnershipTransfer.Status.OWNER_PENDING)
+        self.assertEqual(transfer.token_hash, original_hash)
+        self.assertEqual(transfer.expires_at, original_expiry)
+        self.owner.refresh_from_db()
+        self.employee.refresh_from_db()
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.owner.role, PanelUser.Role.OWNER)
+        self.assertEqual(self.employee.role, PanelUser.Role.MANAGER)
+        self.assertEqual(self.subscription.owner_id, self.owner.pk)
+
+        self.assertEqual(anonymous_client.post(path).status_code, 200)
+        transfer.refresh_from_db()
+        self.assertEqual(transfer.status, OwnershipTransfer.Status.RECIPIENT_PENDING)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].to, [self.employee.email])
 
     def test_non_owner_cannot_start_transfer(self):
         self._login(self.employee)

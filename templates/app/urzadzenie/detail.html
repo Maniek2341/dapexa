@@ -677,6 +677,26 @@
     </div>
   </div>
 
+  <div class="detail-card mt-3">
+    <div class="detail-card-header">
+      <h2>Dostępność u dostawców</h2>
+      <span>Stany dostawców są niezależne od własnego magazynu.</span>
+    </div>
+    <div class="detail-card-body">
+      {% if supplier_availability %}
+        <div class="scroll-table"><table class="table align-middle"><thead><tr><th>Dostawca</th><th>SKU / EAN</th><th>Cena zakupu netto</th><th>Dostępność</th><th>Aktualizacja</th></tr></thead><tbody>
+          {% for supplier_row in supplier_availability %}<tr>
+            <td><strong>{{ supplier_row.integration.supplier.name }}</strong></td>
+            <td>{{ supplier_row.supplier_product.sku|default:"—" }}{% if supplier_row.supplier_product.ean %}<div class="small text-muted">{{ supplier_row.supplier_product.ean }}</div>{% endif %}</td>
+            <td>{{ supplier_row.purchase_price_net|default:"—" }}</td>
+            <td>{% if supplier_row.availability is True %}<span class="text-success">Dostępny</span>{% elif supplier_row.availability is False %}<span class="text-muted">Niedostępny</span>{% elif supplier_row.stock_quantity != None %}{{ supplier_row.stock_quantity }} {{ supplier_row.supplier_product.unit }}{% else %}—{% endif %}</td>
+            <td>{{ supplier_row.last_sync_at|date:"d.m.Y H:i"|default:"—" }}</td>
+          </tr>{% endfor %}
+        </tbody></table></div>
+      {% else %}<div class="placeholder-box"><i class="bi bi-truck"></i>Brak powiązania z produktem dostawcy.</div>{% endif %}
+    </div>
+  </div>
+
 </div>
 
         <div class="tab-pane fade" id="warehouse" role="tabpanel">

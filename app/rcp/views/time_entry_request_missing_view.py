@@ -9,6 +9,7 @@ from django.utils import timezone
 from app.core.models import PanelUser
 from app.rcp.forms import MissingHoursRequestForm
 from app.rcp.models import TimeEntryRequest, TimeEntryRequestType
+from app.rcp.forms import get_default_work_hours
 
 
 class TimeEntryRequestMissingView(LoginRequiredMixin, View):
@@ -33,6 +34,7 @@ class TimeEntryRequestMissingView(LoginRequiredMixin, View):
 
         req_date = form.cleaned_data["date"]
         reason = form.cleaned_data["reason"]
+        default_start_time, default_end_time = get_default_work_hours(request.user)
 
         days_diff = (timezone.localdate() - req_date).days
 
@@ -49,8 +51,8 @@ class TimeEntryRequestMissingView(LoginRequiredMixin, View):
             user=request.user,
             request_type=TimeEntryRequestType.MISSING,
             date=req_date,
-            new_start_time=request.POST.get("new_start_time") or "07:00",
-            new_end_time=request.POST.get("new_end_time") or "15:00",
+            new_start_time=request.POST.get("new_start_time") or default_start_time,
+            new_end_time=request.POST.get("new_end_time") or default_end_time,
             reason=reason,
         )
 

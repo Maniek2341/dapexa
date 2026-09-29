@@ -1,6 +1,5 @@
 from collections import defaultdict
 from decimal import Decimal
-import pdfkit
 
 from django.conf import settings
 from django.http import HttpResponse
@@ -13,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
 from app.core.models import PanelUser
-from app.core.pdf_utils import get_company_logo_url
+from app.core.pdf_utils import get_company_logo_url, render_pdf
 from app.rcp.models import TimeEntry
 
 
@@ -145,7 +144,6 @@ class TimeEntryPdfView(LoginRequiredMixin, View):
 
         html = render_to_string("app/pdf/time_entry_report.html", context, request=request)
 
-        config = getattr(settings, "WKHTMLTOPDF_CONFIG", None)
         options = {
             "encoding": "UTF-8",
             "page-size": "A4",
@@ -153,17 +151,11 @@ class TimeEntryPdfView(LoginRequiredMixin, View):
             "margin-right": "10mm",
             "margin-bottom": "10mm",
             "margin-left": "10mm",
-            "enable-local-file-access": "",
             "quiet": "",
         }
 
         try:
-            pdf = pdfkit.from_string(
-                html,
-                False,
-                configuration=config,
-                options=options,
-            )
+            pdf = render_pdf(html, options=options)
         except Exception:
             messages.error(request, "Nie udało się wygenerować PDF.")
             return redirect("time_entry_list")

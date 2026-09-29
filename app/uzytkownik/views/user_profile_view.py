@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -19,7 +19,8 @@ from app.core.subscription_limits import (
 from app.klient.models import Client
 from app.protokol.models import Protocol
 from app.rcp.models import TimeEntry, TimeEntryRequest
-from app.urlop.models import LeaveAllowance, LeavePool, LeaveRequest
+from app.urlop.models import LeaveAllowance, LeaveRequest
+from app.urlop.services import days_in_year, used_vacation_days, pending_leave_days
 from app.uzytkownik.models import CompanyRoleGroup, EmployeeContract, EmployeeTraining
 from app.uzytkownik.forms import (
     EmployeeContractForm, EmployeeTrainingForm,
@@ -111,11 +112,17 @@ class UserProfileView(LoginRequiredMixin, View):
             "enabled_features": sum(feature["enabled"] for feature in features),
             "can_purchase_extra_users": (
                 user.role == user.Role.OWNER
-                and subscription.package != subscription.Package.TRIAL
-                and subscription.base_max_users is not None
+                and subscription.package in {
+                    subscription.Package.START,
+                    subscription.Package.STANDARD,
+                }
                 and bool(subscription.stripe_subscription_id)
                 and bool(subscription.billing_period)
                 and not subscription.cancel_at_period_end
+                and subscription.status in {
+                    subscription.STATUS_ACTIVE,
+                    subscription.STATUS_TRIALING,
+                }
             ),
             "extra_user_unit_price": unit_amount / 100,
         }
@@ -133,21 +140,9 @@ class UserProfileView(LoginRequiredMixin, View):
             .order_by("-date_from")
         )
 
-        leave_stats = leave_queryset.aggregate(
-            approved_days=Sum(
-                "days_count",
-                filter=Q(
-                    status=LeaveRequest.Status.APPROVED,
-                    leave_type__pool=LeavePool.VACATION,
-                ),
-            ),
-            pending_days=Sum(
-                "days_count",
-                filter=Q(status=LeaveRequest.Status.SUBMITTED),
-            ),
-        )
-        approved_days = leave_stats["approved_days"] or Decimal("0")
-        pending_days = leave_stats["pending_days"] or Decimal("0")
+        leave_year = timezone.localdate().year
+        approved_days = used_vacation_days(user.company, user, leave_year)
+        pending_days = pending_leave_days(user.company, user, leave_year)
         leave_requests = list(leave_queryset[:10])
 
         time_entry_request_queryset = TimeEntryRequest.objects.filter(

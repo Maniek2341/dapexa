@@ -8,18 +8,21 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.db import transaction
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.utils import timezone
 from django.views import View
 
 from app.core.models import Subscription
+from app.core.subscription_lifecycle import clear_scheduled_cancellation
 from app.core.subscription_limits import get_company_storage_used_bytes
 from app.core.views.views_stripe import (
     EXTRA_USER_LOOKUP_PREFIX,
     STRIPE_PRICE_IDS,
     company_billing_errors,
+    create_plan_checkout_session,
     get_extra_user_price_id,
     sync_extra_users_from_stripe,
     sync_stripe_customer_billing_data,
+    stripe_data,
 )
 from app.klient.models import Client
 from app.protokol.models import Protocol
@@ -62,28 +65,16 @@ class ChangePackageView(LoginRequiredMixin, View):
         return exceeded
 
     def _create_checkout(self, request, subscription, package, billing_period):
-        domain_url = getattr(settings, "DOMAIN_URL", None) or request.build_absolute_uri("/").rstrip("/")
-        params = {
-            "mode": "subscription",
-            "line_items": [{
-                "price": STRIPE_PRICE_IDS[package][billing_period],
-                "quantity": 1,
-            }],
-            "success_url": domain_url + reverse("checkout_success") + "?session_id={CHECKOUT_SESSION_ID}",
-            "cancel_url": domain_url + reverse("checkout_cancel"),
-            "client_reference_id": str(subscription.pk),
-            "metadata": {
-                "package": package,
-                "billing_period": billing_period,
-                "local_subscription_id": str(subscription.pk),
-            },
-        }
-        if subscription.stripe_customer_id:
-            params["customer"] = subscription.stripe_customer_id
-        else:
-            params["customer_email"] = request.user.email
-        session = stripe.checkout.Session.create(**params)
-        return redirect(session.url)
+        session = create_plan_checkout_session(
+            request, subscription, package, billing_period
+        )
+        if session.url:
+            return redirect(session.url)
+        messages.info(
+            request,
+            "Płatność została już wysłana do Stripe. Oczekuje na synchronizację.",
+        )
+        return redirect("profile")
 
     def post(self, request):
         if request.user.role != request.user.Role.OWNER:
@@ -109,13 +100,23 @@ class ChangePackageView(LoginRequiredMixin, View):
                 if not subscription:
                     messages.error(request, "Nie znaleziono subskrypcji firmy.")
                     return redirect("select_plan")
-                if subscription.cancel_at_period_end:
+                cancellation_period_finished = (
+                    subscription.status == Subscription.STATUS_CANCELED
+                    and subscription.current_period_end
+                    and subscription.current_period_end <= timezone.now()
+                )
+                if subscription.cancel_at_period_end and not cancellation_period_finished:
                     messages.error(
                         request,
                         "Nie można zmienić pakietu subskrypcji zaplanowanej do anulowania.",
                     )
                     return redirect("profile")
-                if subscription.package == package:
+                if cancellation_period_finished:
+                    clear_scheduled_cancellation(subscription)
+                if (
+                    subscription.package == package
+                    and subscription.billing_period == billing_period
+                ):
                     messages.info(request, "Ten pakiet jest już aktywny.")
                     return redirect("select_plan")
 
@@ -129,7 +130,11 @@ class ChangePackageView(LoginRequiredMixin, View):
                     )
                     return redirect("company_settings")
 
-                exceeded = self._validate_usage(subscription, package)
+                exceeded = (
+                    self._validate_usage(subscription, package)
+                    if package != subscription.package
+                    else []
+                )
                 if exceeded:
                     messages.error(
                         request,
@@ -139,13 +144,7 @@ class ChangePackageView(LoginRequiredMixin, View):
                     return redirect("select_plan")
 
                 stripe.api_key = settings.STRIPE_SECRET_KEY
-                if (
-                    not subscription.stripe_subscription_id
-                    or subscription.status not in {
-                        Subscription.STATUS_ACTIVE,
-                        Subscription.STATUS_TRIALING,
-                    }
-                ):
+                if not subscription.stripe_subscription_id:
                     sync_stripe_customer_billing_data(
                         subscription,
                         subscription.company,
@@ -156,10 +155,35 @@ class ChangePackageView(LoginRequiredMixin, View):
                         request, subscription, package, billing_period
                     )
 
-                stripe_subscription = stripe.Subscription.retrieve(
+                stripe_subscription = stripe_data(stripe.Subscription.retrieve(
                     subscription.stripe_subscription_id,
                     expand=["items.data.price", "latest_invoice.payment_intent"],
-                )
+                ))
+                remote_status = stripe_subscription.get("status")
+                if remote_status == Subscription.STATUS_CANCELED:
+                    subscription.status = Subscription.STATUS_CANCELED
+                    clear_scheduled_cancellation(subscription)
+                    stripe_customer_id = stripe_subscription.get("customer")
+                    if isinstance(stripe_customer_id, str):
+                        subscription.stripe_customer_id = stripe_customer_id
+                    sync_stripe_customer_billing_data(
+                        subscription,
+                        subscription.company,
+                        request.user.email,
+                    )
+                    subscription.save()
+                    return self._create_checkout(
+                        request, subscription, package, billing_period
+                    )
+                if remote_status not in {
+                    Subscription.STATUS_ACTIVE,
+                    Subscription.STATUS_TRIALING,
+                }:
+                    messages.error(
+                        request,
+                        "Najpierw ureguluj zaległą płatność w panelu rozliczeń Stripe.",
+                    )
+                    return redirect("profile")
                 stripe_customer_id = stripe_subscription.get("customer")
                 if isinstance(stripe_customer_id, str):
                     subscription.stripe_customer_id = stripe_customer_id
@@ -206,6 +230,7 @@ class ChangePackageView(LoginRequiredMixin, View):
                     proration_behavior="always_invoice",
                     expand=["items.data.price", "latest_invoice.payment_intent"],
                 )
+                updated = stripe_data(updated)
                 sync_extra_users_from_stripe(subscription, updated)
                 subscription.status = updated.get("status", subscription.status)
                 subscription.save()

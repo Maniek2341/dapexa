@@ -49,6 +49,7 @@ class OfferVariantCreateView(LoginRequiredMixin, CreateView):
         context["offer"] = self.offer
         return context
 
+    @transaction.atomic
     def form_valid(self, form):
         context = self.get_context_data()
         item_formset = context["item_formset"]
@@ -137,7 +138,7 @@ class OfferVariantCreateView(LoginRequiredMixin, CreateView):
                 obj.delete()
 
             variant.recalculate_totals()
-    
+
         OfferActivity.objects.create(
             company=self.offer.company,
             offer=self.offer,
@@ -150,5 +151,3 @@ class OfferVariantCreateView(LoginRequiredMixin, CreateView):
         self.object = variant
         messages.success(self.request, "Wariant został dodany.")
         return redirect("offer_detail", pk=self.offer.pk)
-
-    

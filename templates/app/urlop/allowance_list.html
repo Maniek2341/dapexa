@@ -304,10 +304,11 @@
     </div>
   </div>
 
-  <a href="{% url 'generate_leave_allowances' %}" class="btn-orange">
+  {% if perms.urlop.access_generate_leave_allowances and request.user.role == "owner" %}<form method="post" action="{% url 'generate_leave_allowances' %}" class="d-inline">{% csrf_token %}
+  <button type="submit" class="btn-orange">
     <i class="bi bi-arrow-repeat me-1"></i>
     Generuj limity
-  </a>
+  </button></form>{% endif %}
 </div>
 
 {% if data %}
@@ -334,7 +335,7 @@
           {% else %}
             <span class="badge-soft badge-empty">
               <i class="bi bi-x-circle"></i>
-              Brak dni
+              {% if row.remaining < 0 %}Przekroczenie{% else %}Brak dni{% endif %}
             </span>
           {% endif %}
         </div>
@@ -350,6 +351,11 @@
             </div>
 
             <div class="summary-box">
+              <div class="summary-label">Korekta</div>
+              <div class="summary-value">{{ row.adjustment|floatformat:2 }}</div>
+            </div>
+
+            <div class="summary-box">
               <div class="summary-label">Zaległy</div>
               <div class="summary-value">
                 {% if row.carryover > 0 %}
@@ -362,7 +368,7 @@
 
             <div class="summary-box">
               <div class="summary-label">Wykorzystane</div>
-              <div class="summary-value danger">
+              <div class="summary-value {% if row.remaining < 0 %}danger{% else %}success{% endif %}">
                 {{ row.used|floatformat:0 }}
               </div>
             </div>

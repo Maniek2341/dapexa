@@ -14,6 +14,8 @@ from app.zadanie.models import Task
 from app.praca.models import WorkOrder
 from app.pojazd.models import Vehicle
 from app.wsparcie.models import SupportReply, SupportTicket
+from app.urlop.models import LeaveRequest
+from app.urlop.services import get_remaining_days
 
 
 class DashboardView(LoginRequiredMixin, View):
@@ -71,20 +73,6 @@ class DashboardView(LoginRequiredMixin, View):
 
         kpi_protocols_to_invoice = protocols_qs.filter(
             status="do_zafakturowania",
-        ).count()
-
-        kpi_open_tasks = tasks_qs.exclude(
-            status=Task.Status.DONE,
-        ).count()
-
-        # ======================
-        # Alerty
-        # ======================
-
-        overdue_tasks_count = tasks_qs.filter(
-            due_date__lt=today,
-        ).exclude(
-            status=Task.Status.DONE,
         ).count()
 
         protocols_to_invoice_count = kpi_protocols_to_invoice
@@ -180,6 +168,16 @@ class DashboardView(LoginRequiredMixin, View):
                 "pk": service.pk,
                 "kind": "serwis",
             })
+
+        leave_requests = LeaveRequest.objects.filter(company_id=user.company_id)
+        kpi_leave_pending_self = leave_requests.filter(
+            user=user, status=LeaveRequest.Status.SUBMITTED,
+        ).count()
+        kpi_leave_pending_approvals = 0
+        if user.has_perm("urlop.access_hr_leave_approve"):
+            kpi_leave_pending_approvals = leave_requests.filter(
+                status=LeaveRequest.Status.SUBMITTED,
+            ).count()
 
         for work in today_works:
             today_events.append({
@@ -288,11 +286,15 @@ class DashboardView(LoginRequiredMixin, View):
             "kpi_protocols_30d": kpi_protocols_30d,
             "kpi_services_to_do": kpi_services_to_do,
             "kpi_protocols_to_invoice": kpi_protocols_to_invoice,
-            "kpi_open_tasks": kpi_open_tasks,
             "kpi_clients_count": kpi_clients_count,
+            "kpi_leave_pending_self": kpi_leave_pending_self,
+            "kpi_leave_pending_approvals": kpi_leave_pending_approvals,
+            "can_manage_leave_approvals": user.has_perm("urlop.access_hr_leave_approve"),
+            "leave_remaining_days": get_remaining_days(
+                company, user, timezone.localdate().year,
+            ),
 
             # Alerty
-            "overdue_tasks_count": overdue_tasks_count,
             "protocols_to_invoice_count": protocols_to_invoice_count,
             "vehicle_deadlines_count": vehicle_deadlines_count,
             "warranty_alerts_count": warranty_alerts_count,

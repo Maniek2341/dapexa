@@ -1,0 +1,74 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+<style>
+.delete-company-page{max-width:850px;margin:0 auto;padding:0 0 2rem;color:var(--text)}
+.delete-company-card{overflow:hidden;border:1px solid rgba(239,68,68,.28);border-radius:22px;background:var(--card);box-shadow:0 18px 48px rgba(0,0,0,.18)}
+.delete-company-head{display:flex;align-items:flex-start;gap:1rem;padding:1.35rem 1.5rem;border-bottom:1px solid var(--border);background:linear-gradient(110deg,rgba(239,68,68,.13),rgba(255,255,255,.015) 55%)}
+.delete-company-icon{display:grid;width:46px;height:46px;flex:none;place-items:center;border:1px solid rgba(239,68,68,.25);border-radius:15px;background:rgba(239,68,68,.11);color:#ff7e7e;font-size:1.2rem}
+.delete-company-head h1{margin:0;color:var(--text);font-size:clamp(1.25rem,2.4vw,1.7rem);font-weight:900}
+.delete-company-head p{margin:.35rem 0 0;color:var(--muted);font-size:.86rem;line-height:1.55}
+.delete-company-body{padding:1.4rem 1.5rem}
+.delete-company-consequences{display:grid;gap:.8rem;margin:0 0 1.25rem;padding:1rem 1.1rem;border:1px solid var(--border);border-radius:15px;background:rgba(255,255,255,.025);list-style:none}
+.delete-company-consequences li{display:flex;align-items:flex-start;gap:.65rem;color:var(--muted);font-size:.82rem;line-height:1.55}
+.delete-company-consequences i{margin-top:.12rem;color:#ff8585}
+.delete-company-warning{margin-bottom:1.3rem;padding:.9rem 1rem;border:1px solid rgba(255,193,7,.23);border-radius:14px;background:rgba(255,193,7,.07);color:var(--text);font-size:.79rem;line-height:1.6}
+.delete-company-warning strong{color:#ffd166}
+.delete-company-page .form-label{display:block;margin:0 0 .45rem;color:var(--text);font-size:.82rem;font-weight:800}
+.delete-company-page .form-control{min-height:46px;border:1px solid var(--border);border-radius:12px;background:var(--input-bg);color:var(--text)}
+.delete-company-page .form-control:focus{border-color:rgba(239,68,68,.65);box-shadow:0 0 0 .2rem rgba(239,68,68,.12)}
+.delete-company-check{display:flex;align-items:flex-start;gap:.65rem;margin:1rem 0;color:var(--muted);font-size:.8rem;line-height:1.5}
+.delete-company-check input{width:18px;height:18px;flex:none;margin-top:.08rem;accent-color:#dc3545}
+.delete-company-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.65rem;padding-top:1rem;border-top:1px solid var(--border)}
+.delete-company-cancel,.delete-company-submit{display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:.45rem;padding:.7rem 1rem;border-radius:11px;font-size:.84rem;font-weight:850;text-decoration:none}
+.delete-company-cancel{border:1px solid var(--border);background:transparent;color:var(--text)}
+.delete-company-cancel:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.delete-company-submit{border:1px solid #dc3545;background:#b42332;color:#fff}
+.delete-company-submit:hover{background:#dc3545;color:#fff}
+@media(max-width:600px){.delete-company-head,.delete-company-body{padding:1.05rem}.delete-company-actions{flex-direction:column-reverse}.delete-company-actions>*{width:100%}}
+</style>
+
+<main class="delete-company-page">
+  <section class="delete-company-card" aria-labelledby="delete-company-title">
+    <header class="delete-company-head">
+      <div class="delete-company-icon"><i class="bi bi-trash3"></i></div>
+      <div>
+        <h1 id="delete-company-title">Trwale usuń konto firmy</h1>
+        <p>Ta operacja zamknie konto firmy {{ company.name }} i nie można jej cofnąć.</p>
+      </div>
+    </header>
+
+    <div class="delete-company-body">
+      <ul class="delete-company-consequences">
+        <li><i class="bi bi-x-circle"></i><span>Usuniemy z aplikacji firmę, konta wszystkich jej użytkowników, dane modułów oraz przesłane pliki.</span></li>
+        <li><i class="bi bi-credit-card"></i><span>Klient Stripe firmy zostanie usunięty, a powiązane aktywne subskrypcje anulowane natychmiast.</span></li>
+        <li><i class="bi bi-box-arrow-right"></i><span>Po usunięciu nastąpi wylogowanie z konta.</span></li>
+      </ul>
+
+      <div class="delete-company-warning" role="note">
+        <strong>Informacja o Stripe:</strong> usunięcie klienta usuwa zapisane metody płatności i blokuje dalsze operacje, ale Stripe zachowuje część historii klienta, w tym dokumenty rozliczeniowe wymagane do ewidencji. Aplikacja nie może skasować tych danych z systemów Stripe.
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label" for="company-name-confirmation">Wpisz nazwę firmy: <strong>{{ company.name }}</strong></label>
+          <input class="form-control" id="company-name-confirmation" name="company_name_confirmation" type="text" autocomplete="organization" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="delete-company-password">Potwierdź swoje hasło</label>
+          <input class="form-control" id="delete-company-password" name="password" type="password" autocomplete="current-password" required>
+        </div>
+        <label class="delete-company-check" for="confirm-delete-company">
+          <input id="confirm-delete-company" name="confirm_delete" type="checkbox" value="yes" required>
+          <span>Rozumiem, że usunięcie firmy i jej danych z aplikacji jest trwałe, a subskrypcja zostanie anulowana natychmiast.</span>
+        </label>
+        <div class="delete-company-actions">
+          <a class="delete-company-cancel" href="{% url 'company_settings' %}">Wróć do ustawień</a>
+          <button class="delete-company-submit" type="submit"><i class="bi bi-trash3"></i> Usuń firmę i anuluj subskrypcję</button>
+        </div>
+      </form>
+    </div>
+  </section>
+</main>
+{% endblock %}

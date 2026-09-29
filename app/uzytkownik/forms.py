@@ -149,15 +149,6 @@ class ForgotForm(PasswordResetForm):
         model = PanelUser
         fields = ('email',)
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        try:
-            PanelUser.objects.get(email=email)
-        except PanelUser.DoesNotExist:
-            raise forms.ValidationError('Taki e-mail nie istnieje')
-
-        return email
-
 class SettPasswordForm(SetPasswordForm):
     new_password1 = forms.CharField(
         widget=forms.PasswordInput(
@@ -402,6 +393,17 @@ class EmployeeCreateForm(forms.ModelForm):
         if self.instance.pk and self.instance.role == User.Role.OWNER:
             self.fields["role"].disabled = True
 
+    def clean_is_active_employee(self):
+        active = self.cleaned_data.get("is_active_employee", False)
+        if self.instance.pk and active and (
+            not self.instance.is_active or not self.instance.has_usable_password()
+        ):
+            raise forms.ValidationError(
+                "Nie można aktywować pracownika, ponieważ konto jest nieaktywne lub pracownik nie ustawił jeszcze hasła. "
+                "Wyślij ponownie link aktywacyjny."
+            )
+        return active
+
     def clean_email(self):
         email = self.cleaned_data.get("email", "").lower().strip()
 
@@ -426,6 +428,7 @@ class EmployeeCreateForm(forms.ModelForm):
             user.set_unusable_password()  # hasło zostanie ustawione przez link aktywacyjny
             user.is_staff = True
             user.is_active = False  # konto aktywne dopiero po ustawieniu hasła
+            user.is_active_employee = False
             user.is_superuser = False
             user.is_admin = False
 

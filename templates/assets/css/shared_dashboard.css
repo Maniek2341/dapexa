@@ -21,9 +21,10 @@
     align-items: center;
     justify-content: center;
     background:
-        radial-gradient(circle at top left, rgba(255, 122, 0, .35), transparent 55%),
-        linear-gradient(135deg, rgba(255, 122, 0, .20), rgba(255, 122, 0, .08));
-    border: 1px solid rgba(255, 122, 0, .18);
+        radial-gradient(circle at top left, rgba(8, 184, 238, .25), transparent 55%),
+        linear-gradient(135deg, rgba(20, 104, 245, .20), rgba(155, 77, 255, .10));
+    border: 1px solid rgba(20, 104, 245, .30);
+    box-shadow: 0 12px 30px rgba(20, 104, 245, .18), inset 0 1px 0 rgba(255, 255, 255, .10);
     color: #1468f5;
     font-size: 1.5rem;
 }
@@ -195,7 +196,9 @@
     width: 52px;
     height: 52px;
     border-radius: 16px;
-    background: rgba(255, 122, 0, .12);
+    background: rgba(20, 104, 245, .12);
+    border: 1px solid rgba(20, 104, 245, .30);
+    box-shadow: 0 8px 22px rgba(20, 104, 245, .16), inset 0 1px 0 rgba(255, 255, 255, .10);
     color: #1468f5;
     display: flex;
     align-items: center;

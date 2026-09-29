@@ -1,15 +1,33 @@
 [Unit]
-Description=Dapexa Celery scheduler
-After=network.target redis-server.service
+Description=Dapexa Celery periodic scheduler
+After=network.target postgresql.service redis-server.service dapexa-celery.service
+Requires=redis-server.service
 
 [Service]
-User=%APP_USER%
+Type=simple
+User=deploy
 Group=www-data
-WorkingDirectory=%APP_DIR%
-EnvironmentFile=%APP_DIR%/.env
-ExecStart=%APP_DIR%/.venv/bin/celery -A BusinessManager beat --loglevel=INFO
-Restart=always
+WorkingDirectory=/var/www/dapexa
+EnvironmentFile=/var/www/dapexa/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+StateDirectory=dapexa-celery-beat
+StateDirectoryMode=0750
+ExecStart=/var/www/dapexa/.venv/bin/celery -A BusinessManager beat --loglevel=INFO --schedule=/var/lib/dapexa-celery-beat/schedule --pidfile=
+Restart=on-failure
 RestartSec=5
+TimeoutStopSec=60
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 
 [Install]
 WantedBy=multi-user.target

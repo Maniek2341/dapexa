@@ -1,13 +1,14 @@
 from django.views import View
 from django.shortcuts import render
-from django.contrib.auth.mixins import LoginRequiredMixin
+from app.urlop.access import LeavePermissionMixin
 from django.urls import reverse_lazy
 from django.db.models import Count
 
 from app.urlop.models import LeaveType
 
 
-class LeaveTypeListView(LoginRequiredMixin, View):
+class LeaveTypeListView(LeavePermissionMixin, View):
+    leave_permission = "leave_type_list"
 
     login_url = reverse_lazy("login")
     template_name = "app/urlop/leave_type_list.html"

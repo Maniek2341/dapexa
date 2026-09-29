@@ -37,6 +37,7 @@ EMPLOYEE_DEFAULT_PERMISSIONS = {
     "core.access_user_calendar",
     "core.access_user_calendar_events",
     "urlop.access_urlop_add",
+    "dostawcy.access_supplier_catalog",
 }
 
 MANAGEMENT_DEFAULT_PERMISSIONS = EMPLOYEE_DEFAULT_PERMISSIONS | {
@@ -61,6 +62,16 @@ MANAGEMENT_DEFAULT_PERMISSIONS = EMPLOYEE_DEFAULT_PERMISSIONS | {
     "urlop.access_hr_leave_cancel",
     "urlop.access_leave_type_list",
     "urlop.access_leave_allowance_list",
+    "urlop.access_hr_leave_approve",
+    "urlop.access_hr_leave_reject",
+    "urlop.access_hr_leave_pdf",
+    "urlop.access_leave_type_add",
+    "urlop.access_leave_type_edit",
+    "urlop.access_leave_type_delete",
+    "dostawcy.access_supplier_integrations",
+    "dostawcy.access_supplier_integration_save",
+    "dostawcy.access_supplier_integration_sync",
+    "dostawcy.access_supplier_product_add",
 }
 
 SUBCONTRACTOR_DEFAULT_PERMISSIONS = {
@@ -84,7 +95,7 @@ DEFAULT_ROLE_PERMISSIONS = {
 
 PROJECT_PERMISSION_APP_LABELS = {
     "core", "dokument", "gwarancja", "klient", "magazyn", "obsluga",
-    "oferta_praca", "pojazd", "praca", "protokol", "rcp", "serwis",
+    "oferta_praca", "dostawcy", "pojazd", "praca", "protokol", "rcp", "serwis",
     "sprzet", "urlop", "urzadzenie", "zadanie", "wsparcie",
 }
 

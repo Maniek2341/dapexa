@@ -26,7 +26,15 @@ class EmployeeListView(LoginRequiredMixin, ListView):
         for employee in employees:
             employee.completion = get_employee_completion(employee)
 
-        context["active_count"] = employees.filter(is_active_employee=True).count()
+        context["active_count"] = employees.filter(is_active=True, is_active_employee=True).count()
+        context["can_manage_employee_status"] = (
+            self.request.user.company_id is not None
+            and self.request.user.role in {User.Role.OWNER, User.Role.MANAGER, User.Role.BIURO}
+            and (
+                self.request.user.role == User.Role.OWNER
+                or self.request.user.has_perm("core.access_employee_status_toggle")
+            )
+        )
         context["manager_count"] = employees.filter(role=User.Role.MANAGER).count()
 
         return context

@@ -6,18 +6,20 @@ from django.urls import reverse_lazy
 
 from app.urlop.models import LeaveType
 from app.urlop.forms import LeaveTypeForm
+from app.urlop.access import LeavePermissionMixin
 
 
-class LeaveTypeCreateView(LoginRequiredMixin, View):
+class LeaveTypeCreateView(LeavePermissionMixin, View):
+    leave_permission = "leave_type_add"
 
     template_name = "app/urlop/urlop_type_form.html"
 
     def get(self, request):
-        form = LeaveTypeForm()
+        form = LeaveTypeForm(company=request.user.company)
         return render(request, self.template_name, {"form": form})
 
     def post(self, request):
-        form = LeaveTypeForm(request.POST)
+        form = LeaveTypeForm(request.POST, company=request.user.company)
 
         if form.is_valid():
             leave_type = form.save(commit=False)
@@ -28,5 +30,4 @@ class LeaveTypeCreateView(LoginRequiredMixin, View):
             return redirect("leave_type_list")
 
         return render(request, self.template_name, {"form": form})
-
 

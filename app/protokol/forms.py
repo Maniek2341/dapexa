@@ -335,19 +335,25 @@ class ProtocolCreateForm(forms.ModelForm):
         if commit:
             instance.save()
             self.save_m2m()
-
-            # 📎 Załączniki
-            files = self.cleaned_data.get("attachments", [])
-            for file in files:
-                ProtokolImage.objects.create(
-                    protokol=instance,
-                    file=file,
-                    kind="image" if file.content_type.startswith("image") else "file",
-                    original_name=file.name,
-                    uploaded_by=self.user
-                )
+            self.save_attachments(instance)
 
         return instance
+
+    def save_attachments(self, protocol):
+        """Save validated uploads using the private protocol file field."""
+        for uploaded_file in self.cleaned_data.get("attachments", []):
+            content_type = getattr(uploaded_file, "content_type", "") or ""
+            ProtokolImage.objects.create(
+                protokol=protocol,
+                file=uploaded_file,
+                kind=(
+                    ProtokolImage.Kind.IMAGE
+                    if content_type.startswith("image/")
+                    else ProtokolImage.Kind.FILE
+                ),
+                original_name=uploaded_file.name,
+                uploaded_by=self.user,
+            )
 
 class ProtokolUrzadzeniaForm(forms.ModelForm):
 

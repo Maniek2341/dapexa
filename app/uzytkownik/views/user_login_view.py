@@ -1,5 +1,8 @@
 import json
+import logging
+import os
 import secrets
+import traceback
 from datetime import timedelta
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
@@ -16,11 +19,34 @@ from django.views import View
 from app.core.models import PanelUser
 from app.uzytkownik.forms import LoginForm, LoginTwoFactorForm
 
+logger = logging.getLogger(__name__)
+
+
+def _log_sanitized_login_exception(exc):
+    frames = traceback.extract_tb(exc.__traceback__)
+    locations = " > ".join(
+        f"{os.path.basename(frame.filename)}:{frame.lineno}:{frame.name}"
+        for frame in frames[-5:]
+    )
+    logger.error(
+        "Unexpected login failure (%s); traceback locations: %s",
+        type(exc).__name__,
+        locations,
+    )
+
 
 class UserLoginView(View):
     two_factor_session_user_key = "pending_2fa_user_id"
     two_factor_session_next_key = "pending_2fa_next"
     two_factor_session_remember_key = "pending_2fa_remember"
+    two_factor_session_backend_key = "pending_2fa_backend"
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except Exception as exc:
+            _log_sanitized_login_exception(exc)
+            raise
 
     def _safe_next_url(self, request, value):
         if value and url_has_allowed_host_and_scheme(
@@ -36,6 +62,7 @@ class UserLoginView(View):
             self.two_factor_session_user_key,
             self.two_factor_session_next_key,
             self.two_factor_session_remember_key,
+            self.two_factor_session_backend_key,
         ):
             request.session.pop(key, None)
 
@@ -126,6 +153,7 @@ class UserLoginView(View):
                     request.session[self.two_factor_session_user_key] = user.pk
                     request.session[self.two_factor_session_next_key] = next_url
                     request.session[self.two_factor_session_remember_key] = bool(request.POST.get("remember"))
+                    request.session[self.two_factor_session_backend_key] = user.backend
                     messages.info(request, json.dumps({
                         "body": f"Wysłaliśmy 6-cyfrowy kod weryfikacyjny na adres {user.email}.",
                         "title": "Potwierdź logowanie"
@@ -215,7 +243,17 @@ class UserLoginView(View):
             "login_2fa_attempts",
         ])
 
-        login(request, user)
+        backend = request.session.get(self.two_factor_session_backend_key)
+        if not backend:
+            # Sessions created before backend tracking used ModelBackend during
+            # password authentication; keep already-issued 2FA codes usable.
+            backend = "django.contrib.auth.backends.ModelBackend"
+        if backend not in settings.AUTHENTICATION_BACKENDS:
+            self._clear_pending_two_factor(request)
+            messages.error(request, "Sesja weryfikacji wygasła. Zaloguj się ponownie.")
+            return redirect("login")
+
+        login(request, user, backend=backend)
         remember = request.session.get(self.two_factor_session_remember_key)
         self._clear_pending_two_factor(request)
         if not remember:

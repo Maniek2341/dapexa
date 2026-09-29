@@ -40,6 +40,7 @@ class CompanySettingsAdmin(admin.ModelAdmin):
     list_display = (
         "company", "default_vat",
         "default_work_start_time", "default_work_end_time",
+        "default_employee_work_start_time", "default_employee_work_end_time",
         "notification_email", "updated_at",
     )
     search_fields = ("company__name", "notification_email")
@@ -51,7 +52,8 @@ class CompanySettingsAdmin(admin.ModelAdmin):
             "labor_price_2_workers", "labor_price_3_workers",
             "default_vat",
         )}),
-        ("RCP", {"fields": ("default_work_start_time", "default_work_end_time")}),
+        ("RCP — biuro i managerowie", {"fields": ("default_work_start_time", "default_work_end_time")}),
+        ("RCP — pracownicy", {"fields": ("default_employee_work_start_time", "default_employee_work_end_time")}),
         ("Numeracja", {"fields": (
             "default_protocol_valid_days", "protocol_number_prefix",
             "protocol_number_digits", "service_number_prefix", "service_number_digits",

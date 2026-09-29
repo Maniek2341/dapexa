@@ -9,9 +9,10 @@ from decimal import Decimal
 from django.contrib import messages
 
 from app.protokol.forms import ProtocolCreateForm, ProtokolUrzadzeniaFormSet
-from app.protokol.models import Protocol, ProtokolUrzadzenia, ProtokolImage, ProtocolActivity
+from app.protokol.models import Protocol, ProtokolUrzadzenia, ProtocolActivity
 from app.urzadzenie.models import Product
 from django.core.exceptions import PermissionDenied
+from app.core.notifications import notify_company_email
 
 class ProtocolFromServiceView(LoginRequiredMixin, View):
 
@@ -110,6 +111,7 @@ class ProtocolFromServiceView(LoginRequiredMixin, View):
                     )[:250]
 
                 protocol.save()
+                form.save_attachments(protocol)
 
                 # 🔹 ZAPIS MATERIAŁÓW
                 formset.instance = protocol
@@ -155,6 +157,17 @@ class ProtocolFromServiceView(LoginRequiredMixin, View):
                     description=f"Protokół utworzony na podstawie serwisu {service.number}.",
                     created_by=request.user
                 )
+
+            notify_company_email(
+                company=protocol.company,
+                module="protokol",
+                subject=f"Dodano protokół {protocol.number}",
+                message=(
+                    f"Dodano protokół {protocol.number} do serwisu {service.number}.\n"
+                    f"Klient: {service.client}\n"
+                    f"Dodał: {request.user.get_full_name() or request.user.email}"
+                ),
+            )
 
             messages.success(
                 request,

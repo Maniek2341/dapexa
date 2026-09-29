@@ -2,6 +2,11 @@
 import json
 import logging
 from datetime import UTC, datetime
+from django.db import transaction
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
+from django.contrib import messages
 
 import stripe
 
@@ -12,7 +17,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 
-from app.core.models import Company, PanelUser, Address, Subscription
+from app.core.models import Subscription, StripeWebhookEvent
 from app.core.subscription_lifecycle import (
     clear_scheduled_cancellation,
     mark_cancellation_scheduled,
@@ -25,21 +30,7 @@ logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
 stripe.api_version = settings.STRIPE_API_VERSION
 
-# price_id z Twojego panelu Stripe
-STRIPE_PRICE_IDS = {
-    "start": {
-        "monthly": "price_1SYlwN2cLveabukasUB1Gfp5",
-        "yearly": "price_1SYlwe2cLveabukaBBljR9VM",
-    },
-    "standard": {
-        "monthly": "price_1SYlxI2cLveabukamOy0egY7",
-        "yearly": "price_1SYlxR2cLveabuka2atcyWd7",
-    },
-    "pro": {
-        "monthly": "price_1SYlxl2cLveabuka76AEloE3",
-        "yearly": "price_1SYlxw2cLveabukaJvYLRrp8",
-    },
-}
+STRIPE_PRICE_IDS = settings.STRIPE_PRICE_IDS
 
 STRIPE_PLAN_BY_PRICE_ID = {
     price_id: (package, billing_period)
@@ -48,6 +39,14 @@ STRIPE_PLAN_BY_PRICE_ID = {
 }
 
 EXTRA_USER_LOOKUP_PREFIX = "business_manager_extra_user"
+
+
+def stripe_data(resource):
+    """Convert Stripe SDK resources to regular dictionaries for safe `.get()` use."""
+    if isinstance(resource, dict):
+        return resource
+    to_dict = getattr(type(resource), "to_dict", None)
+    return resource.to_dict() if callable(to_dict) else resource
 
 
 def get_extra_user_price_id(billing_period):
@@ -70,11 +69,13 @@ def get_extra_user_price_id(billing_period):
         },
         lookup_key=lookup_key,
         nickname=f"Dodatkowy użytkownik ({billing_period})",
+        idempotency_key=lookup_key,
     )
     return price.id
 
 
 def sync_extra_users_from_stripe(subscription, stripe_subscription):
+    stripe_subscription = stripe_data(stripe_subscription)
     main_price_id = None
     extra_quantity = 0
     extra_item_id = ""
@@ -160,6 +161,59 @@ def sync_stripe_customer_billing_data(subscription, company, email):
     return customer.id
 
 
+def create_plan_checkout_session(request, subscription, package, billing_period):
+    """Reuse an open Checkout Session and serialize creations per subscription."""
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+    target_price_id = STRIPE_PRICE_IDS[package][billing_period]
+    if subscription.stripe_checkout_session_id:
+        existing = stripe.checkout.Session.retrieve(
+            subscription.stripe_checkout_session_id
+        )
+        existing_data = stripe_data(existing)
+        if existing_data.get("status") == "open":
+            metadata = existing_data.get("metadata", {}) or {}
+            if (
+                metadata.get("package") == package
+                and metadata.get("billing_period") == billing_period
+            ):
+                return existing
+            stripe.checkout.Session.expire(existing.id)
+        elif existing_data.get("status") == "complete":
+            return existing
+
+    domain_url = getattr(settings, "DOMAIN_URL", None) or request.build_absolute_uri("/").rstrip("/")
+    params = {
+        "mode": "subscription",
+        "line_items": [{"price": target_price_id, "quantity": 1}],
+        "success_url": domain_url + reverse("checkout_success") + "?session_id={CHECKOUT_SESSION_ID}",
+        "cancel_url": domain_url + reverse("checkout_cancel"),
+        "client_reference_id": str(subscription.pk),
+        "metadata": {
+            "package": package,
+            "billing_period": billing_period,
+            "local_subscription_id": str(subscription.pk),
+        },
+    }
+    if subscription.stripe_customer_id:
+        params["customer"] = subscription.stripe_customer_id
+    else:
+        params["customer_email"] = request.user.email
+
+    attempt = subscription.stripe_checkout_attempt + 1
+    session = stripe.checkout.Session.create(
+        **params,
+        idempotency_key=f"plan-checkout-{subscription.pk}-{attempt}",
+    )
+    subscription.stripe_checkout_session_id = session.id
+    subscription.stripe_checkout_attempt = attempt
+    subscription.save(update_fields=[
+        "stripe_checkout_session_id",
+        "stripe_checkout_attempt",
+        "updated_at",
+    ])
+    return session
+
+
 # --- POMOCNICZE ---
 
 def unix_to_dt(ts):
@@ -168,10 +222,10 @@ def unix_to_dt(ts):
     return datetime.fromtimestamp(ts, tz=UTC)
 
 
-# --- CHECKOUT SESSION (wywoływane z JS) ---
+# --- CHECKOUT SESSION ---
 
 @require_POST
-@csrf_exempt  # jeśli chcesz – dodaj X-CSRFToken w fetch i usuń to
+@login_required
 def create_checkout_session(request):
     try:
         data = json.loads(request.body.decode("utf-8"))
@@ -180,24 +234,8 @@ def create_checkout_session(request):
 
     package = data.get("package")
     billing_period = data.get("billing_period")  # monthly / yearly
-    email = data.get("email")
-    first_name = data.get("first_name")
-    last_name = data.get("last_name")
-    company_name = data.get("company_name")
-    nip = data.get("nip")
-    regon = data.get("regon")
-    phone = data.get("phone")
-    city = data.get("city")
-    address = data.get("address")
-    postal_code = data.get("postalCode")
-
-    if not is_valid_polish_nip(nip):
-        return JsonResponse({"error": "Podaj prawidłowy polski NIP."}, status=400)
-    if not all([company_name, city, address, postal_code]):
-        return JsonResponse(
-            {"error": "Uzupełnij nazwę i pełny adres firmy do faktury."},
-            status=400,
-        )
+    if request.user.role != request.user.Role.OWNER or not request.user.company_id:
+        return JsonResponse({"error": "Tylko właściciel firmy może rozpocząć płatność."}, status=403)
 
     if package not in STRIPE_PRICE_IDS:
         return HttpResponseBadRequest("Unknown package")
@@ -205,61 +243,35 @@ def create_checkout_session(request):
     if billing_period not in STRIPE_PRICE_IDS[package]:
         return HttpResponseBadRequest("Unknown billing period")
 
-    price_id = STRIPE_PRICE_IDS[package][billing_period]
-
-    domain_url = getattr(settings, "DOMAIN_URL", None)
-    if not domain_url:
-        domain_url = request.build_absolute_uri("/").rstrip("/")
-
     try:
-        customer = stripe.Customer.create(
-            name=company_name,
-            email=email,
-            phone=phone or None,
-            preferred_locales=["pl"],
-            address={
-                "line1": address,
-                "postal_code": postal_code,
-                "city": city,
-                "country": "PL",
-            },
-            tax_id_data=[{
-                "type": "pl_nip",
-                "value": normalize_nip(nip),
-            }],
-            metadata={"nip": normalize_nip(nip)},
-        )
-        checkout_session = stripe.checkout.Session.create(
-            mode="subscription",
-            line_items=[
-                {
-                    "price": price_id,
-                    "quantity": 1,
-                }
-            ],
-            subscription_data={
-                "trial_period_days": 14,  # 14 dni okresu próbnego
-            },
-            success_url=domain_url + reverse("checkout_success") + "?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url=domain_url + reverse("checkout_cancel"),
-            customer=customer.id,
-            metadata={
-                "package": package,
-                "billing_period": billing_period,
-                "first_name": first_name or "",
-                "last_name": last_name or "",
-                "company_name": company_name or "",
-                "nip": nip or "",
-                "regon": regon or "",
-                "phone": phone or "",
-                "city": city or "",
-                "address": address or "",
-                "postal_code": postal_code or "",
-            },
-        )
-    except Exception as e:
+        with transaction.atomic():
+            subscription = (
+                Subscription.objects.select_for_update()
+                .filter(company_id=request.user.company_id)
+                .order_by("-created_at")
+                .first()
+            )
+            if not subscription or subscription.cancel_at_period_end:
+                return JsonResponse({"error": "Nie znaleziono subskrypcji do zmiany."}, status=400)
+            if subscription.stripe_subscription_id:
+                return JsonResponse(
+                    {"error": "Subskrypcja ma już powiązanie ze Stripe. Użyj zmiany pakietu."},
+                    status=409,
+                )
+            billing_errors = company_billing_errors(subscription.company)
+            if billing_errors:
+                return JsonResponse({"error": "Uzupełnij dane do faktury: " + ", ".join(billing_errors)}, status=400)
+            stripe_customer_id = sync_stripe_customer_billing_data(
+                subscription, subscription.company, request.user.email
+            )
+            subscription.stripe_customer_id = stripe_customer_id
+            subscription.save(update_fields=["stripe_customer_id", "updated_at"])
+            checkout_session = create_plan_checkout_session(
+                request, subscription, package, billing_period
+            )
+    except stripe.error.StripeError as e:
         logger.exception("Error creating Stripe Checkout Session")
-        return JsonResponse({"error": str(e)}, status=400)
+        return JsonResponse({"error": getattr(e, "user_message", None) or "Nie udało się rozpocząć płatności."}, status=400)
 
     return JsonResponse({"session_id": checkout_session.id})
 
@@ -293,11 +305,18 @@ def checkout_cancel(request):
     return render(request, "app/payments/cancel.html")
 
 
+@require_POST
+@login_required
+def create_billing_portal_session(request):
+    if request.user.role != request.user.Role.OWNER or not request.user.company_id:
+        raise PermissionDenied("Tylko właściciel firmy może zarządzać rozliczeniami.")
+    return redirect("billing_management")
+
+
 # --- WEBHOOK STRIPE ---
 
 @csrf_exempt
 def stripe_webhook(request):
-    logger.info("Stripe webhook RAW body: %s", request.body)
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
     endpoint_secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
@@ -316,190 +335,124 @@ def stripe_webhook(request):
     except stripe.error.SignatureVerificationError:
         return HttpResponseBadRequest("Invalid signature")
 
-    event_type = event["type"]
-    data_object = event["data"]["object"]
+    event = stripe_data(event)
+    event_id = event.get("id")
+    event_type = event.get("type")
+    event_created = event.get("created")
+    data_object = event.get("data", {}).get("object", {})
+    if not event_id or not event_type:
+        return HttpResponseBadRequest("Invalid event")
 
-    if event_type == "checkout.session.completed":
-        handle_checkout_session_completed(data_object)
+    with transaction.atomic():
+        webhook_event, _ = StripeWebhookEvent.objects.get_or_create(
+            event_id=event_id,
+            defaults={
+                "event_type": event_type,
+                "event_created": event_created or 0,
+            },
+        )
+        webhook_event = StripeWebhookEvent.objects.select_for_update().get(pk=webhook_event.pk)
+        if webhook_event.processed_at:
+            return JsonResponse({"status": "duplicate"})
 
-    if event_type == "customer.subscription.updated":
-        handle_subscription_updated(data_object)
+        if event_type == "checkout.session.completed":
+            handle_checkout_session_completed(data_object, event_created=event_created)
+        elif event_type in {"customer.subscription.created", "customer.subscription.updated"}:
+            handle_subscription_updated(data_object, event_created=event_created)
+        elif event_type == "customer.subscription.deleted":
+            handle_subscription_updated(data_object, deleted=True, event_created=event_created)
+        elif event_type in {
+            "invoice.paid",
+            "invoice.payment_failed",
+            "invoice.payment_action_required",
+        }:
+            handle_invoice_event(
+                data_object,
+                payment_failed=event_type == "invoice.payment_failed",
+                payment_action_required=(
+                    event_type == "invoice.payment_action_required"
+                ),
+            )
 
-    if event_type == "customer.subscription.deleted":
-        handle_subscription_updated(data_object, deleted=True)
+        webhook_event.processed_at = datetime.now(tz=UTC)
+        webhook_event.save(update_fields=["processed_at"])
 
     return JsonResponse({"status": "success"})
 
 
-def handle_checkout_session_completed(session):
+def handle_checkout_session_completed(session, event_created=None):
     """
     Tworzy/aktualizuje Subscription, Company, PanelUser na podstawie checkout.session.completed
     """
+    session = stripe_data(session)
     logger.info("Handling checkout.session.completed for session: %s", session.get("id"))
+    if session.get("mode") != "subscription" or session.get("status") != "complete":
+        logger.warning("Ignoring incomplete or non-subscription Checkout Session %s", session.get("id"))
+        return
     subscription_id = session.get("subscription")
     customer_id = session.get("customer")
     metadata = session.get("metadata", {}) or {}
 
-    package = metadata.get("package")
-    billing_period = metadata.get("billing_period") or Subscription.BILLING_MONTHLY
-
     local_subscription_id = metadata.get("local_subscription_id")
-    if local_subscription_id:
-        try:
-            sub_obj = Subscription.objects.get(pk=local_subscription_id)
-        except (Subscription.DoesNotExist, ValueError):
-            logger.error("Unknown local subscription: %s", local_subscription_id)
-            return
-
-        try:
-            stripe_sub = stripe.Subscription.retrieve(subscription_id)
-        except Exception:
-            logger.exception("Could not retrieve changed Stripe subscription")
-            return
-
-        sub_obj.stripe_subscription_id = subscription_id
-        sub_obj.stripe_customer_id = customer_id or sub_obj.stripe_customer_id
-        sub_obj.package = package or sub_obj.package
-        sub_obj.billing_period = billing_period
-        sync_extra_users_from_stripe(sub_obj, stripe_sub)
-        sub_obj.status = stripe_sub.get("status", sub_obj.status)
-        sub_obj.current_period_start = unix_to_dt(stripe_sub.get("current_period_start"))
-        sub_obj.current_period_end = unix_to_dt(stripe_sub.get("current_period_end"))
-        sync_cancellation_state(
-            sub_obj,
-            stripe_sub.get("cancel_at_period_end", False),
-            sub_obj.current_period_end,
-        )
-        sub_obj.save()
+    if not local_subscription_id or not subscription_id:
+        logger.error("Checkout Session %s has no local subscription reference", session.get("id"))
         return
-
-    # znajdź lub utwórz Subscription
-    sub_obj, created = Subscription.objects.get_or_create(
-        stripe_subscription_id=subscription_id,
-        defaults={
-            "stripe_customer_id": customer_id or "",
-            "package": package or "",
-            "billing_period": billing_period,
-        },
-    )
-
-    # dociągamy pełną subskrypcję ze Stripe
     try:
-        stripe_sub = stripe.Subscription.retrieve(subscription_id)
-    except Exception:
-        stripe_sub = None
-
-    if stripe_sub:
-        sub_obj.stripe_customer_id = customer_id or sub_obj.stripe_customer_id
-        sync_extra_users_from_stripe(sub_obj, stripe_sub)
-        sub_obj.status = stripe_sub.get("status", sub_obj.status)
-        sub_obj.current_period_start = unix_to_dt(stripe_sub.get("current_period_start"))
-        sub_obj.current_period_end = unix_to_dt(stripe_sub.get("current_period_end"))
-        sync_cancellation_state(
-            sub_obj,
-            stripe_sub.get("cancel_at_period_end", False),
-            sub_obj.current_period_end,
+        sub_obj = Subscription.objects.select_for_update().get(pk=local_subscription_id)
+    except (Subscription.DoesNotExist, ValueError):
+        logger.error("Unknown local subscription: %s", local_subscription_id)
+        return
+    if sub_obj.stripe_customer_id and customer_id != sub_obj.stripe_customer_id:
+        logger.error("Checkout Session %s has an unexpected customer", session.get("id"))
+        return
+    if (
+        sub_obj.stripe_checkout_session_id
+        and sub_obj.stripe_checkout_session_id != session.get("id")
+    ):
+        logger.error("Checkout Session %s is not the current session for this subscription", session.get("id"))
+        return
+    if Subscription.objects.exclude(pk=sub_obj.pk).filter(stripe_subscription_id=subscription_id).exists():
+        logger.error("Stripe subscription %s is already linked to another local record", subscription_id)
+        return
+    try:
+        stripe_sub = stripe.Subscription.retrieve(
+            subscription_id, expand=["items.data.price"]
         )
+    except stripe.error.StripeError:
+        logger.exception("Could not retrieve Checkout subscription %s", subscription_id)
+        raise
+    stripe_sub = stripe_data(stripe_sub)
 
-    # Dane do stworzenia firmy i ownera
-    email = session.get("customer_details", {}).get("email") or session.get("customer_email")
-
-    first_name = metadata.get("first_name")
-    last_name = metadata.get("last_name")
-    company_name = metadata.get("company_name") or "Firma bez nazwy"
-    nip = metadata.get("nip") or ""
-    regon = metadata.get("regon") or ""
-    phone = metadata.get("phone") or ""
-    city = metadata.get("city") or ""
-    street = metadata.get("address") or ""
-    postal_code = metadata.get("postal_code") or ""
-
-    # 1. Tworzymy lub znajdujemy użytkownika (owner)
-    owner, owner_created = PanelUser.objects.get_or_create(
-        email=email,
-        defaults={
-            "first_name": first_name or "",
-            "last_name": last_name or "",
-            "role": PanelUser.Role.OWNER,
-            "is_active": True,
-            "is_staff": True,
-            "is_admin": False,
-            "is_superuser": False,
-        },
+    sync_extra_users_from_stripe(sub_obj, stripe_sub)
+    if sub_obj.stripe_price_id not in STRIPE_PLAN_BY_PRICE_ID:
+        logger.error("Checkout subscription %s has an unrecognized Price", subscription_id)
+        return
+    sub_obj.stripe_subscription_id = subscription_id
+    sub_obj.stripe_customer_id = customer_id or sub_obj.stripe_customer_id
+    sub_obj.stripe_checkout_session_id = ""
+    sub_obj.status = stripe_sub.get("status", sub_obj.status)
+    sub_obj.current_period_start = unix_to_dt(stripe_sub.get("current_period_start"))
+    sub_obj.current_period_end = unix_to_dt(stripe_sub.get("current_period_end"))
+    sync_cancellation_state(
+        sub_obj,
+        stripe_sub.get("cancel_at_period_end", False),
+        sub_obj.current_period_end,
     )
-    # if owner_created:
-    #     owner.set_password(PanelUser.objects.make_random_password())
-    #     owner.save()
-
-    # 2. Firma – idempotentnie (żeby webhook retry nie tworzył duplikatów)
-    if nip:
-        company = Company.objects.filter(nip=nip).first()
-    else:
-        company = Company.objects.filter(name=company_name, email=email).first()
-
-    company_created = False
-    main_address = None
-
-    if not company:
-        main_address = Address.objects.create(
-            street=street,
-            postcode=postal_code,
-            city=city,
-            country="Polska",
-        )
-        if nip:
-            company = Company.objects.create(
-                name=company_name,
-                nip=nip,
-                regon=regon,
-                phone=phone,
-                email=email,
-                main_address=main_address,
-            )
-        else:
-            company = Company.objects.create(
-                name=company_name,
-                regon=regon,
-                phone=phone,
-                email=email,
-                main_address=main_address,
-            )
-        company_created = True
-    else:
-        if not company.main_address and (street or postal_code or city):
-            main_address = Address.objects.create(
-                street=street,
-                postcode=postal_code,
-                city=city,
-                country="Polska",
-            )
-            company.main_address = main_address
-            company.save(update_fields=["main_address"])
-
-    logger.info("Company %s (created=%s)", company.id, company_created)
-
-    # 3. Podpinamy ownera do firmy
-    if owner.company_id != company.id:
-        owner.company = company
-        owner.save(update_fields=["company"])
-
-    # 4. Podpinamy firmę i ownera do subskrypcji
-    sub_obj.company = company
-    sub_obj.owner = owner
+    if event_created:
+        sub_obj.stripe_event_created = max(sub_obj.stripe_event_created or 0, event_created)
     sub_obj.save()
-    if not company_billing_errors(company):
-        try:
-            sync_stripe_customer_billing_data(sub_obj, company, owner.email)
-            sub_obj.save(update_fields=["stripe_customer_id", "updated_at"])
-        except stripe.error.StripeError:
-            logger.exception("Could not synchronize invoice data after Checkout")
 
 
-def handle_subscription_updated(stripe_sub, deleted=False):
+def handle_subscription_updated(stripe_sub, deleted=False, event_created=None):
+    stripe_sub = stripe_data(stripe_sub)
     subscription_id = stripe_sub.get("id")
     try:
         sub_obj = Subscription.objects.get(stripe_subscription_id=subscription_id)
     except Subscription.DoesNotExist:
+        return
+
+    if event_created and sub_obj.stripe_event_created and event_created < sub_obj.stripe_event_created:
+        logger.info("Ignoring stale Stripe event for subscription %s", subscription_id)
         return
 
     sync_extra_users_from_stripe(sub_obj, stripe_sub)
@@ -512,4 +465,53 @@ def handle_subscription_updated(stripe_sub, deleted=False):
         mark_cancellation_scheduled(sub_obj, period_end=sub_obj.current_period_end)
     elif sub_obj.cancel_at_period_end:
         clear_scheduled_cancellation(sub_obj)
+    if event_created:
+        sub_obj.stripe_event_created = event_created
     sub_obj.save()
+
+
+def handle_invoice_event(
+    invoice, payment_failed=False, payment_action_required=False
+):
+    subscription_id = invoice.get("subscription")
+    if not subscription_id:
+        parent = invoice.get("parent", {}) or {}
+        details = parent.get("subscription_details", {}) or {}
+        subscription_id = details.get("subscription")
+    if isinstance(subscription_id, dict):
+        subscription_id = subscription_id.get("id")
+    if not subscription_id:
+        return
+    try:
+        sub_obj = Subscription.objects.get(stripe_subscription_id=subscription_id)
+    except Subscription.DoesNotExist:
+        logger.info("Ignoring invoice for unknown Stripe subscription %s", subscription_id)
+        return
+    try:
+        stripe_sub = stripe.Subscription.retrieve(
+            subscription_id, expand=["items.data.price"]
+        )
+    except stripe.error.StripeError:
+        logger.exception("Could not refresh subscription after invoice event")
+        raise
+    handle_subscription_updated(stripe_sub)
+    if (payment_failed or payment_action_required) and sub_obj.owner_id and sub_obj.owner.email:
+        hosted_url = invoice.get("hosted_invoice_url")
+        if payment_action_required:
+            body = "Płatność za subskrypcję wymaga dodatkowego potwierdzenia. Dokończ płatność w Stripe."
+        else:
+            body = "Płatność za subskrypcję nie powiodła się. Zaktualizuj metodę płatności."
+        if hosted_url:
+            body += f"\n\nSzczegóły faktury: {hosted_url}"
+        try:
+            from django.core.mail import send_mail
+
+            send_mail(
+                "Problem z płatnością za subskrypcję",
+                body,
+                settings.DEFAULT_FROM_EMAIL,
+                [sub_obj.owner.email],
+                fail_silently=True,
+            )
+        except Exception:
+            logger.exception("Could not notify subscription owner about failed invoice")

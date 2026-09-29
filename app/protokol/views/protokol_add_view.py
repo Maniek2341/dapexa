@@ -7,8 +7,9 @@ from app.core.routing import RoutingService
 from decimal import Decimal
 
 from app.protokol.forms import ProtocolCreateForm, ProtokolUrzadzeniaFormSet
-from app.protokol.models import Protocol, ProtokolUrzadzenia, ProtokolImage, ProtocolActivity
+from app.protokol.models import Protocol, ProtokolUrzadzenia, ProtocolActivity
 from app.urzadzenie.models import Product
+from app.core.notifications import notify_company_email
 
 
 class ProtokolAddView(LoginRequiredMixin, View):
@@ -63,6 +64,7 @@ class ProtokolAddView(LoginRequiredMixin, View):
 
         # 🔥 ZAPIS NAJPIERW
         protocol.save()
+        form.save_attachments(protocol)
 
         # 🔥 ZAPIS MATERIAŁÓW
         formset.instance = protocol
@@ -87,18 +89,6 @@ class ProtokolAddView(LoginRequiredMixin, View):
         protocol.save()
 
         # ---------------------------
-        # ZAŁĄCZNIKI
-        # ---------------------------
-
-        files = request.FILES.getlist("attachments[]")
-
-        for file in files:
-            ProtokolImage.objects.create(
-                protokol=protocol,
-                image=file
-            )
-
-        # ---------------------------
         # AKTYWNOŚĆ
         # ---------------------------
 
@@ -109,6 +99,18 @@ class ProtokolAddView(LoginRequiredMixin, View):
             title="Utworzono protokół",
             description=f"Numer: {protocol.number}",
             created_by=request.user
+        )
+
+        notify_company_email(
+            company=protocol.company,
+            module="protokol",
+            subject=f"Dodano protokół {protocol.number}",
+            message=(
+                f"Dodano protokół {protocol.number}.\n"
+                f"Tytuł: {protocol.title or '—'}\n"
+                f"Klient: {protocol.client or '—'}\n"
+                f"Dodał: {request.user.get_full_name() or request.user.email}"
+            ),
         )
 
         messages.success(request, "Protokół został utworzony.")

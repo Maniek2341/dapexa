@@ -12,6 +12,7 @@ from app.klient.models import ClientLocation
 from app.oferta_praca.forms import OfferCreateForm
 from app.oferta_praca.models import Offer, OfferImage, OfferActivity
 from app.dokument.models import DocumentFolder
+from app.core.notifications import notify_company_email
 
 
 class OfferCreateView(LoginRequiredMixin, CreateView):
@@ -46,6 +47,17 @@ class OfferCreateView(LoginRequiredMixin, CreateView):
             title="Oferta utworzona",
             description=f"Utworzono ofertę {offer.number}",
             created_by=self.request.user,
+        )
+
+        notify_company_email(
+            company=offer.company,
+            module="oferta_praca",
+            subject=f"Dodano ofertę {offer.number}",
+            message=(
+                f"Dodano ofertę {offer.number}: {offer.title}.\n"
+                f"Klient: {offer.client}\n"
+                f"Dodał: {self.request.user.get_full_name() or self.request.user.email}"
+            ),
         )
 
         self.object = offer

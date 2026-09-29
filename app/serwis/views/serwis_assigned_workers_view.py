@@ -11,6 +11,7 @@ from app.serwis.models import ServiceOrder, ServiceActivity
 from app.serwis.permissions import can_manage_services
 from app.serwis.signals import log_service_activity
 from app.core.models import PanelUser
+from app.core.notifications import notify_assigned_users
 
 def _safe_next(request, fallback_url: str) -> str:
     nxt = (request.POST.get("next") or "").strip()
@@ -46,6 +47,19 @@ class SerwisAssignWorkersView(LoginRequiredMixin, View):
         workers = [by_id[i] for i in worker_ids if i in by_id]  # kolejność z POST
 
         service.assigned_to.set(workers)  # ✅ zapisuje też usunięcia
+
+        old_worker_ids = {worker.pk for worker in old_workers}
+        newly_assigned = [worker for worker in workers if worker.pk not in old_worker_ids]
+        notify_assigned_users(
+            company=service.company,
+            users=newly_assigned,
+            subject=f"Przypisano Cię do serwisu {service.number}",
+            message=(
+                f"Przypisano Cię do serwisu {service.number}: {service.title}.\n"
+                f"Klient: {service.client}\n"
+                f"Termin: {service.planned_start or 'nieustalony'}"
+            ),
+        )
 
         new_names = ", ".join(f"{u.first_name} {u.last_name}" for u in workers) or "Brak"
 

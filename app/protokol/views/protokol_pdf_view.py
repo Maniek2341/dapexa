@@ -1,5 +1,4 @@
 from datetime import timedelta
-import pdfkit
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -9,7 +8,7 @@ from django.conf import settings
 
 from app.protokol.models import Protocol
 from app.core.models import CompanySettings
-from app.core.pdf_utils import get_company_logo_url
+from app.core.pdf_utils import get_company_logo_url, render_pdf
 
 
 class ProtocolPDFView(LoginRequiredMixin, View):
@@ -43,10 +42,6 @@ class ProtocolPDFView(LoginRequiredMixin, View):
             }
         )
 
-        config = pdfkit.configuration(
-            wkhtmltopdf=settings.WKHTMLTOPDF_CMD
-        )
-
         options = {
             "page-size": "A4",
             "margin-top": "15mm",
@@ -54,15 +49,9 @@ class ProtocolPDFView(LoginRequiredMixin, View):
             "margin-left": "15mm",
             "margin-right": "15mm",
             "encoding": "UTF-8",
-            "enable-local-file-access": "",
         }
 
-        pdf = pdfkit.from_string(
-            html,
-            False,
-            configuration=config,
-            options=options
-        )
+        pdf = render_pdf(html, options=options)
 
         response = HttpResponse(pdf, content_type="application/pdf")
         response["Content-Disposition"] = (

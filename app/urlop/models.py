@@ -1,5 +1,4 @@
 # app/leaves/models.py
-from datetime import timedelta
 from decimal import Decimal
 from django.db import models
 from django.core.exceptions import ValidationError
@@ -8,7 +7,11 @@ from django.conf import settings
 from app.core.models import CompanyOwnedModel
 from app.core.view_permissions import view_permissions
 from django.core.validators import MinValueValidator
-import holidays
+from app.urlop.calendar import calculate_working_days
+
+
+def current_leave_year():
+    return timezone.localdate().year
 
 # app/leaves/models.py
 from django.db import models
@@ -33,6 +36,25 @@ class LeaveType(CompanyOwnedModel):
 
     is_special = models.BooleanField(default=False)  # macierzyński/rodzicielski itp.
 
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=("company", "code"), name="unique_leave_type_code_per_company")]
+
+    def clean(self):
+        super().clean()
+        if self.counts_against_limit and self.annual_limit_days <= 0:
+            raise ValidationError({"annual_limit_days": "Limit musi być większy od zera."})
+        if self.pk and self.leaverequest_set.exists():
+            previous = type(self).objects.filter(pk=self.pk).values(
+                "code", "pool", "counts_against_limit", "annual_limit_days", "is_special",
+            ).first()
+            if previous and any(previous[field] != getattr(self, field) for field in previous):
+                raise ValidationError("Nie można zmieniać zasad typu użytego we wnioskach urlopowych.")
+
+    def save(self, *args, **kwargs):
+        self.code = (self.code or "").strip().lower()
+        self.full_clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
@@ -56,6 +78,11 @@ class LeaveAllowance(CompanyOwnedModel):
     carryover_deadline = models.DateField(null=True, blank=True)
 
     is_locked = models.BooleanField(default=False)  # blokada edycji przez automaty (np. po zamknięciu roku)
+
+    def clean(self):
+        super().clean()
+        if self.user_id and self.company_id and self.user.company_id != self.company_id:
+            raise ValidationError({"user": "Pracownik należy do innej firmy."})
 
     class Meta:
         unique_together = (("company", "user", "year"),)
@@ -84,7 +111,7 @@ class LeaveRequest(CompanyOwnedModel):
     days_count = models.DecimalField(max_digits=5, decimal_places=2, editable=False)
 
     # rok rozliczeniowy i czy zaległy
-    leave_year = models.PositiveIntegerField(default=timezone.now().year)
+    leave_year = models.PositiveIntegerField(default=current_leave_year)
     is_carryover = models.BooleanField(default=False)
 
     reason = models.TextField(blank=True)
@@ -99,27 +126,45 @@ class LeaveRequest(CompanyOwnedModel):
     approved_at = models.DateTimeField(null=True, blank=True)
 
     def clean(self):
+        super().clean()
         if self.date_from and self.date_to and self.date_from > self.date_to:
             raise ValidationError("Data zakończenia nie może być wcześniejsza niż rozpoczęcia.")
+        if self.date_from and self.date_to and (self.date_to - self.date_from).days > 366:
+            raise ValidationError("Wniosek nie może obejmować więcej niż 367 dni kalendarzowych.")
+        if self.date_from and self.date_to:
+            try:
+                if calculate_working_days(self.date_from, self.date_to) <= 0:
+                    raise ValidationError("Wniosek musi obejmować co najmniej 1 dzień roboczy.")
+            except ValueError as exc:
+                raise ValidationError(str(exc)) from exc
+        if self.user_id and self.company_id and self.user.company_id != self.company_id:
+            raise ValidationError({"user": "Pracownik należy do innej firmy."})
+        if self.leave_type_id and self.company_id and self.leave_type.company_id != self.company_id:
+            raise ValidationError({"leave_type": "Rodzaj urlopu należy do innej firmy."})
+        if self.approver_id and self.company_id and self.approver.company_id != self.company_id:
+            raise ValidationError({"approver": "Zatwierdzający należy do innej firmy."})
+        if self.status == self.Status.APPROVED and (not self.approver_id or not self.approved_at):
+            raise ValidationError({"approved_at": "Zatwierdzenie musi mieć osobę i datę."})
+        if self.approved_at and self.status not in {self.Status.APPROVED, self.Status.CANCELLED}:
+            raise ValidationError({"approved_at": "Data zatwierdzenia może być ustawiona tylko dla zatwierdzonego wniosku."})
 
-    
     def calculate_working_days(self):
         if not self.date_from or not self.date_to:
             return Decimal("0")
 
-        pl_holidays = holidays.Poland()
-
-        current = self.date_from
-        working_days = 0
-
-        while current <= self.date_to:
-            if current.weekday() < 5 and current not in pl_holidays:
-                working_days += 1
-            current += timedelta(days=1)
-
-        return Decimal(working_days)
+        return calculate_working_days(self.date_from, self.date_to)
 
     def save(self, *args, **kwargs):
+        if self.pk:
+            previous = type(self).objects.filter(pk=self.pk).values(
+                "status", "date_from", "date_to", "leave_type_id", "is_carryover",
+            ).first()
+            if previous and previous["status"] == self.Status.APPROVED and any(
+                previous[field] != getattr(self, field)
+                for field in ("date_from", "date_to", "leave_type_id", "is_carryover")
+            ):
+                raise ValidationError("Nie można edytować zatwierdzonego wniosku.")
+        self.leave_year = self.date_from.year
         self.full_clean()
         self.days_count = self.calculate_working_days()
         super().save(*args, **kwargs)

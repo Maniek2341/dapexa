@@ -1,14 +1,116 @@
 {% extends "app/core/base.html" %}
 {% block content %}
 <style>
-.support-page .btn-orange{background:linear-gradient(135deg,#08b8ee 0%,#1468f5 52%,#9b4dff 100%);border:1px solid #ff8a17;color:#fff;border-radius:12px;font-weight:800;padding:.7rem 1.1rem;box-shadow:0 8px 20px rgba(20,104,245,.18)}
-.support-page .btn-orange:hover{color:#fff;filter:brightness(1.08)}
+.support-create{max-width:1180px;margin:0 auto;padding:0 0 2rem;color:var(--text)}
+.support-create-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:1.25rem;margin-bottom:1.25rem;padding:1.45rem 1.6rem;background:linear-gradient(110deg,rgba(20,104,245,.16),var(--card) 50%);border:1px solid var(--border);border-radius:20px}
+.support-create-kicker{display:flex;align-items:center;gap:.5rem;margin-bottom:.45rem;color:#75b9ff;font-size:.73rem;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
+.support-create-kicker i{font-size:1rem;color:#08b8ee}
+.support-create h1{margin:0;color:var(--text);font-size:clamp(1.45rem,2.5vw,2rem);font-weight:900;letter-spacing:-.035em}
+.support-create-lead{margin:.45rem 0 0;color:var(--muted);font-size:.92rem;line-height:1.55}
+.support-create-back{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;flex:none;padding:.65rem .9rem;border:1px solid var(--border);border-radius:12px;background:rgba(255,255,255,.035);color:var(--text);font-size:.84rem;font-weight:750;text-decoration:none;transition:background .18s,border-color .18s,transform .18s}
+.support-create-back:hover{color:var(--text);border-color:rgba(77,140,255,.5);background:rgba(20,104,245,.12);transform:translateY(-1px)}
+.support-create-layout{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(250px,.8fr);align-items:start;gap:1rem}
+.support-create-card,.support-create-hint{overflow:hidden;border:1px solid var(--border);border-radius:18px;background:var(--card);box-shadow:0 14px 36px rgba(0,0,0,.12)}
+.support-create-card-head{padding:1.1rem 1.35rem;border-bottom:1px solid var(--border);background:rgba(255,255,255,.025)}
+.support-create-card-head h2{display:flex;align-items:center;gap:.55rem;margin:0;color:var(--text);font-size:1rem;font-weight:850}
+.support-create-card-head h2 i{color:#53a7ff}
+.support-create-card-head p{margin:.3rem 0 0;color:var(--muted);font-size:.8rem}
+.support-create-form{padding:1.35rem}
+.support-create-fields{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:1rem}
+.support-create-field{min-width:0}
+.support-create-field--title{grid-column:1/-1}
+.support-create-field--description{grid-column:1/-1}
+.support-create .form-label{display:flex;align-items:center;gap:.4rem;margin-bottom:.45rem;color:var(--text);font-size:.79rem;font-weight:800}
+.support-create .required-mark{color:#ff8181}
+.support-create .form-control,.support-create .form-select{width:100%;min-height:46px;padding:.7rem .8rem;border:1px solid var(--border)!important;border-radius:11px;background:var(--input-bg)!important;color:var(--text)!important;box-shadow:none;transition:border-color .18s,box-shadow .18s}
+.support-create textarea.form-control{min-height:190px;resize:vertical;line-height:1.6}
+.support-create .form-control::placeholder{color:var(--muted);opacity:.78}
+.support-create .form-select option{background:var(--card);color:var(--text)}
+.support-create .form-control:focus,.support-create .form-select:focus{border-color:rgba(77,140,255,.8)!important;box-shadow:0 0 0 .2rem rgba(20,104,245,.15)!important}
+.support-create-field.has-error .form-control,.support-create-field.has-error .form-select{border-color:rgba(239,68,68,.8)!important}
+.support-create-error{margin-top:.4rem;color:#ff8e8e;font-size:.76rem;line-height:1.45}
+.support-create-error ul{margin:0;padding-left:1rem}
+.support-create-help{margin:.4rem 0 0;color:var(--muted);font-size:.75rem;line-height:1.5}
+.support-create-actions{display:flex;flex-wrap:wrap;align-items:center;gap:.65rem;margin-top:1.2rem;padding-top:1.05rem;border-top:1px solid var(--border)}
+.support-create-submit,.support-create-cancel{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;min-height:44px;padding:.7rem 1rem;border-radius:11px;font-size:.84rem;font-weight:800;text-decoration:none;transition:filter .18s,transform .18s,background .18s}
+.support-create-submit{border:0;background:var(--brand-gradient);color:#fff;box-shadow:0 9px 22px rgba(20,104,245,.22)}
+.support-create-submit:hover{color:#fff;filter:brightness(1.08);transform:translateY(-1px)}
+.support-create-cancel{border:1px solid var(--border);background:transparent;color:var(--muted)}
+.support-create-cancel:hover{border-color:var(--border);background:rgba(255,255,255,.05);color:var(--text)}
+.support-create-hint{padding:1.2rem}
+.support-create-hint-icon{display:grid;width:42px;height:42px;margin-bottom:.9rem;place-items:center;border:1px solid rgba(77,140,255,.24);border-radius:13px;background:rgba(20,104,245,.12);color:#78b8ff;font-size:1.2rem}
+.support-create-hint h2{margin:0 0 .5rem;color:var(--text);font-size:.98rem;font-weight:850}
+.support-create-hint>p{margin:0;color:var(--muted);font-size:.81rem;line-height:1.6}
+.support-create-hint-list{display:grid;gap:.8rem;margin:1.1rem 0 0;padding:1rem 0 0;border-top:1px solid var(--border);list-style:none}
+.support-create-hint-list li{display:flex;align-items:flex-start;gap:.55rem;color:var(--muted);font-size:.78rem;line-height:1.5}
+.support-create-hint-list i{margin-top:.08rem;color:#53a7ff}
+@media(max-width:850px){.support-create-layout{grid-template-columns:minmax(0,1fr)}.support-create-hint{display:grid;grid-template-columns:auto 1fr;column-gap:.85rem}.support-create-hint-icon{grid-row:1/3;margin:0}.support-create-hint-list{grid-column:1/-1;grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.support-create-hero{flex-direction:column;padding:1.15rem}.support-create-back{width:100%}.support-create-form{padding:1rem}.support-create-fields{grid-template-columns:minmax(0,1fr);gap:.85rem}.support-create-field--title,.support-create-field--description{grid-column:auto}.support-create-actions{align-items:stretch;flex-direction:column-reverse}.support-create-submit,.support-create-cancel{width:100%}.support-create-hint-list{grid-template-columns:minmax(0,1fr)}}
 </style>
-<div class="support-page">
-<div class="page-header mb-4"><h1>Nowe zgłoszenie wsparcia</h1><p class="text-muted">Opisz problem — zespół wsparcia wróci z odpowiedzią.</p></div>
-<form method="post" class="card shadow-sm"><div class="card-body p-4">{% csrf_token %}
-  {% for field in form %}<div class="mb-3"><label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.errors %}<div class="text-danger small">{{ field.errors|striptags }}</div>{% endif %}</div>{% endfor %}
-  <div class="d-flex gap-2 pt-2"><button class="btn-orange" type="submit"><i class="bi bi-send me-1"></i>Wyślij zgłoszenie</button><a class="btn btn-outline-light" href="{% url 'support_list' %}">Anuluj</a></div>
-</div></form>
+<main class="support-create">
+  <header class="support-create-hero">
+    <div>
+      <div class="support-create-kicker"><i class="bi bi-headset"></i> Centrum pomocy</div>
+      <h1>Nowe zgłoszenie</h1>
+      <p class="support-create-lead">Opisz problem, a zespół wsparcia wróci z odpowiedzią.</p>
+    </div>
+    <a class="support-create-back" href="{% url 'support_list' %}"><i class="bi bi-arrow-left"></i> Wróć do zgłoszeń</a>
+  </header>
+
+  <div class="support-create-layout">
+    <section class="support-create-card" aria-labelledby="support-form-title">
+      <div class="support-create-card-head">
+        <h2 id="support-form-title"><i class="bi bi-pencil-square"></i> Opis zgłoszenia</h2>
+        <p>Pola oznaczone <span class="required-mark">*</span> są wymagane.</p>
+      </div>
+      <form method="post" class="support-create-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+          <div class="support-create-error mb-3" role="alert">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="support-create-fields">
+          <div class="support-create-field support-create-field--title{% if form.title.errors %} has-error{% endif %}">
+            <label class="form-label" for="{{ form.title.id_for_label }}">{{ form.title.label }} <span class="required-mark">*</span></label>
+            {{ form.title }}
+            {% if form.title.errors %}<div class="support-create-error" role="alert">{{ form.title.errors }}</div>{% endif %}
+            <p class="support-create-help">Krótko opisz, czego dotyczy problem.</p>
+          </div>
+          <div class="support-create-field{% if form.module.errors %} has-error{% endif %}">
+            <label class="form-label" for="{{ form.module.id_for_label }}"><i class="bi bi-grid-3x3-gap"></i>{{ form.module.label }}</label>
+            {{ form.module }}
+            {% if form.module.errors %}<div class="support-create-error" role="alert">{{ form.module.errors }}</div>{% endif %}
+            <p class="support-create-help">Np. Serwisy, RCP lub logowanie.</p>
+          </div>
+          <div class="support-create-field{% if form.priority.errors %} has-error{% endif %}">
+            <label class="form-label" for="{{ form.priority.id_for_label }}"><i class="bi bi-flag"></i>{{ form.priority.label }}</label>
+            {{ form.priority }}
+            {% if form.priority.errors %}<div class="support-create-error" role="alert">{{ form.priority.errors }}</div>{% endif %}
+          </div>
+          <div class="support-create-field support-create-field--description{% if form.description.errors %} has-error{% endif %}">
+            <label class="form-label" for="{{ form.description.id_for_label }}">{{ form.description.label }} <span class="required-mark">*</span></label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="support-create-error" role="alert">{{ form.description.errors }}</div>{% endif %}
+            <p class="support-create-help">Dodaj kroki, które prowadzą do problemu, oraz opisz, jaki efekt widzisz.</p>
+          </div>
+        </div>
+        <div class="support-create-actions">
+          <button class="support-create-submit" type="submit"><i class="bi bi-send"></i> Wyślij zgłoszenie</button>
+          <a class="support-create-cancel" href="{% url 'support_list' %}">Anuluj</a>
+        </div>
+      </form>
+    </section>
+
+    <aside class="support-create-hint" aria-label="Wskazówki do zgłoszenia">
+      <div class="support-create-hint-icon"><i class="bi bi-lightbulb"></i></div>
+      <h2>Jak opisać problem?</h2>
+      <p>Kilka szczegółów pomoże szybciej odtworzyć sytuację i znaleźć przyczynę.</p>
+      <ul class="support-create-hint-list">
+        <li><i class="bi bi-check-circle"></i><span>Podaj nazwę modułu lub miejsce w panelu.</span></li>
+        <li><i class="bi bi-check-circle"></i><span>Opisz po kolei, co robisz przed wystąpieniem problemu.</span></li>
+        <li><i class="bi bi-check-circle"></i><span>Napisz, jaki rezultat miał się pojawić i co pojawiło się zamiast niego.</span></li>
+        <li><i class="bi bi-check-circle"></i><span>Jeśli widzisz komunikat błędu, przepisz jego treść.</span></li>
+      </ul>
+    </aside>
+  </div>
 </div>
 {% endblock %}

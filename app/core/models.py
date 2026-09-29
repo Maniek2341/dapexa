@@ -1,11 +1,11 @@
 # app/core/models.py
 from datetime import time
+import calendar
 from decimal import Decimal
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.conf import settings
-from django.forms import ValidationError
 
 from app.core.geocoding import GeocodingService
 from app.core.fields import TrackedFileField, file_size_field
@@ -90,18 +90,13 @@ class Address(models.Model):
             should_geocode = True
 
         if should_geocode:
-
             lat, lng = GeocodingService.get_coordinates(
                 street=self.street,
                 city=self.city,
                 postcode=self.postcode
             )
-
-            if lat is None or lng is None:
-                raise ValidationError(
-                    "Nie można znaleźć podanego adresu. Sprawdź dane."
-                )
-
+            # Geocoding is optional: missing provider configuration or a
+            # temporary provider failure must not block saving the address.
             self.latitude = lat
             self.longitude = lng
 
@@ -203,6 +198,14 @@ class CompanySettings(TimeStampedModel):
     default_work_end_time = models.TimeField(
         default=time(15, 0),
         verbose_name="Domyślna godzina zakończenia pracy",
+    )
+    default_employee_work_start_time = models.TimeField(
+        default=time(7, 0),
+        verbose_name="Domyślna godzina rozpoczęcia pracy pracownika",
+    )
+    default_employee_work_end_time = models.TimeField(
+        default=time(15, 0),
+        verbose_name="Domyślna godzina zakończenia pracy pracownika",
     )
 
     # 🔢 NUMERACJA
@@ -388,22 +391,31 @@ class PanelUser(AbstractUser, TimeStampedModel):
     def __str__(self):
         return f"{self.email} ({self.company})"
 
-    def get_total_seniority_years(self):
+    def get_total_seniority_years(self, as_of=None):
         if not self.employment_start_date:
             return Decimal(self.previous_employment_years or 0)
 
-        today = timezone.now().date()
-        current_years = (today - self.employment_start_date).days / 365
+        today = as_of or timezone.localdate()
+        current_years = Decimal(max(0, (today - self.employment_start_date).days)) / Decimal("365.2425")
         return Decimal(current_years) + Decimal(self.previous_employment_years or 0)
 
 
-    def get_vacation_entitlement(self):
+    def get_vacation_entitlement(self, as_of=None):
         """
         Zwraca limit urlopu wypoczynkowego na dany rok
         uwzględnia staż i wymiar etatu.
         """
-        base = Decimal("26") if self.get_total_seniority_years() >= 10 else Decimal("20")
-        return (base * Decimal(self.employment_fraction)).quantize(Decimal("0.01"))
+        as_of = as_of or timezone.localdate()
+        base = Decimal("26") if self.get_total_seniority_years(as_of=as_of) >= 10 else Decimal("20")
+        entitlement = base * Decimal(self.employment_fraction)
+        if self.employment_start_date and self.employment_start_date.year == as_of.year:
+            year_end = as_of.replace(month=12, day=31)
+            days = Decimal((year_end - self.employment_start_date).days + 1)
+            days_in_year = Decimal("366" if calendar.isleap(as_of.year) else "365")
+            entitlement *= max(Decimal("0"), days) / days_in_year
+        elif self.employment_start_date and self.employment_start_date.year > as_of.year:
+            entitlement = Decimal("0")
+        return entitlement.quantize(Decimal("0.01"))
 
 class Subscription(models.Model):
     BILLING_MONTHLY = "monthly"
@@ -453,6 +465,9 @@ class Subscription(models.Model):
         blank=True,
         null=True,
     )
+    stripe_event_created = models.PositiveBigIntegerField(null=True, blank=True)
+    stripe_checkout_session_id = models.CharField(max_length=255, blank=True)
+    stripe_checkout_attempt = models.PositiveIntegerField(default=0)
     stripe_price_id = models.CharField(max_length=255, blank=True)
     stripe_extra_user_item_id = models.CharField(max_length=255, blank=True)
     extra_users = models.PositiveIntegerField(
@@ -675,6 +690,20 @@ class Subscription(models.Model):
 
     def __str__(self):
         return f"{self.company} - {self.package} ({self.billing_period or 'brak okresu'})"
+
+
+class StripeWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, unique=True)
+    event_type = models.CharField(max_length=120)
+    event_created = models.PositiveBigIntegerField(default=0)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.event_type}: {self.event_id}"
 
 class RouteDistanceCache(models.Model):
     origin_lat = models.FloatField()

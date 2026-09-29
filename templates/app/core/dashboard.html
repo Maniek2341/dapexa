@@ -579,6 +579,16 @@
     </div>
     <div class="kpi-icon"><i class="bi bi-wrench-adjustable"></i></div>
   </div>
+  {% if perms.urlop.access_urlop_add %}
+  <div class="kpi-card">
+    <div>
+      <div class="kpi-label">Oczekujące wnioski urlopowe</div>
+      <div class="kpi-value">{{ kpi_leave_pending_self|default:0 }}</div>
+      <small>Pozostały limit: {{ leave_remaining_days|floatformat:2 }} dni</small>
+    </div>
+    <div class="kpi-icon"><i class="bi bi-calendar2-check"></i></div>
+  </div>
+  {% endif %}
 
   <div class="kpi-card">
     <div>
@@ -586,14 +596,6 @@
       <div class="kpi-value">{{ kpi_protocols_to_invoice|default:0 }}</div>
     </div>
     <div class="kpi-icon"><i class="bi bi-receipt"></i></div>
-  </div>
-
-  <div class="kpi-card">
-    <div>
-      <div class="kpi-label">Zadania otwarte</div>
-      <div class="kpi-value">{{ kpi_open_tasks|default:0 }}</div>
-    </div>
-    <div class="kpi-icon"><i class="bi bi-check2-square"></i></div>
   </div>
 
   <div class="kpi-card">
@@ -607,16 +609,6 @@
 
 {% if show_management_dashboard_sections %}
   <div class="alert-grid">
-    <div class="alert-box alert-box-danger">
-      <div class="alert-icon">
-        <i class="bi bi-exclamation-triangle"></i>
-      </div>
-      <div>
-        <div class="alert-title">{{ overdue_tasks_count|default:0 }} zadań po terminie</div>
-        <div class="alert-text">Sprawdź zadania wymagające reakcji.</div>
-      </div>
-    </div>
-
     <div class="alert-box alert-box-orange">
       <div class="alert-icon">
         <i class="bi bi-file-earmark-text"></i>
@@ -626,6 +618,15 @@
         <div class="alert-text">Gotowe do przekazania do rozliczenia.</div>
       </div>
     </div>
+    {% if can_manage_leave_approvals %}
+    <a class="alert-box alert-box-warning text-decoration-none" href="{% url 'hr_leave_list' %}?status=submitted">
+      <div class="alert-icon"><i class="bi bi-calendar2-week"></i></div>
+      <div>
+        <div class="alert-title">{{ kpi_leave_pending_approvals }} oczekujących wniosków urlopowych</div>
+        <div class="alert-text">Otwórz listę do rozpatrzenia.</div>
+      </div>
+    </a>
+    {% endif %}
 
     <div class="alert-box alert-box-warning">
       <div class="alert-icon">

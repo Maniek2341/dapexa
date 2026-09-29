@@ -46,26 +46,18 @@ class TimeEntryForm(forms.ModelForm):
         self.fields["end_time"].input_formats = ["%H:%M"]
 
         if not self.instance.pk:
-            default_start_time = "07:00"
-            default_end_time = "15:00"
-
             user = getattr(self.request, "user", None)
-            if user and user.is_authenticated and user.company_id:
-                company_settings = (
-                    CompanySettings.objects
-                    .filter(company_id=user.company_id)
-                    .only("default_work_start_time", "default_work_end_time")
-                    .first()
-                )
-                if company_settings:
-                    default_start_time = company_settings.default_work_start_time.strftime("%H:%M")
-                    default_end_time = company_settings.default_work_end_time.strftime("%H:%M")
+            default_start_time, default_end_time = get_default_work_hours(user)
 
             if not self.initial.get("date"):
                 self.fields["date"].initial = timezone.localdate()
 
             if not self.initial.get("work_mode"):
-                self.fields["work_mode"].initial = WorkMode.OFFICE
+                self.fields["work_mode"].initial = (
+                    WorkMode.FIELD
+                    if user and user.is_authenticated and user.role == user.Role.EMPLOYEE
+                    else WorkMode.OFFICE
+                )
 
             if not self.initial.get("start_time"):
                 self.fields["start_time"].initial = default_start_time
@@ -141,6 +133,33 @@ class TimeEntryForm(forms.ModelForm):
             instance.save()
 
         return instance
+
+
+def get_default_work_hours(user):
+    default_start_time = "07:00"
+    default_end_time = "15:00"
+
+    if not user or not user.is_authenticated or not user.company_id:
+        return default_start_time, default_end_time
+
+    company_settings = (
+        CompanySettings.objects
+        .filter(company_id=user.company_id)
+        .only(
+            "default_work_start_time", "default_work_end_time",
+            "default_employee_work_start_time", "default_employee_work_end_time",
+        )
+        .first()
+    )
+    if company_settings:
+        if user.role == user.Role.EMPLOYEE:
+            default_start_time = company_settings.default_employee_work_start_time.strftime("%H:%M")
+            default_end_time = company_settings.default_employee_work_end_time.strftime("%H:%M")
+        else:
+            default_start_time = company_settings.default_work_start_time.strftime("%H:%M")
+            default_end_time = company_settings.default_work_end_time.strftime("%H:%M")
+
+    return default_start_time, default_end_time
 
 
 class MissingHoursRequestForm(forms.Form):

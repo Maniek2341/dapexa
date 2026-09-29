@@ -544,12 +544,14 @@
 </form>
 
 {{ leave_limits_map|json_script:"leave-limits-data" }}
+{{ public_holidays|json_script:"leave-holidays-data" }}
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const leaveTypeInput = document.getElementById("id_leave_type");
   const fromInput = document.getElementById("id_date_from");
   const toInput = document.getElementById("id_date_to");
+  const carryoverInput = document.getElementById("id_is_carryover");
 
   const daysPreview = document.getElementById("days-preview");
   const remainingPreview = document.getElementById("remaining-preview");
@@ -559,19 +561,28 @@ document.addEventListener("DOMContentLoaded", function() {
   const leaveLimits = JSON.parse(
     document.getElementById("leave-limits-data").textContent
   );
+  const leaveHolidays = new Set(JSON.parse(
+    document.getElementById("leave-holidays-data").textContent
+  ));
 
   function calculateWorkingDays(start, end) {
     let count = 0;
-    let current = new Date(start);
+    let current = new Date(start + "T00:00:00Z");
+    const endDate = new Date(end + "T00:00:00Z");
 
-    while (current <= end) {
-      const day = current.getDay();
+    if (Number.isNaN(current.getTime()) || Number.isNaN(endDate.getTime()) || endDate < current) {
+      return null;
+    }
 
-      if (day !== 0 && day !== 6) {
+    while (current <= endDate) {
+      const day = current.getUTCDay();
+      const isoDate = current.toISOString().slice(0, 10);
+
+      if (day !== 0 && day !== 6 && !leaveHolidays.has(isoDate)) {
         count++;
       }
 
-      current.setDate(current.getDate() + 1);
+      current.setUTCDate(current.getUTCDate() + 1);
     }
 
     return count;
@@ -583,37 +594,40 @@ document.addEventListener("DOMContentLoaded", function() {
       return;
     }
 
-    const start = new Date(fromInput.value);
-    const end = new Date(toInput.value);
-
-    if (end >= start) {
-      const days = calculateWorkingDays(start, end);
-      daysPreview.innerText = days + " dni";
-    } else {
-      daysPreview.innerText = "—";
-    }
+    const days = calculateWorkingDays(fromInput.value, toInput.value);
+    daysPreview.innerText = days === null ? "—" : days + " dni";
   }
 
   function updateLeaveLimitPreview() {
     const selectedId = leaveTypeInput.value;
+    const year = (fromInput.value || new Date().toISOString().slice(0, 10)).slice(0, 4);
+    const yearLimits = leaveLimits[year] || {};
 
-    if (!selectedId || !leaveLimits[selectedId]) {
+    if (!selectedId || !yearLimits[selectedId]) {
       remainingPreview.innerText = "—";
       limitPreview.innerText = "—";
       usedPreview.innerText = "—";
       return;
     }
 
-    const item = leaveLimits[selectedId];
-
-    remainingPreview.innerText = item.remaining + " dni";
-    limitPreview.innerText = item.limit + " dni";
+    const item = yearLimits[selectedId];
+    const isCarryover = carryoverInput && carryoverInput.checked;
+    remainingPreview.innerText = (isCarryover ? item.carryover_remaining : item.remaining) + " dni";
+    limitPreview.innerText = (isCarryover ? item.carryover_remaining : item.limit) + " dni";
     usedPreview.innerText = item.used + " dni";
   }
 
-  if (fromInput) fromInput.addEventListener("change", updateDaysPreview);
-  if (toInput) toInput.addEventListener("change", updateDaysPreview);
+  if (fromInput) {
+    fromInput.addEventListener("input", updateDaysPreview);
+    fromInput.addEventListener("change", updateDaysPreview);
+  }
+  if (toInput) {
+    toInput.addEventListener("input", updateDaysPreview);
+    toInput.addEventListener("change", updateDaysPreview);
+  }
+  if (fromInput) fromInput.addEventListener("change", updateLeaveLimitPreview);
   if (leaveTypeInput) leaveTypeInput.addEventListener("change", updateLeaveLimitPreview);
+  if (carryoverInput) carryoverInput.addEventListener("change", updateLeaveLimitPreview);
 
   updateDaysPreview();
   updateLeaveLimitPreview();

@@ -1,0 +1,35 @@
+[Unit]
+Description=Dapexa Django application (Gunicorn)
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=deploy
+Group=www-data
+WorkingDirectory=/var/www/dapexa
+EnvironmentFile=/var/www/dapexa/.env
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+RuntimeDirectory=dapexa
+RuntimeDirectoryMode=0750
+ExecStart=/var/www/dapexa/.venv/bin/gunicorn BusinessManager.wsgi:application --bind unix:/run/dapexa/gunicorn.sock --umask 007 --workers 3 --timeout 120 --access-logfile - --access-logformat "%%(h)s %%(t)s %%(m)s %%(s)s %%(b)s %%(L)s" --error-logfile - --capture-output
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=130
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/www/dapexa/files
+
+[Install]
+WantedBy=multi-user.target

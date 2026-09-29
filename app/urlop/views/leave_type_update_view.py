@@ -1,16 +1,16 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView
 from django.views import View
 from django.shortcuts import render
 
 from app.urlop.forms import LeaveTypeForm
 from app.urlop.models import LeaveType
+from app.urlop.access import LeavePermissionMixin
 
 
-class LeaveTypeUpdateView(LoginRequiredMixin, View):
+class LeaveTypeUpdateView(LeavePermissionMixin, View):
+    leave_permission = "leave_type_edit"
 
     template_name = "app/urlop/urlop_type_form.html"
 
@@ -20,7 +20,7 @@ class LeaveTypeUpdateView(LoginRequiredMixin, View):
             pk=pk,
             company=request.user.company
         )
-        form = LeaveTypeForm(instance=leave_type)
+        form = LeaveTypeForm(instance=leave_type, company=request.user.company)
         return render(request, self.template_name, {
             "form": form,
             "object": leave_type
@@ -32,7 +32,7 @@ class LeaveTypeUpdateView(LoginRequiredMixin, View):
             pk=pk,
             company=request.user.company
         )
-        form = LeaveTypeForm(request.POST, instance=leave_type)
+        form = LeaveTypeForm(request.POST, instance=leave_type, company=request.user.company)
 
         if form.is_valid():
             form.save()

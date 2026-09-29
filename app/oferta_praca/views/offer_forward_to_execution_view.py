@@ -12,6 +12,7 @@ from django.views import View
 
 from app.oferta_praca.models import Offer, OfferActivity
 from app.praca.models import WorkOrder, WorkActivity
+from app.core.notifications import notify_assigned_users
 
 
 User = get_user_model()
@@ -102,6 +103,16 @@ class OfferForwardToExecutionView(LoginRequiredMixin, View):
                 )
 
                 work_order.assigned_employees.set(assigned_employees)
+                notify_assigned_users(
+                    company=work_order.company,
+                    users=assigned_employees,
+                    subject=f"Przypisano Cię do pracy {work_order.number}",
+                    message=(
+                        f"Przypisano Cię do pracy {work_order.number}: {work_order.title}.\n"
+                        f"Oferta: {offer.number}\n"
+                        f"Termin: {work_order.planned_start or 'nieustalony'}"
+                    ),
+                )
 
                 WorkActivity.objects.create(
                     company=work_order.company,

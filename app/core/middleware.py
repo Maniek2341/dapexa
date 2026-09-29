@@ -55,6 +55,10 @@ class ViewPermissionMiddleware:
                 login_url=reverse("login"),
             )
 
+        # File access uses the source object permission in private_media itself.
+        if match.url_name == "private_media":
+            return
+
         if not match.url_name or match.url_name in self.PUBLIC_URL_NAMES:
             return
 
@@ -77,7 +81,22 @@ class ViewPermissionMiddleware:
             return
 
         app_label = self.APP_LABEL_OVERRIDES.get(module_parts[1], module_parts[1])
-        permission_name = f"{app_label}.access_{match.url_name}"
+        # Resending activation is part of managing employee status.
+        permission_view = {
+            "employee_resend_activation": "employee_status_toggle",
+            "my_leave_cancel": "urlop_add",
+            "calendar_personal_event_add": "user_calendar",
+            "calendar_personal_event_delete": "user_calendar",
+        }.get(match.url_name, match.url_name)
+        permission_name = f"{app_label}.access_{permission_view}"
+
+        # Pracownik zawsze może złożyć własny wniosek urlopowy. Nie uzależniaj
+        # tej podstawowej funkcji od konfiguracji grupy uprawnień firmy.
+        if (
+            permission_name == "urlop.access_urlop_add"
+            and user.role == user.Role.EMPLOYEE
+        ):
+            return
 
         if not user.has_perm(permission_name):
             raise PermissionDenied(
@@ -104,6 +123,18 @@ class SubscriptionRequiredMiddleware:
         'setpassword',
         "employee_ownership_transfer_confirm",
         "select_plan",   # nasza strona wyboru pakietu
+        "change_package",
+        "create_checkout_session",
+        "cancel_subscription",
+        "resume_subscription",
+        "stripe_billing_portal",
+        "billing_management",
+        "billing_setup_intent",
+        "billing_save_payment_method",
+        "billing_invoice_pdf",
+        "checkout_success",
+        "checkout_cancel",
+        "delete_company_account",
         "admin:index",
     }
 
@@ -179,10 +210,16 @@ class SubscriptionRequiredMiddleware:
         if subscription.is_access_expired:
             return redirect("select_plan")
 
-        if subscription.status in [
-            Subscription.STATUS_PAST_DUE,
-            Subscription.STATUS_UNPAID,
-        ]:
+        scheduled_cancellation_still_valid = (
+            subscription.status == Subscription.STATUS_CANCELED
+            and subscription.cancel_at_period_end
+            and subscription.current_period_end
+            and subscription.current_period_end > timezone.now()
+        )
+        if subscription.status not in {
+            Subscription.STATUS_ACTIVE,
+            Subscription.STATUS_TRIALING,
+        } and not scheduled_cancellation_still_valid:
             return redirect("select_plan")
 
         # wszystko ok – wpuszczamy
@@ -237,7 +274,8 @@ class PackageLimitsMiddleware(MiddlewareMixin):
 
         feature = self.APP_FEATURES.get(module_parts[1])
         if module_parts[1] == "core" and match.url_name in {
-            "user_calendar", "user_calendar_events"
+            "user_calendar", "user_calendar_events", "calendar_personal_event_add",
+            "calendar_personal_event_delete", "calendar_personal_event_share"
         }:
             feature = "kalendarz"
         if match.url_name in self.RCP_ADVANCED_VIEWS:

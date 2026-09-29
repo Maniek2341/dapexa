@@ -1,7 +1,14 @@
 # app/uzytkownik/views/user_register_view.py
 from datetime import timedelta
 import json
+import logging
+import os
+import traceback
+from smtplib import SMTPException
+
 from django.contrib import messages
+from django.conf import settings
+from django.db import transaction
 
 from django.views import View
 from django.shortcuts import render, redirect
@@ -16,6 +23,20 @@ from app.core.models import Address, Subscription
 
 REGISTRATION_STARTED_SESSION_KEY = "registration_started_at"
 REGISTRATION_MIN_SECONDS = 3
+logger = logging.getLogger(__name__)
+
+
+def _log_sanitized_registration_exception(exc):
+    frames = traceback.extract_tb(exc.__traceback__)
+    locations = " > ".join(
+        f"{os.path.basename(frame.filename)}:{frame.lineno}:{frame.name}"
+        for frame in frames[-5:]
+    )
+    logger.error(
+        "Unexpected registration failure (%s); traceback locations: %s",
+        type(exc).__name__,
+        locations,
+    )
 
 def create_trial_subscription(company, owner):
     return Subscription.objects.create(
@@ -56,32 +77,61 @@ class UserRegisterView(View):
         user_form = UserRegistrationForm(request.POST, prefix="user")
         company_form = CompanyForm(request.POST, prefix="company")
 
-        if user_form.is_valid() and company_form.is_valid():
-            # 1) Użytkownik
-            user = user_form.save()
+        try:
+            forms_valid = user_form.is_valid() and company_form.is_valid()
+        except Exception as exc:
+            _log_sanitized_registration_exception(exc)
+            raise
 
-            # 2) Adres firmy (Address)
-            addr = Address.objects.create(
-                street=company_form.cleaned_data.get("street", ""),
-                postcode=company_form.cleaned_data.get("postcode", ""),
-                city=company_form.cleaned_data.get("city", ""),
-                country="Polska",
-            )
+        if forms_valid:
+            if not settings.EMAIL_HOST:
+                logger.error("Registration unavailable because the SMTP host is not configured")
+                messages.error(
+                    request,
+                    "Rejestracja jest chwilowo niedostępna, ponieważ nie skonfigurowano wysyłki wiadomości aktywacyjnych.",
+                )
+                return render(
+                    request,
+                    self.template_name,
+                    {"user_form": user_form, "company_form": company_form},
+                )
+            try:
+                with transaction.atomic():
+                    user = user_form.save()
 
-            # 3) Firma
-            company = company_form.save(commit=False)
-            company.main_address = addr
-            company.is_active = True
-            company.save()
+                    addr = Address.objects.create(
+                        street=company_form.cleaned_data.get("street", ""),
+                        postcode=company_form.cleaned_data.get("postcode", ""),
+                        city=company_form.cleaned_data.get("city", ""),
+                        country="Polska",
+                    )
 
-            user.company = company
-            user.role = user.Role.OWNER  # właściciel firmy
-            user.save()
+                    company = company_form.save(commit=False)
+                    company.main_address = addr
+                    company.is_active = True
+                    company.save()
 
-            send_activation_email(request, user)   
-            # 4) Subskrypcja – trial 14 dni
-            
-            create_trial_subscription(company, user)
+                    user.company = company
+                    user.role = user.Role.OWNER
+                    user.save()
+
+                    create_trial_subscription(company, user)
+                    send_activation_email(request, user)
+            except (OSError, SMTPException):
+                # Do not leave a partial account if activation mail cannot be sent.
+                logger.error("Registration rolled back because activation email delivery failed")
+                messages.error(
+                    request,
+                    "Rejestracja jest chwilowo niedostępna, ponieważ nie można wysłać wiadomości aktywacyjnej. Spróbuj ponownie później.",
+                )
+                return render(
+                    request,
+                    self.template_name,
+                    {"user_form": user_form, "company_form": company_form},
+                )
+            except Exception as exc:
+                _log_sanitized_registration_exception(exc)
+                raise
 
             messages.success(
                 request,

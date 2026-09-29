@@ -1,4 +1,5 @@
 import tempfile
+import stripe
 from datetime import timedelta
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -271,7 +272,11 @@ class PackageChangeTests(TestCase):
         get_extra_price,
         sync_customer,
     ):
-        retrieve_subscription.return_value = {
+        retrieve_subscription.return_value = stripe.Subscription.construct_from({
+            "id": "sub_package_change",
+            "object": "subscription",
+            "status": Subscription.STATUS_ACTIVE,
+            "customer": "cus_package",
             "items": {"data": [
                 {
                     "id": "si_main",
@@ -290,8 +295,10 @@ class PackageChangeTests(TestCase):
                     },
                 },
             ]},
-        }
-        modify_subscription.return_value = {
+        }, "sk_test_local")
+        modify_subscription.return_value = stripe.Subscription.construct_from({
+            "id": "sub_package_change",
+            "object": "subscription",
             "status": Subscription.STATUS_ACTIVE,
             "pending_update": None,
             "items": {"data": [
@@ -312,7 +319,7 @@ class PackageChangeTests(TestCase):
                     },
                 },
             ]},
-        }
+        }, "sk_test_local")
 
         response = self.client.post(
             reverse("change_package"),
@@ -389,11 +396,82 @@ class PackageChangeTests(TestCase):
         with patch("app.core.views.change_package_view.stripe.Subscription.retrieve") as retrieve:
             response = self.client.post(
                 reverse("change_package"),
-                {"package": "start", "billing_period": "yearly"},
+                {"package": "start", "billing_period": "monthly"},
             )
 
         self.assertRedirects(response, reverse("select_plan"))
         retrieve.assert_not_called()
+
+    def test_current_monthly_variant_is_disabled_but_yearly_variant_is_available(self):
+        response = self.client.get(reverse("select_plan"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            'name="billing_period" value="monthly" class="plan-submit" disabled',
+        )
+        self.assertNotContains(
+            response,
+            'name="billing_period" value="yearly" class="plan-submit" disabled',
+        )
+
+    @patch(
+        "app.core.views.change_package_view.sync_stripe_customer_billing_data",
+        return_value="cus_package",
+    )
+    @patch("app.core.views.change_package_view.stripe.Subscription.modify")
+    @patch("app.core.views.change_package_view.stripe.Subscription.retrieve")
+    def test_same_package_can_change_from_monthly_to_yearly(
+        self, retrieve_subscription, modify_subscription, sync_customer
+    ):
+        self.subscription.extra_users = 0
+        self.subscription.stripe_extra_user_item_id = ""
+        self.subscription.save(
+            update_fields=["extra_users", "stripe_extra_user_item_id", "updated_at"]
+        )
+        retrieve_subscription.return_value = stripe.Subscription.construct_from({
+            "id": "sub_package_change",
+            "object": "subscription",
+            "status": Subscription.STATUS_ACTIVE,
+            "customer": "cus_package",
+            "items": {"data": [{
+                "id": "si_main",
+                "quantity": 1,
+                "price": {
+                    "id": STRIPE_PRICE_IDS["start"]["monthly"],
+                    "lookup_key": None,
+                },
+            }]},
+        }, "sk_test_local")
+        modify_subscription.return_value = stripe.Subscription.construct_from({
+            "id": "sub_package_change",
+            "object": "subscription",
+            "status": Subscription.STATUS_ACTIVE,
+            "pending_update": None,
+            "items": {"data": [{
+                "id": "si_main",
+                "quantity": 1,
+                "price": {
+                    "id": STRIPE_PRICE_IDS["start"]["yearly"],
+                    "lookup_key": None,
+                },
+            }]},
+        }, "sk_test_local")
+
+        response = self.client.post(
+            reverse("change_package"),
+            {"package": "start", "billing_period": "yearly"},
+        )
+
+        self.assertRedirects(response, reverse("profile"))
+        self.subscription.refresh_from_db()
+        self.assertEqual(self.subscription.package, Subscription.Package.START)
+        self.assertEqual(self.subscription.billing_period, Subscription.BILLING_YEARLY)
+        self.assertEqual(
+            modify_subscription.call_args.kwargs["items"][0]["price"],
+            STRIPE_PRICE_IDS["start"]["yearly"],
+        )
+        sync_customer.assert_called_once()
 
     @patch("app.core.views.change_package_view.stripe.checkout.Session.create")
     def test_current_package_without_stripe_id_is_also_blocked(self, create_session):
@@ -573,3 +651,65 @@ class StripeCompatibilityTests(SimpleTestCase):
 
         self.assertEqual(subscription.current_period_end, 1790000000)
         self.assertEqual(request.call_args.args[2]["Stripe-Version"], "2024-09-30.acacia")
+
+
+class BillingManagementViewTests(TestCase):
+    def setUp(self):
+        self.company = Company.objects.create(name="Firma rozliczeniowa")
+        self.owner = PanelUser.objects.create_user(
+            email="billing-owner@example.com",
+            password="test-password",
+            company=self.company,
+            role=PanelUser.Role.OWNER,
+        )
+        Subscription.objects.create(
+            company=self.company,
+            owner=self.owner,
+            package=Subscription.Package.START,
+            billing_period=Subscription.BILLING_MONTHLY,
+            status=Subscription.STATUS_ACTIVE,
+            stripe_customer_id="cus_billing_test",
+        )
+        self.client.force_login(
+            self.owner,
+            backend="django.contrib.auth.backends.ModelBackend",
+        )
+
+    @patch("app.core.views.billing_management_view.stripe.Invoice.list")
+    @patch("app.core.views.billing_management_view.stripe.Customer.retrieve")
+    def test_billing_page_shows_stripe_payment_method_and_invoice(
+        self, retrieve_customer, list_invoices
+    ):
+        retrieve_customer.return_value = stripe.Customer.construct_from({
+            "id": "cus_billing_test",
+            "object": "customer",
+            "invoice_settings": {
+                "default_payment_method": {
+                    "card": {
+                        "brand": "visa",
+                        "last4": "4242",
+                        "exp_month": 12,
+                        "exp_year": 2030,
+                    }
+                }
+            }
+        }, "sk_test_local")
+        list_invoices.return_value = SimpleNamespace(
+            data=[stripe.Invoice.construct_from({
+                "id": "in_billing_test",
+                "object": "invoice",
+                "number": "FV-001",
+                "created": 1790000000,
+                "status": "paid",
+                "total": 12345,
+                "currency": "pln",
+            }, "sk_test_local")]
+        )
+
+        response = self.client.get(reverse("billing_management"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "4242")
+        self.assertContains(response, "FV-001")
+        retrieve_customer.assert_called_once()
+        list_invoices.assert_called_once_with(customer="cus_billing_test", limit=50)

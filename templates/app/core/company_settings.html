@@ -40,6 +40,12 @@
 .logo-preview-text { color:var(--muted); font-size:.78rem; line-height:1.5; }
 .premium-lock { display:flex; gap:.6rem; margin-top:.65rem; padding:.8rem .9rem; color:#ffc107; background:rgba(255,193,7,.08); border:1px solid rgba(255,193,7,.2); border-radius:13px; font-size:.76rem; }
 .premium-lock i { color:#ffc107; }
+.danger-zone { margin-top:1.25rem; overflow:hidden; border:1px solid rgba(239,68,68,.3); border-radius:22px; background:linear-gradient(110deg,rgba(239,68,68,.08),var(--card) 52%); box-shadow:0 14px 35px rgba(0,0,0,.1); }
+.danger-zone-body { display:flex; align-items:center; justify-content:space-between; gap:1.2rem; padding:1.2rem 1.3rem; }
+.danger-zone h2 { margin:0; color:var(--text); font-size:.98rem; font-weight:900; }
+.danger-zone p { margin:.3rem 0 0; color:var(--muted); font-size:.8rem; line-height:1.55; }
+.danger-zone-link { display:inline-flex; flex:none; align-items:center; gap:.45rem; padding:.7rem .95rem; border:1px solid rgba(239,68,68,.45); border-radius:12px; color:#ff8585; font-size:.82rem; font-weight:850; text-decoration:none; }
+.danger-zone-link:hover { color:#fff; background:rgba(239,68,68,.16); }
 .notification-options > div { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.65rem; }
 .notification-options label { display:flex; align-items:center; gap:.6rem; min-height:46px; padding:.7rem .8rem; color:var(--text); background:rgba(255,255,255,.025); border:1px solid var(--border); border-radius:13px; font-size:.8rem; font-weight:750; cursor:pointer; }
 .notification-options input { width:18px; height:18px; flex:0 0 auto; accent-color:#1468f5; }
@@ -129,12 +135,18 @@
     <section class="settings-card" id="rcp">
       <div class="settings-card-head">
         <div class="settings-card-icon"><i class="bi bi-clock-history"></i></div>
-        <div><h2 class="settings-card-title">Ustawienia RCP</h2><div class="settings-card-desc">Domyślne godziny wstawiane podczas tworzenia nowego wpisu czasu pracy.</div></div>
+        <div><h2 class="settings-card-title">Ustawienia RCP</h2><div class="settings-card-desc">Domyślne godziny wstawiane podczas tworzenia nowego wpisu, zależnie od roli użytkownika.</div></div>
       </div>
       <div class="settings-card-body">
+        <div class="fw-semibold mb-2">Biuro i managerowie</div>
         <div class="settings-grid">
           <div><label class="form-label" for="{{ settings_form.default_work_start_time.id_for_label }}">{{ settings_form.default_work_start_time.label }}</label>{{ settings_form.default_work_start_time }}{% if settings_form.default_work_start_time.errors %}<div class="field-errors">{{ settings_form.default_work_start_time.errors }}</div>{% endif %}</div>
           <div><label class="form-label" for="{{ settings_form.default_work_end_time.id_for_label }}">{{ settings_form.default_work_end_time.label }}</label>{{ settings_form.default_work_end_time }}{% if settings_form.default_work_end_time.errors %}<div class="field-errors">{{ settings_form.default_work_end_time.errors }}</div>{% endif %}</div>
+        </div>
+        <div class="fw-semibold mt-4 mb-2">Pracownicy</div>
+        <div class="settings-grid">
+          <div><label class="form-label" for="{{ settings_form.default_employee_work_start_time.id_for_label }}">{{ settings_form.default_employee_work_start_time.label }}</label>{{ settings_form.default_employee_work_start_time }}{% if settings_form.default_employee_work_start_time.errors %}<div class="field-errors">{{ settings_form.default_employee_work_start_time.errors }}</div>{% endif %}</div>
+          <div><label class="form-label" for="{{ settings_form.default_employee_work_end_time.id_for_label }}">{{ settings_form.default_employee_work_end_time.label }}</label>{{ settings_form.default_employee_work_end_time }}{% if settings_form.default_employee_work_end_time.errors %}<div class="field-errors">{{ settings_form.default_employee_work_end_time.errors }}</div>{% endif %}</div>
         </div>
         <div class="settings-hint"><i class="bi bi-info-circle"></i><span>Zmiana dotyczy nowych wpisów RCP. Istniejące wpisy zachowają zapisane godziny.</span></div>
       </div>
@@ -211,4 +223,16 @@
     </div>
   </form>
 </div>
+
+{% if request.user.role == request.user.Role.OWNER %}
+  <section class="danger-zone" aria-labelledby="delete-company-heading">
+    <div class="danger-zone-body">
+      <div>
+        <h2 id="delete-company-heading"><i class="bi bi-exclamation-triangle me-1"></i> Usunięcie konta firmy</h2>
+        <p>Trwale usuń firmę, użytkowników, dane i przesłane pliki. Aktywne subskrypcje zostaną anulowane w Stripe.</p>
+      </div>
+      <a class="danger-zone-link" href="{% url 'delete_company_account' %}"><i class="bi bi-trash3"></i> Usuń konto firmy</a>
+    </div>
+  </section>
+{% endif %}
 {% endblock %}

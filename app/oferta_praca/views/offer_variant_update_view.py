@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -62,6 +63,7 @@ class OfferVariantUpdateView(LoginRequiredMixin, UpdateView):
         context["is_edit"] = True
         return context
 
+    @transaction.atomic
     def form_valid(self, form):
         context = self.get_context_data()
         item_formset = context["item_formset"]
@@ -132,9 +134,9 @@ class OfferVariantUpdateView(LoginRequiredMixin, UpdateView):
                 if item.product:
                     if hasattr(item.product, "unit") and not item.unit:
                         item.unit = item.product.unit or "szt."
-                    if hasattr(item.product, "net_price") and not item.unit_price_netto:
+                    if hasattr(item.product, "net_price") and item.unit_price_netto in (None, ""):
                         item.unit_price_netto = item.product.net_price or Decimal("0")
-                    if hasattr(item.product, "vat_rate") and not item.vat_rate:
+                    if hasattr(item.product, "vat_rate") and item.vat_rate in (None, ""):
                         item.vat_rate = item.product.vat_rate or Decimal("23")
 
                 item.save()

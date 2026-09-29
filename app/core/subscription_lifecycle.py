@@ -1,4 +1,5 @@
 import calendar
+import logging
 from datetime import timedelta
 
 from django.apps import apps
@@ -97,13 +98,28 @@ def send_cancellation_reminders(now=None):
 def _delete_company_files(company):
     if getattr(company, "_company_files_deleted", False):
         return
+    files_by_storage = {}
+
+    def collect_files(field, queryset):
+        storage_key = id(field.storage)
+        if storage_key not in files_by_storage:
+            files_by_storage[storage_key] = (field.storage, set())
+        names = files_by_storage[storage_key][1]
+        for filename in queryset.exclude(**{field.name: ""}).values_list(
+            field.name, flat=True
+        ):
+            if filename:
+                names.add(filename)
+
     for field in [
         field for field in company._meta.fields
         if isinstance(field, models.FileField)
     ]:
         filename = getattr(company, field.name)
         if filename:
-            field.storage.delete(filename.name)
+            files_by_storage.setdefault(id(field.storage), (field.storage, set()))[1].add(
+                filename.name
+            )
 
     for model in apps.get_models():
         try:
@@ -118,11 +134,31 @@ def _delete_company_files(company):
             continue
         queryset = model._default_manager.filter(company_id=company.pk)
         for field in file_fields:
-            for filename in queryset.exclude(**{field.name: ""}).values_list(
-                field.name, flat=True
-            ):
-                if filename:
-                    field.storage.delete(filename)
+            collect_files(field, queryset)
+
+    # Also include uploads whose model points to the company through a
+    # service, protocol, claim, vehicle event, or other company-owned object.
+    from app.core.private_media import FILE_POLICIES
+
+    for model_label, field_name, company_lookup, _permission, _feature in FILE_POLICIES:
+        model = apps.get_model(model_label)
+        field = model._meta.get_field(field_name)
+        queryset = model._default_manager.filter(**{company_lookup: company.pk})
+        collect_files(field, queryset)
+
+    def delete_files():
+        for storage, names in files_by_storage.values():
+            for filename in names:
+                try:
+                    storage.delete(filename)
+                except Exception:
+                    logging.getLogger(__name__).exception(
+                        "Nie udało się usunąć pliku firmy %s: %s",
+                        company.pk,
+                        filename,
+                    )
+
+    transaction.on_commit(delete_files)
 
     company._company_files_deleted = True
 

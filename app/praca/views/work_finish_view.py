@@ -9,6 +9,7 @@ from app.praca.permissions import has_work_permission
 
 from app.praca.models import WorkOrder, WorkActivity
 from app.protokoly.models import Protocol
+from app.core.notifications import notify_company_email
 
 
 class WorkFinishView(LoginRequiredMixin, View):
@@ -52,6 +53,17 @@ class WorkFinishView(LoginRequiredMixin, View):
             title="Zakończono pracę",
             description=f"Utworzono protokół: {protocol}",
             created_by=request.user,
+        )
+
+        notify_company_email(
+            company=work.company,
+            module="protokol",
+            subject=f"Dodano protokół {protocol}",
+            message=(
+                f"Dodano protokół {protocol} podczas zakończenia pracy {work.number}.\n"
+                f"Klient: {work.client}\n"
+                f"Dodał: {request.user.get_full_name() or request.user.email}"
+            ),
         )
 
         messages.success(request, "Praca została zakończona i utworzono protokół.")

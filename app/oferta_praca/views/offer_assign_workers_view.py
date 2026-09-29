@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.views import View
 
 from app.oferta_praca.models import Offer, OfferActivity
+from app.core.notifications import notify_assigned_users
 
 User = get_user_model()
 
@@ -34,6 +35,17 @@ class OfferAssignWorkersView(LoginRequiredMixin, View):
                 continue
 
         offer.assigned_employees.set(assigned_employees)
+        old_worker_ids = {worker.pk for worker in old_workers}
+        newly_assigned = [worker for worker in assigned_employees if worker.pk not in old_worker_ids]
+        notify_assigned_users(
+            company=offer.company,
+            users=newly_assigned,
+            subject=f"Przypisano Cię do oferty {offer.number}",
+            message=(
+                f"Przypisano Cię do oferty {offer.number}: {offer.title}.\n"
+                f"Klient: {offer.client}"
+            ),
+        )
 
         # 🔥 opis zmian (before → after)
         old_names = ", ".join(

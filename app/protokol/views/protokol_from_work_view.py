@@ -11,6 +11,7 @@ from django.contrib import messages
 from app.praca.models import WorkOrder, WorkActivity
 from app.protokol.forms import ProtocolCreateForm, ProtokolUrzadzeniaFormSet
 from app.protokol.models import ProtocolActivity, Protocol
+from app.core.notifications import notify_company_email
 
 
 class ProtocolFromWorkView(LoginRequiredMixin, View):
@@ -91,6 +92,7 @@ class ProtocolFromWorkView(LoginRequiredMixin, View):
                         protocol.address = work.location.address
 
                     protocol.save()
+                    form.save_attachments(protocol)
 
                     formset.instance = protocol
 
@@ -131,6 +133,17 @@ class ProtocolFromWorkView(LoginRequiredMixin, View):
                         description=f"Protokół utworzony na podstawie pracy {work.number}.",
                         created_by=request.user,
                     )
+
+                notify_company_email(
+                    company=protocol.company,
+                    module="protokol",
+                    subject=f"Dodano protokół {protocol.number}",
+                    message=(
+                        f"Dodano protokół {protocol.number} do pracy {work.number}.\n"
+                        f"Klient: {work.client}\n"
+                        f"Dodał: {request.user.get_full_name() or request.user.email}"
+                    ),
+                )
 
                 messages.success(
                     request,

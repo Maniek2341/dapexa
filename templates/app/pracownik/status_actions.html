@@ -1,0 +1,16 @@
+{% if not employee.has_usable_password %}
+  <form method="post" action="{% url 'employee_resend_activation' employee.pk %}" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="icon-btn icon-btn-status" title="Wyślij link aktywacyjny" aria-label="Wyślij link aktywacyjny">
+      <i class="bi bi-envelope"></i>
+    </button>
+  </form>
+{% endif %}
+{% if employee.is_active_employee or employee.is_active and employee.has_usable_password %}
+  <form method="post" action="{% url 'employee_status_toggle' employee.pk %}" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="icon-btn icon-btn-status{% if employee.is_active_employee %} off{% endif %}" title="{% if employee.is_active_employee %}Dezaktywuj pracownika{% else %}Aktywuj pracownika{% endif %}" aria-label="{% if employee.is_active_employee %}Dezaktywuj pracownika{% else %}Aktywuj pracownika{% endif %}">
+      <i class="bi {% if employee.is_active_employee %}bi-person-slash{% else %}bi-person-check{% endif %}"></i>
+    </button>
+  </form>
+{% endif %}

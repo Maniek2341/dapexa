@@ -2,9 +2,19 @@
 <!DOCTYPE html>
 <html lang="pl" data-theme="dark">
 <head>
+  <script>
+    (function () {
+      try {
+        const savedTheme = localStorage.getItem('dashboard-theme');
+        if (savedTheme === 'light' || savedTheme === 'dark') {
+          document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+      } catch (error) {}
+    })();
+  </script>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Panel administratora – Strona główna</title>
+  <title>Dapexa.com - Zarzadzaj swoja firma</title>
   <link rel="icon" type="image/x-icon" href="{% static 'assets/img/logo.png' %}">
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,7 +55,11 @@
   <style>
     :root{
       --bg: #0b0f19;
+      --body: #0b0f19;
+      --surface: #111a2e;
+      --input-bg: #111a2e;
       --muted: #8a93a6;
+      --text-muted: #8a93a6;
       --card: #0f1526;
       --card-2: #111a2e;
       --border: rgba(255,255,255,.06);
@@ -118,7 +132,11 @@
     /* Jasny motyw */
     [data-theme="light"]{
       --bg: #f6f7fb;
+      --body: #f6f7fb;
+      --surface: #ffffff;
+      --input-bg: #ffffff;
       --muted: #5d6473;
+      --text-muted: #5d6473;
       --card: #ffffff;
       --card-2: #ffffff;
       --border: rgba(16,24,40,.08);
@@ -493,6 +511,27 @@
       border-color: rgba(255,153,0,.25);
       box-shadow: 0 0 0 3px rgba(255,153,0,.07);
     }
+
+    html[data-theme="dark"] body .form-control,
+    html[data-theme="dark"] body .form-select,
+    html[data-theme="dark"] body textarea,
+    html[data-theme="dark"] body select,
+    html[data-theme="light"] body .form-control,
+    html[data-theme="light"] body .form-select,
+    html[data-theme="light"] body textarea,
+    html[data-theme="light"] body select {
+      background-color: var(--input-bg) !important;
+      color: var(--text) !important;
+      border-color: var(--border) !important;
+    }
+
+    html[data-theme="dark"] body input::placeholder,
+    html[data-theme="dark"] body textarea::placeholder,
+    html[data-theme="light"] body input::placeholder,
+    html[data-theme="light"] body textarea::placeholder {
+      color: var(--muted) !important;
+      opacity: .85;
+    }
   </style>
   
 </head>
@@ -585,6 +624,9 @@
             {% if user.role == user.Role.OWNER or user.role == user.Role.MANAGER or user.role == user.Role.BIURO %}
               {% if perms.core.access_company_settings %}
                 <li><a class="dropdown-item" href="{% url 'company_settings' %}"><i class="bi bi-gear me-2"></i>Ustawienia firmy</a></li>
+              {% endif %}
+              {% if perms.dostawcy.access_supplier_integrations %}
+                <li><a class="dropdown-item" href="{% url 'supplier_integrations' %}"><i class="bi bi-plug me-2"></i>Integracje</a></li>
               {% endif %}
             {% endif %}
             <li><hr class="dropdown-divider"></li>
@@ -725,6 +767,7 @@
     let chart;
     function sum(arr){ return arr.reduce((a,b)=>a+b,0); }
     function renderPL(range){
+      if (!ctx || !document.getElementById('rev') || !document.getElementById('cost') || !document.getElementById('profit')) return;
       const ds = plDataSets[range];
       if(chart) chart.destroy();
       chart = new Chart(ctx, {
@@ -764,10 +807,12 @@
       const saved = localStorage.getItem(key) || 'dark';
       root.setAttribute('data-theme', saved);
       const btn = document.getElementById('themeToggle');
-      const setIcon = () => { btn.innerHTML = root.getAttribute('data-theme') === 'light' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>'; };
+      const setIcon = () => {
+        if (btn) btn.innerHTML = root.getAttribute('data-theme') === 'light' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>';
+      };
       setIcon();
-      
-      btn.addEventListener('click', ()=>{
+
+      if (btn) btn.addEventListener('click', ()=>{
         const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
         root.setAttribute('data-theme', next);
         localStorage.setItem(key, next);

@@ -145,7 +145,7 @@
 .calendar-modal .form-control{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text);border-radius:12px;padding:.7rem .8rem}
 .calendar-modal .form-control:focus{border-color:#1468f5;box-shadow:0 0 0 .2rem rgba(20,104,245,.14);background:rgba(255,255,255,.06);color:var(--text)}
 .calendar-modal-cancel{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:12px;padding:.72rem 1rem;background:rgba(255,255,255,.04);color:var(--text);font-weight:800}
-.personal-events-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}.personal-events-head{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);background:rgba(20,104,245,.06)}.personal-events-head h2{margin:0;color:var(--text);font-size:1rem;font-weight:900}.personal-events-head p{margin:.2rem 0 0;color:var(--muted);font-size:.82rem}.personal-events-list{display:grid}.personal-event-row{display:flex;align-items:center;gap:1rem;padding:.85rem 1.1rem;border-bottom:1px solid var(--border)}.personal-event-row:last-child{border-bottom:0}.personal-event-date{min-width:70px;display:flex;flex-direction:column;color:#7d4cff}.personal-event-date strong{font-size:1rem}.personal-event-date small,.personal-event-info small{color:var(--muted);font-size:.78rem}.personal-event-info{display:flex;flex-direction:column;flex:1;min-width:0}.personal-event-info strong{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.personal-event-delete{width:36px;height:36px;border-radius:10px;border:1px solid rgba(220,53,69,.3);background:rgba(220,53,69,.1);color:#ff6b6b}.personal-event-delete:hover{filter:brightness(1.1)}
+.personal-events-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden}.personal-events-head{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);background:rgba(20,104,245,.06)}.personal-events-head h2{margin:0;color:var(--text);font-size:1rem;font-weight:900}.personal-events-head p{margin:.2rem 0 0;color:var(--muted);font-size:.82rem}.personal-events-list{display:grid}.personal-event-row{display:flex;align-items:center;gap:1rem;padding:.85rem 1.1rem;border-bottom:1px solid var(--border)}.personal-event-row:last-child{border-bottom:0}.personal-event-date{min-width:70px;display:flex;flex-direction:column;color:#7d4cff}.personal-event-date strong{font-size:1rem}.personal-event-date small,.personal-event-info small{color:var(--muted);font-size:.78rem}.personal-event-info{display:flex;flex-direction:column;flex:1;min-width:0}.personal-event-info strong{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.personal-event-delete{width:36px;height:36px;border-radius:10px;border:1px solid rgba(220,53,69,.3);background:rgba(220,53,69,.1);color:#ff6b6b}.personal-event-delete:hover{filter:brightness(1.1)}.calendar-modal select[multiple]{min-height:115px}.calendar-share-help{font-size:.78rem;color:var(--muted);margin-top:.35rem}.personal-event-share{margin-top:.4rem}.personal-event-share summary{color:#1468f5;font-size:.8rem;font-weight:800;cursor:pointer}.personal-event-share-fields{display:flex;gap:.5rem;align-items:center;margin-top:.45rem}.personal-event-share-fields select{max-width:360px}.personal-event-save{border:0;border-radius:9px;padding:.5rem .7rem;background:#1468f5;color:#fff;font-weight:800;font-size:.8rem}
 .calendar-shell{min-width:0;overflow:hidden}
 .calendar-page-header{min-width:0}
 
@@ -241,10 +241,10 @@
 
 {% if personal_events %}
 <div class="personal-events-card mt-4">
-  <div class="personal-events-head"><h2><i class="bi bi-person-workspace me-2"></i>Moje wydarzenia</h2><p>Wydarzenia dodane przez Ciebie.</p></div>
+  <div class="personal-events-head"><h2><i class="bi bi-person-workspace me-2"></i>Moje i udostępnione wydarzenia</h2><p>Wydarzenia widoczne dla Ciebie w kalendarzu.</p></div>
   <div class="personal-events-list">
     {% for event in personal_events %}
-      <div class="personal-event-row"><div class="personal-event-date"><strong>{{ event.start|date:"d.m" }}</strong><small>{{ event.start|date:"H:i" }}–{{ event.end|date:"H:i" }}</small></div><div class="personal-event-info"><strong>{{ event.title }}</strong>{% if event.description %}<small>{{ event.description }}</small>{% endif %}</div><form method="post" action="{% url 'calendar_personal_event_delete' event.pk %}">{% csrf_token %}<button type="submit" class="personal-event-delete" title="Usuń wydarzenie" onclick="return confirm('Czy na pewno usunąć to wydarzenie?');"><i class="bi bi-trash"></i></button></form></div>
+      <div class="personal-event-row"><div class="personal-event-date"><strong>{{ event.start|date:"d.m" }}</strong><small>{{ event.start|date:"H:i" }}–{{ event.end|date:"H:i" }}</small></div><div class="personal-event-info"><strong>{{ event.title }}</strong>{% if event.description %}<small>{{ event.description }}</small>{% endif %}{% if event.recurrence == "daily" %}<small>Powtarza się w dni robocze do {{ event.recurrence_until|date:"d.m.Y" }}</small>{% endif %}{% if event.created_by_id == request.user.id %}<small>Dodane przez Ciebie</small>{% elif event.created_by %}<small>Udostępnione przez {{ event.created_by.get_full_name|default:event.created_by.email }}</small>{% endif %}{% if event.created_by_id == request.user.id or not event.created_by_id %}<details class="personal-event-share"><summary>Zmień osoby, którym udostępniono</summary><form method="post" action="{% url 'calendar_personal_event_share' event.pk %}">{% csrf_token %}<div class="personal-event-share-fields"><select class="form-control" name="attendees" multiple aria-label="Osoby, którym udostępniono wydarzenie">{% for person in calendar_users %}<option value="{{ person.pk }}"{% if person in event.attendees.all %} selected{% endif %}>{{ person.get_full_name|default:person.email }}</option>{% endfor %}</select><button type="submit" class="personal-event-save">Zapisz</button></div></form></details>{% endif %}</div>{% if event.created_by_id == request.user.id or not event.created_by_id %}<form method="post" action="{% url 'calendar_personal_event_delete' event.pk %}">{% csrf_token %}<button type="submit" class="personal-event-delete" title="Usuń wydarzenie" onclick="return confirm('Czy na pewno usunąć to wydarzenie?');"><i class="bi bi-trash"></i></button></form>{% endif %}</div>
     {% endfor %}
   </div>
 </div>
@@ -256,7 +256,7 @@
       <form method="post" action="{% url 'calendar_personal_event_add' %}">
         {% csrf_token %}
         <div class="modal-header"><h5 class="modal-title"><i class="bi bi-calendar-plus me-2" style="color:#1468f5"></i>Dodaj własne wydarzenie</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-        <div class="modal-body"><div class="mb-3"><label class="form-label">Nazwa wydarzenia</label><input class="form-control" name="title" required></div><div class="row g-3"><div class="col-12 col-md-6"><label class="form-label">Początek</label><input class="form-control" type="datetime-local" name="start" required></div><div class="col-12 col-md-6"><label class="form-label">Koniec</label><input class="form-control" type="datetime-local" name="end" required></div></div><div class="mt-3"><label class="form-label">Opis <span class="text-muted">(opcjonalnie)</span></label><textarea class="form-control" name="description" rows="3"></textarea></div></div>
+        <div class="modal-body"><div class="mb-3"><label class="form-label">Nazwa wydarzenia</label><input class="form-control" name="title" required></div><div class="row g-3"><div class="col-12 col-md-6"><label class="form-label">Początek</label><input class="form-control" type="datetime-local" name="start" required></div><div class="col-12 col-md-6"><label class="form-label">Koniec</label><input class="form-control" type="datetime-local" name="end" required></div></div><div class="mt-3"><label class="form-label">Harmonogram</label><select class="form-control" name="recurrence" id="calendar-recurrence"><option value="none">Bez powtarzania</option><option value="daily">Codziennie w dni robocze</option></select></div><div class="mt-3" id="calendar-recurrence-until-wrap" hidden><label class="form-label">Powtarzaj do</label><input class="form-control" type="date" name="recurrence_until"><div class="calendar-share-help">W weekendy wydarzenie nie będzie tworzone.</div></div><div class="mt-3"><label class="form-label">Opis <span class="text-muted">(opcjonalnie)</span></label><textarea class="form-control" name="description" rows="3"></textarea></div><div class="mt-3"><label class="form-label" for="calendar-attendees">Udostępnij pracownikom</label><select class="form-control" id="calendar-attendees" name="attendees" multiple>{% for person in calendar_users %}<option value="{{ person.pk }}">{{ person.get_full_name|default:person.email }}</option>{% endfor %}</select><div class="calendar-share-help">Możesz wybrać kilka osób. Wydarzenie pojawi się również w Twoim kalendarzu.</div></div><div class="calendar-share-help mt-3">Wydarzenia przypadające w sobotę lub niedzielę nie mogą zostać zapisane.</div></div>
         <div class="modal-footer"><button type="button" class="calendar-modal-cancel" data-bs-dismiss="modal">Anuluj</button><button type="submit" class="calendar-modal-save"><i class="bi bi-check2"></i>Zapisz wydarzenie</button></div>
       </form>
     </div>
@@ -268,6 +268,32 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/locales-all.global.min.js"></script>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const recurrence = document.getElementById('calendar-recurrence');
+        const recurrenceUntil = document.querySelector('[name="recurrence_until"]');
+        const recurrenceWrap = document.getElementById('calendar-recurrence-until-wrap');
+        recurrence.addEventListener('change', function() {
+            const repeats = recurrence.value === 'daily';
+            recurrenceWrap.hidden = !repeats;
+            recurrenceUntil.required = repeats;
+        });
+        document.querySelector('#personalEventModal form').addEventListener('submit', function(event) {
+            const start = new Date(this.elements.start.value);
+            const end = new Date(this.elements.end.value);
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return;
+            const days = Math.ceil((end - start) / 86400000);
+            for (let offset = 0; offset <= days; offset++) {
+                const date = new Date(start);
+                date.setDate(date.getDate() + offset);
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    event.preventDefault();
+                    alert('Nie można dodawać wydarzeń w weekend ani wydarzeń obejmujących weekend.');
+                    return;
+                }
+            }
+        });
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         const calendarEl = document.getElementById('calendar');
     
@@ -312,23 +338,5 @@
     });
     </script>
     <script>
-        // Przełącznik motywu (zapisywany w localStorage)
-        (function(){
-          const root = document.documentElement;
-          const key = 'dashboard-theme';
-          const saved = localStorage.getItem(key) || 'dark';
-          root.setAttribute('data-theme', saved);
-          const btn = document.getElementById('themeToggle');
-          const setIcon = () => { btn.innerHTML = root.getAttribute('data-theme') === 'light' ? '<i class="bi bi-sun"></i>' : '<i class="bi bi-moon-stars"></i>'; };
-          setIcon();
-          btn.addEventListener('click', ()=>{
-            const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            root.setAttribute('data-theme', next);
-            localStorage.setItem(key, next);
-            setIcon();
-            // odśwież kolory wykresu bez przeładowania
-            renderPL(document.querySelector('[data-range].active')?.getAttribute('data-range') || 'mtd');
-          });
-        })();
         </script>
 {% endblock %}

@@ -1,0 +1,11 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><div><a class="small text-muted" href="{% url 'supplier_integrations' %}">← Integracje</a><h1 class="h3 mt-2 mb-1">Katalog dostawców</h1><p class="text-muted mb-0">Wyniki obejmują dane i ceny widoczne wyłącznie dla Twojej firmy.</p></div></div>
+  <form method="get" class="card border-0 shadow-sm mb-3"><div class="card-body"><div class="input-group"><input class="form-control" name="q" value="{{ query }}" placeholder="Nazwa, SKU, EAN lub producent"><button class="btn btn-primary"><i class="bi bi-search me-1"></i>Szukaj</button></div></div></form>
+  <div class="card border-0 shadow-sm"><div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Produkt</th><th>SKU / EAN</th><th>Dostawca</th><th>Cena zakupu netto</th><th>Dostępność</th><th>Aktualizacja</th><th></th></tr></thead><tbody>
+  {% for row in rows %}<tr><td><strong>{{ row.supplier_product.name }}</strong><div class="small text-muted">{{ row.supplier_product.manufacturer|default:"—" }}</div></td><td>{{ row.supplier_product.sku|default:"—" }}<div class="small text-muted">{{ row.supplier_product.ean|default:"" }}</div></td><td>{{ row.supplier_product.supplier.name }}</td><td>{{ row.purchase_price_net|default:"—" }}</td><td>{% if row.availability is True %}<span class="text-success">Dostępny</span>{% elif row.availability is False %}<span class="text-muted">Niedostępny</span>{% elif row.stock_quantity != None %}{{ row.stock_quantity }}{% else %}—{% endif %}</td><td>{{ row.last_sync_at|date:"d.m.Y H:i"|default:"—" }}</td><td>{% if row.local_product_id %}<span class="badge text-bg-success">Dodano</span>{% else %}<form method="post" action="{% url 'supplier_product_add' row.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-primary">Dodaj do moich produktów</button></form>{% endif %}</td></tr>
+  {% empty %}<tr><td colspan="7" class="text-center text-muted py-5">{% if query %}Brak wyników dla „{{ query }}”.{% else %}Katalog pojawi się po skonfigurowaniu i synchronizacji integracji.{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div></div>
+</div>
+{% endblock %}

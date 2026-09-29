@@ -1,30 +1,11 @@
-from decimal import Decimal
+from types import SimpleNamespace
+
 from django import forms
 from django.core.exceptions import ValidationError
-from django.utils import timezone
+from app.urlop.calendar import calculate_working_days
+from app.urlop.services import days_in_year, validate_request_against_allowance, validate_no_overlap
 
-from app.urlop.services import validate_request_against_allowance
-from datetime import timedelta
-import holidays
-
-from .models import LeaveRequest, LeaveType
-
-def calculate_working_days(date_from, date_to):
-    if not date_from or not date_to:
-        return Decimal("0")
-
-    pl_holidays = holidays.country_holidays("PL")
-
-    current = date_from
-    working_days = 0
-
-    while current <= date_to:
-        # weekday(): 0=pon, 6=niedz
-        if current.weekday() < 5 and current not in pl_holidays:
-            working_days += 1
-        current += timedelta(days=1)
-
-    return Decimal(working_days)
+from .models import LeaveRequest, LeaveType, LeavePool
 
 class LeaveRequestForm(forms.ModelForm):
     is_carryover = forms.BooleanField(
@@ -73,6 +54,24 @@ class LeaveRequestForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         if self.user and getattr(self.user, "company", None):
+            leave_types = LeaveType.objects.filter(company=self.user.company)
+            if not leave_types.filter(pool=LeavePool.VACATION).exists():
+                code = "vacation"
+                suffix = 1
+                while leave_types.filter(code=code).exists():
+                    suffix += 1
+                    code = f"vacation_{suffix}"
+                LeaveType.objects.get_or_create(
+                    company=self.user.company,
+                    code=code,
+                    defaults={
+                        "name": "Wypoczynkowy (limit stażowy)",
+                        "pool": LeavePool.VACATION,
+                        "counts_against_limit": True,
+                        # The actual employee limit comes from LeaveAllowance.
+                        "annual_limit_days": 26,
+                    },
+                )
             self.fields["leave_type"].queryset = LeaveType.objects.filter(
                 company=self.user.company
             ).order_by("name")
@@ -103,19 +102,39 @@ class LeaveRequestForm(forms.ModelForm):
 
         if requested_days <= 0:
             raise ValidationError("Wniosek musi obejmować co najmniej 1 dzień roboczy.")
+        if is_carry and df.year != dt.year:
+            raise ValidationError("Urlop zaległy musi mieścić się w jednym roku kalendarzowym.")
+        if is_carry and lt.pool != "vacation":
+            raise ValidationError("Urlop zaległy może dotyczyć tylko puli wypoczynkowej.")
+
+        try:
+            validate_no_overlap(
+                self.user.company, self.user, df, dt,
+                exclude_pk=self.instance.pk if self.instance.pk else None,
+            )
+        except ValueError as exc:
+            raise ValidationError(str(exc))
 
         cd["leave_year"] = year
         cd["days_count_calc"] = requested_days
 
         try:
-            validate_request_against_allowance(
-                company=self.user.company,
-                user=self.user,
-                leave_type=lt,
-                year=year,
-                requested_days=requested_days,
-                is_carryover=is_carry,
-            )
+            for request_year in range(df.year, dt.year + 1):
+                days = days_in_year(SimpleNamespace(date_from=df, date_to=dt), request_year)
+                if days:
+                    from app.urlop.allowance_generator import ensure_employee_year_allowance
+                    ensure_employee_year_allowance(self.user.company, self.user, request_year)
+                    validate_request_against_allowance(
+                        company=self.user.company,
+                        user=self.user,
+                        leave_type=lt,
+                        year=request_year,
+                        requested_days=days,
+                        is_carryover=is_carry,
+                        date_from=df,
+                        date_to=dt,
+                        exclude_pk=self.instance.pk if self.instance.pk else None,
+                    )
         except ValueError as e:
             raise ValidationError(str(e))
 
@@ -124,11 +143,16 @@ class LeaveRequestForm(forms.ModelForm):
 
 class LeaveTypeForm(forms.ModelForm):
 
+    def __init__(self, *args, **kwargs):
+        self.company = kwargs.pop("company", None)
+        super().__init__(*args, **kwargs)
+
     class Meta:
         model = LeaveType
         fields = [
             "name",
             "code",
+            "pool",
             "counts_against_limit",
             "annual_limit_days",
             "is_special",
@@ -138,6 +162,7 @@ class LeaveTypeForm(forms.ModelForm):
                 "class": "form-control",
                 "placeholder": "Np. Wypoczynkowy"
             }),
+            "pool": forms.Select(attrs={"class": "form-select"}),
             "code": forms.TextInput(attrs={
                 "class": "form-control",
                 "placeholder": "np. WYPOCZ"
@@ -167,5 +192,20 @@ class LeaveTypeForm(forms.ModelForm):
             raise ValidationError(
                 "Jeżeli urlop liczy się do limitu, musi mieć określoną liczbę dni."
             )
+
+        code = (cleaned_data.get("code") or "").strip().lower()
+        if code:
+            company_id = self.company.pk if self.company else self.instance.company_id
+            queryset = LeaveType.objects.filter(company_id=company_id, code=code)
+            if self.instance.pk:
+                queryset = queryset.exclude(pk=self.instance.pk)
+            if company_id and queryset.exists():
+                self.add_error("code", "Ten kod jest już używany w tej firmie.")
+            if self.instance.pk and any(
+                self.instance.__dict__.get(field) != cleaned_data.get(field)
+                for field in ("code", "pool", "counts_against_limit", "annual_limit_days", "is_special")
+            ) and self.instance.leaverequest_set.exists():
+                raise ValidationError("Nie można zmieniać zasad typu użytego w istniejących wnioskach.")
+            cleaned_data["code"] = code
 
         return cleaned_data

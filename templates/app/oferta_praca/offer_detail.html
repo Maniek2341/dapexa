@@ -5121,30 +5121,6 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script>
-(function(){
-  const root = document.documentElement;
-  const key = 'dashboard-theme';
-  const saved = localStorage.getItem(key) || 'dark';
-  root.setAttribute('data-theme', saved);
-
-  const btn = document.getElementById('themeToggle');
-  if (!btn) return;
-
-  const setIcon = () => {
-    btn.innerHTML = root.getAttribute('data-theme') === 'light'
-      ? '<i class="bi bi-sun"></i>'
-      : '<i class="bi bi-moon-stars"></i>';
-  };
-
-  setIcon();
-
-  btn.addEventListener('click', ()=>{
-    const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-    root.setAttribute('data-theme', next);
-    localStorage.setItem(key, next);
-    setIcon();
-  });
-})();
 </script>
 <script>
 (function(){

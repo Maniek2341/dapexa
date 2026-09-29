@@ -28,7 +28,7 @@ class EmployeeSetPasswordView(View):
     def get(self, request, uidb64, token):
         user = self._get_user(uidb64)
 
-        if user is None or not activation_token.check_token(user, token):
+        if user is None or user.has_usable_password() or not activation_token.check_token(user, token):
             messages.error(
                 request,
                 "Link aktywacyjny jest nieprawidłowy lub wygasł."
@@ -46,7 +46,7 @@ class EmployeeSetPasswordView(View):
     def post(self, request, uidb64, token):
         user = self._get_user(uidb64)
 
-        if user is None or not activation_token.check_token(user, token):
+        if user is None or user.has_usable_password() or not activation_token.check_token(user, token):
             messages.error(
                 request,
                 "Link aktywacyjny jest nieprawidłowy lub wygasł."

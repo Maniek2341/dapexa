@@ -12,6 +12,7 @@ from app.serwis.models import ServiceActivity
 from app.serwis.forms import ServiceOrderCreateForm
 from app.serwis.permissions import can_manage_services
 from django.http import JsonResponse
+from app.core.notifications import notify_assigned_users
 
 def client_locations_api(request):
         client_id = request.GET.get("client")
@@ -103,6 +104,17 @@ class SerwisAddView(LoginRequiredMixin, View):
                 title="Utworzono zgłoszenie",
                 description=f"Numer: {service.number}",
                 created_by=request.user,
+            )
+
+            notify_assigned_users(
+                company=service.company,
+                users=service.assigned_to.all(),
+                subject=f"Przypisano Cię do serwisu {service.number}",
+                message=(
+                    f"Przypisano Cię do serwisu {service.number}: {service.title}.\n"
+                    f"Klient: {service.client}\n"
+                    f"Termin: {service.planned_start or 'nieustalony'}"
+                ),
             )
 
             if service.status == service.Status.OBSLUGA:

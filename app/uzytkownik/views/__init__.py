@@ -22,3 +22,5 @@ from .employee_permission_view import (
     EmployeePermissionUpdateView,
 )
 from .employee_set_password_view import EmployeeSetPasswordView
+
+from .employee_resend_activation_view import EmployeeResendActivationView

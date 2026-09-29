@@ -10,6 +10,7 @@ from django.core.exceptions import PermissionDenied
 from app.praca.permissions import has_work_permission
 
 from app.praca.models import WorkOrder, WorkActivity
+from app.core.notifications import notify_assigned_users
 
 User = get_user_model()
 
@@ -37,6 +38,18 @@ class WorkAssignWorkersView(LoginRequiredMixin, View):
         )
 
         work.assigned_employees.set(workers)
+        old_worker_ids = {worker.pk for worker in old_workers}
+        newly_assigned = [worker for worker in workers if worker.pk not in old_worker_ids]
+        notify_assigned_users(
+            company=work.company,
+            users=newly_assigned,
+            subject=f"Przypisano Cię do pracy {work.number}",
+            message=(
+                f"Przypisano Cię do pracy {work.number}: {work.title}.\n"
+                f"Oferta: {work.offer or '—'}\n"
+                f"Termin: {work.planned_start or 'nieustalony'}"
+            ),
+        )
         work.employees_count = len(workers)
         work.save(update_fields=["employees_count"])
 

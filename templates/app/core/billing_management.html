@@ -1,0 +1,137 @@
+{% extends "app/core/base.html" %}
+
+{% block content %}
+<style>
+.billing-page{max-width:1080px;color:var(--text)}
+.billing-card{padding:1.4rem;background:var(--card);border:1px solid var(--border);border-radius:18px;box-shadow:0 12px 35px rgba(0,0,0,.08)}
+.billing-title{font-weight:850}
+.billing-muted{color:var(--muted)}
+.billing-payment-field{min-height:46px;padding:.8rem 1rem;background:var(--card-2);border:1px solid var(--border);border-radius:10px}
+.billing-table th{color:var(--muted);font-size:.8rem;font-weight:750}
+.billing-table td{vertical-align:middle}
+</style>
+
+<div class="container py-4 billing-page">
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h1 class="h3 billing-title mb-1">Płatności i faktury</h1>
+      <p class="billing-muted mb-0">Dane rozliczeniowe pobierane i aktualizowane w Stripe.</p>
+    </div>
+    <a href="{% url 'profile' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Wróć do profilu</a>
+  </div>
+
+  {% if load_error %}<div class="alert alert-danger" role="alert">{{ load_error }}</div>{% endif %}
+  {% if not subscription or not subscription.stripe_customer_id %}
+    <div class="alert alert-info" role="status">Dla tej firmy nie ma jeszcze konta rozliczeniowego Stripe. Wybierz pakiet, aby rozpocząć płatności.</div>
+    <a href="{% url 'select_plan' %}" class="btn btn-primary">Wybierz pakiet</a>
+  {% else %}
+    <div class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <section class="billing-card h-100" aria-labelledby="payment-method-heading">
+          <h2 id="payment-method-heading" class="h5 billing-title mb-3"><i class="bi bi-credit-card me-2"></i>Metoda płatności</h2>
+          {% if payment_method %}
+            <p class="mb-3">{{ payment_method.brand|title }} •••• {{ payment_method.last4 }}<br>
+              <span class="billing-muted small">Ważna do {{ payment_method.exp_month|stringformat:"02d" }}/{{ payment_method.exp_year }}</span>
+            </p>
+          {% else %}
+            <p class="billing-muted">Nie zapisano jeszcze karty.</p>
+          {% endif %}
+          {% if stripe_publishable_key %}
+            <form id="billing-card-form">
+              {% csrf_token %}
+              <label for="billing-card-element" class="form-label">{% if payment_method %}Zmień kartę{% else %}Dodaj kartę{% endif %}</label>
+              <div id="billing-card-element" class="billing-payment-field"></div>
+              <div id="billing-card-error" class="small text-danger mt-2" role="alert"></div>
+              <button id="billing-card-submit" type="submit" class="btn btn-primary mt-3">
+                <span class="button-label">Zapisz kartę</span>
+                <span class="spinner-border spinner-border-sm d-none" aria-hidden="true"></span>
+              </button>
+              <p class="billing-muted small mt-3 mb-0">Dane karty są przesyłane bezpośrednio do Stripe i nie są zapisywane na serwerze aplikacji.</p>
+            </form>
+          {% else %}
+            <div class="alert alert-warning mb-0">Formularz karty nie jest skonfigurowany. Skontaktuj się z administratorem.</div>
+          {% endif %}
+        </section>
+      </div>
+      <div class="col-lg-7">
+        <section class="billing-card h-100" aria-labelledby="billing-info-heading">
+          <h2 id="billing-info-heading" class="h5 billing-title mb-3"><i class="bi bi-receipt me-2"></i>Faktury</h2>
+          {% if invoices %}
+            <div class="table-responsive">
+              <table class="table billing-table mb-0">
+                <thead><tr><th>Numer</th><th>Data</th><th>Status</th><th class="text-end">Kwota</th><th></th></tr></thead>
+                <tbody>
+                  {% for invoice in invoices %}
+                    <tr>
+                      <td>{{ invoice.number }}</td>
+                      <td>{{ invoice.created|date:"d.m.Y" }}</td>
+                      <td>{% if invoice.status == "paid" %}Opłacona{% elif invoice.status == "open" %}Do zapłaty{% elif invoice.status == "draft" %}Robocza{% elif invoice.status == "void" %}Anulowana{% elif invoice.status == "uncollectible" %}Nieściągalna{% else %}{{ invoice.status|default:"—"|title }}{% endif %}</td>
+                      <td class="text-end text-nowrap">{{ invoice.amount|floatformat:2 }} {{ invoice.currency }}</td>
+                      <td class="text-end text-nowrap">
+                        <a href="{% url 'billing_invoice_pdf' invoice_id=invoice.id %}" class="btn btn-sm btn-outline-secondary" aria-label="Pobierz PDF faktury {{ invoice.number }}"><i class="bi bi-file-earmark-pdf"></i></a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <p class="billing-muted mb-0">Nie ma jeszcze faktur do wyświetlenia.</p>
+          {% endif %}
+        </section>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{% if subscription and subscription.stripe_customer_id and stripe_publishable_key %}
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+(() => {
+  const form = document.getElementById('billing-card-form');
+  if (!form || !window.Stripe) return;
+  const stripe = Stripe('{{ stripe_publishable_key|escapejs }}');
+  const elements = stripe.elements();
+  const card = elements.create('card', { hidePostalCode: true });
+  card.mount('#billing-card-element');
+  const errorBox = document.getElementById('billing-card-error');
+  const button = document.getElementById('billing-card-submit');
+  const csrf = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  async function postJson(url, payload = {}) {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrf},
+      body: JSON.stringify(payload),
+      credentials: 'same-origin'
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Nie udało się zapisać zmian.');
+    return data;
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    errorBox.textContent = '';
+    button.disabled = true;
+    button.querySelector('.spinner-border').classList.remove('d-none');
+    try {
+      const {client_secret: clientSecret} = await postJson('{% url "billing_setup_intent" %}');
+      const result = await stripe.confirmCardSetup(clientSecret, {
+        payment_method: {card}
+      });
+      if (result.error) throw new Error(result.error.message);
+      await postJson('{% url "billing_save_payment_method" %}', {
+        setup_intent_id: result.setupIntent.id
+      });
+      window.location.reload();
+    } catch (error) {
+      errorBox.textContent = error.message || 'Nie udało się zapisać karty.';
+      button.disabled = false;
+      button.querySelector('.spinner-border').classList.add('d-none');
+    }
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

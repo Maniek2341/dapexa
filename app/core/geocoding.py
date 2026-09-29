@@ -1,5 +1,9 @@
+import logging
+
 import requests
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 class GeocodingService:
@@ -12,6 +16,9 @@ class GeocodingService:
         country = (country or "Polska").strip()
 
         if not city and not street:
+            return None, None
+
+        if not settings.GOOGLE_API_KEY:
             return None, None
 
         address_query = ", ".join([
@@ -40,16 +47,13 @@ class GeocodingService:
             status = data.get("status")
 
             if status != "OK":
-                print("Google geocode error:", status)
-                print("Address query:", address_query)
-                print("Google response:", data)
+                logger.warning("Google geocoding failed with status %s", status)
                 return None, None
 
             location = data["results"][0]["geometry"]["location"]
 
             return location["lat"], location["lng"]
 
-        except Exception as e:
-            print("Google Geocoding error:", e)
-            print("Address query:", address_query)
+        except Exception:
+            logger.warning("Google geocoding request failed")
             return None, None

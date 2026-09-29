@@ -6,4 +6,6 @@ class UrlopConfig(AppConfig):
     name = 'app.urlop'
 
     def ready(self):
+        from . import signals
+
         print("App: %s - Loaded.." % self.name)

@@ -4,7 +4,9 @@ from .select_plan_view import select_plan
 from .views_calendar import user_calendar_events, UserCalendarView
 from .calendar_personal_event_view import PersonalCalendarEventCreateView
 from .calendar_personal_event_delete_view import PersonalCalendarEventDeleteView
+from .calendar_personal_event_share_view import PersonalCalendarEventShareView
 from .company_settings_view import CompanySettingsView
+from .delete_company_account_view import DeleteCompanyAccountView
 from .purchase_extra_users_view import PurchaseExtraUsersView
 from .change_package_view import ChangePackageView
 from .cancel_subscription_view import CancelSubscriptionView

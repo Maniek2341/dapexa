@@ -1,0 +1,36 @@
+{% extends "app/core/base.html" %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><div><a class="small text-muted" href="{% url 'supplier_integrations' %}">← Integracje</a><h1 class="h3 mt-2 mb-1">{{ supplier.name }}</h1><p class="text-muted mb-0">Feed jest prywatny dla firmy i przechowywany w bazie w postaci zaszyfrowanej.</p></div>
+    {% if integration and integration.is_active %}<form method="post" action="{% url 'supplier_integration_sync' integration.pk %}">{% csrf_token %}<button class="btn btn-primary"><i class="bi bi-arrow-repeat me-1"></i>Synchronizuj teraz</button></form>{% endif %}</div>
+  <div class="card border-0 shadow-sm"><div class="card-body p-4">
+    <ul class="nav nav-tabs mb-4" role="tablist">
+      <li class="nav-item"><button class="nav-link {% if active_tab == 'connection' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#connection" type="button">Połączenie</button></li>
+      <li class="nav-item"><button class="nav-link {% if active_tab == 'prices' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#prices" type="button">Ceny</button></li>
+      <li class="nav-item"><button class="nav-link {% if active_tab == 'stock' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#stock" type="button">Stany</button></li>
+      <li class="nav-item"><button class="nav-link {% if active_tab == 'sync' %}active{% endif %}" data-bs-toggle="tab" data-bs-target="#sync" type="button">Synchronizacja</button></li>
+    </ul>
+    <form method="post" novalidate>{% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="tab-content">
+        <section class="tab-pane fade {% if active_tab == 'connection' %}show active{% endif %}" id="connection">
+          <div class="row g-3"><div class="col-md-6">{{ form.name.label_tag }}{{ form.name }}{{ form.name.errors }}</div><div class="col-md-6">{{ form.feed_type.label_tag }}{{ form.feed_type }}{{ form.feed_type.errors }}</div>
+          <div class="col-12">{{ form.feed_url.label_tag }}{{ form.feed_url }}<div class="form-text">{{ form.feed_url.help_text }}</div>{{ form.feed_url.errors }}</div>
+          <div class="col-12"><div class="form-check">{{ form.is_active }}{{ form.is_active.label_tag }}</div>{{ form.is_active.errors }}</div>
+          </div><div class="alert alert-info mt-4 mb-0"><strong>Mapowanie feedu</strong><p class="mb-2">Adaptery mają ustawienia bazowe. Możesz już teraz podać nazwy pól lub elementów, a mapowanie będzie łatwe do zmiany po otrzymaniu pliku.</p>{{ form.mapping_json }}<div class="form-text">{{ form.mapping_json.help_text }}</div>{{ form.mapping_json.errors }}</div>
+          {% if integration and integration.is_active and integration.sync_catalog %}<button type="submit" formaction="{% url 'supplier_integration_sync' integration.pk %}" formmethod="post" formnovalidate name="component" value="catalog" class="btn btn-sm btn-outline-primary mt-3">Synchronizuj katalog</button>{% endif %}
+        </section>
+        <section class="tab-pane fade {% if active_tab == 'prices' %}show active{% endif %}" id="prices"><h2 class="h6">Ceny zakupu</h2><div class="form-check mb-3">{{ form.sync_prices }}{{ form.sync_prices.label_tag }}</div><div class="col-md-5">{{ form.default_markup.label_tag }}{{ form.default_markup }}<div class="form-text">Narzut procentowy do ceny zakupu przy ręcznym dodaniu produktu do katalogu.</div>{{ form.default_markup.errors }}</div>{% if integration and integration.is_active and integration.sync_prices %}<button type="submit" formaction="{% url 'supplier_integration_sync' integration.pk %}" formmethod="post" formnovalidate name="component" value="prices" class="btn btn-sm btn-outline-primary mt-3">Synchronizuj ceny</button>{% endif %}</section>
+        <section class="tab-pane fade {% if active_tab == 'stock' %}show active{% endif %}" id="stock"><h2 class="h6">Dostępność u dostawcy</h2><div class="form-check">{{ form.sync_stock }}{{ form.sync_stock.label_tag }}</div><p class="text-muted mt-2">Stan dostawcy jest przechowywany osobno i nie zmienia stanu własnego magazynu.</p>{% if integration and integration.is_active and integration.sync_stock %}<button type="submit" formaction="{% url 'supplier_integration_sync' integration.pk %}" formmethod="post" formnovalidate name="component" value="stock" class="btn btn-sm btn-outline-primary mt-3">Synchronizuj stany</button>{% endif %}</section>
+        <section class="tab-pane fade {% if active_tab == 'sync' %}show active{% endif %}" id="sync">
+          {% if integration %}<div class="row g-3 mb-3"><div class="col-sm-6 col-lg-3"><div class="kpi"><small class="text-muted">Status</small><div class="fw-bold">{{ integration.get_last_sync_status_display }}</div></div></div><div class="col-sm-6 col-lg-3"><div class="kpi"><small class="text-muted">Ostatnia synchronizacja</small><div class="fw-bold">{{ integration.last_sync_at|date:"d.m.Y H:i"|default:"—" }}</div></div></div><div class="col-sm-6 col-lg-3"><div class="kpi"><small class="text-muted">Przetworzone / dodane</small><div class="fw-bold">{{ integration.last_sync_processed }} / {{ integration.last_sync_added }}</div></div></div><div class="col-sm-6 col-lg-3"><div class="kpi"><small class="text-muted">Zaktualizowane / błędne</small><div class="fw-bold">{{ integration.last_sync_updated }} / {{ integration.last_sync_errors }}</div></div></div></div>
+            {% if integration.last_sync_error %}<div class="alert alert-danger">{{ integration.last_sync_error }}</div>{% endif %}
+            {% if integration.is_active %}<button type="submit" formaction="{% url 'supplier_integration_sync' integration.pk %}" class="btn btn-outline-primary" formmethod="post" formnovalidate>Uruchom synchronizację</button>{% endif %}
+          {% else %}<p class="text-muted">Zapisz połączenie, aby zobaczyć status synchronizacji.</p>{% endif %}
+        </section>
+      </div>
+      <div class="d-flex justify-content-end gap-2 mt-4"><a class="btn btn-outline-secondary" href="{% url 'supplier_integrations' %}">Anuluj</a><button class="btn btn-primary">Zapisz ustawienia</button></div>
+    </form>
+  </div></div>
+</div>
+{% endblock %}
