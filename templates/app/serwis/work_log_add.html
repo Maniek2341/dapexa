@@ -26,7 +26,7 @@
         {% csrf_token %}
         <div class="row g-3">
           {% for field in form %}
-            <div class="{% if field.name == 'materials' or field.name == 'performed_work' %}col-12 col-md-6{% else %}col-12 col-md-3{% endif %}"><label class="work-log-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>
+            <div class="{% if field.name == 'materials' or field.name == 'performed_work' %}col-12 col-md-6{% else %}col-12 col-md-3{% endif %}"><label class="work-log-label{% if field.field.required %} required{% endif %}" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}</div>
           {% endfor %}
         </div>
         <div class="work-log-actions"><button class="work-log-btn work-log-btn-save" type="submit"><i class="bi bi-check2-square"></i> Zapisz wpis</button><a class="work-log-btn work-log-btn-back" href="{% url 'serwis_detail' service.pk %}">Anuluj</a></div>

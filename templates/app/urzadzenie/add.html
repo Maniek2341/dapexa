@@ -219,7 +219,7 @@
 
       <div class="row g-3">
         <div class="col-12 col-lg-8">
-          <label class="form-label" for="{{ form.name.id_for_label }}">
+          <label class="form-label required" for="{{ form.name.id_for_label }}">
             {{ form.name.label }}
           </label>
           {{ form.name }}
@@ -235,7 +235,7 @@
         </div>
 
         <div class="col-12 col-md-6">
-          <label class="form-label" for="{{ form.type.id_for_label }}">
+          <label class="form-label{% if form.type.field.required %} required{% endif %}" for="{{ form.type.id_for_label }}">
             {{ form.type.label }}
           </label>
           {{ form.type }}
@@ -251,7 +251,7 @@
         </div>
 
         <div class="col-12 col-md-4">
-          <label class="form-label" for="{{ form.unit.id_for_label }}">
+          <label class="form-label{% if form.unit.field.required %} required{% endif %}" for="{{ form.unit.id_for_label }}">
             {{ form.unit.label }}
           </label>
           {{ form.unit }}
@@ -259,7 +259,7 @@
         </div>
 
         <div class="col-12 col-md-4">
-          <label class="form-label" for="{{ form.net_price.id_for_label }}">
+          <label class="form-label{% if form.net_price.field.required %} required{% endif %}" for="{{ form.net_price.id_for_label }}">
             {{ form.net_price.label }}
           </label>
           {{ form.net_price }}
@@ -267,7 +267,7 @@
         </div>
 
         <div class="col-12 col-md-4">
-          <label class="form-label" for="{{ form.vat_rate.id_for_label }}">
+          <label class="form-label{% if form.vat_rate.field.required %} required{% endif %}" for="{{ form.vat_rate.id_for_label }}">
             {{ form.vat_rate.label }}
           </label>
           {{ form.vat_rate }}

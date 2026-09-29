@@ -420,7 +420,7 @@
 
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="client-label">Typ klienta</label>
+                <label class="client-label required" for="{{ form.client_type.id_for_label }}">Typ klienta</label>
                 <select name="client_type"
                         id="{{ form.client_type.id_for_label }}"
                         class="form-select{% if form.client_type.errors %} is-invalid{% endif %}">
@@ -436,7 +436,7 @@
               <div class="col-12" id="personIdentityRow">
                 <div class="row g-3">
                   <div class="col-md-6">
-                    <label class="client-label">Imię</label>
+                    <label class="client-label required" for="{{ form.first_name.id_for_label }}">Imię</label>
                     <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}"
                            value="{{ form.first_name.value|default_if_none:'' }}"
                            class="form-control{% if form.first_name.errors %} is-invalid{% endif %}"
@@ -447,7 +447,7 @@
                   </div>
 
                   <div class="col-md-6">
-                    <label class="client-label">Nazwisko</label>
+                    <label class="client-label required" for="{{ form.last_name.id_for_label }}">Nazwisko</label>
                     <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}"
                            value="{{ form.last_name.value|default_if_none:'' }}"
                            class="form-control{% if form.last_name.errors %} is-invalid{% endif %}"
@@ -462,7 +462,7 @@
               <div class="col-12 d-none" id="companyIdentityRow">
                 <div class="row g-3">
                   <div class="col-md-6">
-                    <label class="client-label">Nazwa firmy</label>
+                    <label class="client-label required" for="{{ form.name.id_for_label }}">Nazwa firmy</label>
                     <input type="text" name="name" id="{{ form.name.id_for_label }}"
                            value="{{ form.name.value|default_if_none:'' }}"
                            class="form-control{% if form.name.errors %} is-invalid{% endif %}"
@@ -473,7 +473,7 @@
                   </div>
 
                   <div class="col-md-6">
-                    <label class="client-label">NIP</label>
+                    <label class="client-label required" for="{{ form.nip.id_for_label }}">NIP</label>
                     <input type="text" name="nip" id="{{ form.nip.id_for_label }}"
                            value="{{ form.nip.value|default_if_none:'' }}"
                            class="form-control{% if form.nip.errors %} is-invalid{% endif %}"

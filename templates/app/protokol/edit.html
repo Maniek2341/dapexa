@@ -27,11 +27,13 @@
       <div class="card-body p-4">
         <form id="serviceForm" class="needs-validation" method="post" enctype="multipart/form-data" novalidate>
           {% csrf_token %}
+          {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
           <div class="row g-3">
             <!-- Klient + tytuł + data -->
             <div class="col-md-6">
               <label class="form-label required">{{ form.title.label }}</label>
               {{ form.title }}
+              {% if form.title.errors %}<div class="invalid-feedback d-block">{{ form.title.errors|striptags }}</div>{% endif %}
               <div class="invalid-feedback">Podaj tytuł.</div>
             </div>   
 
@@ -42,48 +44,56 @@
                      style="background-color: var(--bg)"
                      value="{{ protocol.client }}"
                      disabled>
+              {% if form.client.errors %}<div class="invalid-feedback d-block">{{ form.client.errors|striptags }}</div>{% endif %}
               <div class="invalid-feedback">Wybierz klienta.</div>
             </div>
 
             <div class="col-md-6">
               <label class="form-label required">{{ form.end_time.label }}</label>
               {{ form.end_time }}
+              {% if form.end_time.errors %}<div class="invalid-feedback d-block">{{ form.end_time.errors|striptags }}</div>{% endif %}
               <div class="invalid-feedback">Podaj datę zakończenia.</div>
             </div>
 
             <div class="col-md-6 d-none" id="locationWrapper">
               <label class="form-label">{{ form.location.label }}</label>
               {{ form.location }}
+              {% if form.location.errors %}<div class="invalid-feedback d-block">{{ form.location.errors|striptags }}</div>{% endif %}
             </div>
 
             <!-- wykonane prace -->
             <div class="col-12">
               <label class="form-label required">{{ form.wykonane_prace.label }}</label>
               {{ form.wykonane_prace }}
+              {% if form.wykonane_prace.errors %}<div class="invalid-feedback d-block">{{ form.wykonane_prace.errors|striptags }}</div>{% endif %}
               <div class="invalid-feedback">Opisz wykonane prace.</div>
             </div>            
 
             <div class="col-md-3">
               <label class="form-label required">{{ form.robocizna.label }}</label>
               {{ form.robocizna }}
+              {% if form.robocizna.errors %}<div class="invalid-feedback d-block">{{ form.robocizna.errors|striptags }}</div>{% endif %}
               <div class="invalid-feedback">Podaj czas pracy.</div>
             </div>
 
             <div class="col-md-3">
               <label class="form-label required">{{ form.pracownicy_szt.label }}</label>
               {{ form.pracownicy_szt }}
+              {% if form.pracownicy_szt.errors %}<div class="invalid-feedback d-block">{{ form.pracownicy_szt.errors|striptags }}</div>{% endif %}
               <div class="invalid-feedback">Podaj ilość pracowników.</div>
             </div>            
 
             <div class="col-md-3">
               <label class="form-label required">{{ form.dojazdy_szt.label }}</label>
               {{ form.dojazdy_szt }}
+              {% if form.dojazdy_szt.errors %}<div class="invalid-feedback d-block">{{ form.dojazdy_szt.errors|striptags }}</div>{% endif %}
               <div class="invalid-feedback">Podaj ilość dojazdów.</div>
             </div>
 
             <div class="col-md-3">
               <label class="form-label required">{{ form.rodzaj_prac.label }}</label>
               {{ form.rodzaj_prac }}
+              {% if form.rodzaj_prac.errors %}<div class="invalid-feedback d-block">{{ form.rodzaj_prac.errors|striptags }}</div>{% endif %}
               <div class="invalid-feedback">Wybierz rodzaj prac.</div>
             </div>            
 
@@ -99,6 +109,7 @@
               </div>
             
               {{ formset.management_form }}
+              {% if formset.non_form_errors %}<div class="alert alert-danger" role="alert">{{ formset.non_form_errors }}</div>{% endif %}
             
               <div class="table-responsive">
                 <table class="table align-middle" id="devicesTable">
@@ -116,6 +127,7 @@
                       <td>
                         {{ form.id }}   
                         {{ form.urzadzenia }}
+                        {% if form.non_field_errors %}<div class="text-danger small">{{ form.non_field_errors }}</div>{% endif %}
                         {% if form.urzadzenia.errors %}
                           <div class="text-danger small">
                             {{ form.urzadzenia.errors }}

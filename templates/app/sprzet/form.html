@@ -120,19 +120,19 @@
             <div class="row g-3">
 
               <div class="col-md-8">
-                <label class="form-label">Nazwa</label>
+                <label class="form-label required" for="{{ form.name.id_for_label }}">Nazwa</label>
                 {{ form.name }}
                 {{ form.name.errors }}
               </div>
 
               <div class="col-md-4">
-                <label class="form-label">Kategoria</label>
+                <label class="form-label{% if form.category.field.required %} required{% endif %}" for="{{ form.category.id_for_label }}">Kategoria</label>
                 {{ form.category }}
                 {{ form.category.errors }}
               </div>
 
               <div class="col-md-4">
-                <label class="form-label">Status</label>
+                <label class="form-label{% if form.status.field.required %} required{% endif %}" for="{{ form.status.id_for_label }}">Status</label>
                 {{ form.status }}
                 {{ form.status.errors }}
               </div>

@@ -430,31 +430,36 @@
           <div class="row g-3">
 
             <div class="col-md-6">
-              <label class="form-label leave-label">
+              <label class="form-label leave-label required" for="{{ form.leave_type.id_for_label }}">
                 Rodzaj urlopu
               </label>
               {{ form.leave_type }}
+              {% if form.leave_type.errors %}<div class="invalid-feedback d-block">{{ form.leave_type.errors|striptags }}</div>{% endif %}
             </div>
 
             <div class="col-md-3">
-              <label class="form-label leave-label">
+              <label class="form-label leave-label required" for="{{ form.date_from.id_for_label }}">
                 Data od
               </label>
               {{ form.date_from }}
+              {% if form.date_from.errors %}<div class="invalid-feedback d-block">{{ form.date_from.errors|striptags }}</div>{% endif %}
             </div>
 
             <div class="col-md-3">
-              <label class="form-label leave-label">
+              <label class="form-label leave-label required" for="{{ form.date_to.id_for_label }}">
                 Data do
               </label>
               {{ form.date_to }}
+              {% if form.date_to.errors %}<div class="invalid-feedback d-block">{{ form.date_to.errors|striptags }}</div>{% endif %}
             </div>
 
             <div class="col-12">
+              {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
               <label class="form-label leave-label">
                 Powód
               </label>
               {{ form.reason }}
+              {% if form.reason.errors %}<div class="invalid-feedback d-block">{{ form.reason.errors|striptags }}</div>{% endif %}
             </div>
 
             <div class="col-12">
@@ -471,6 +476,7 @@
                   </div>
                 </div>
               </label>
+              {% if form.is_carryover.errors %}<div class="invalid-feedback d-block">{{ form.is_carryover.errors|striptags }}</div>{% endif %}
             </div>
 
           </div>
