@@ -199,6 +199,7 @@
 
 <form method="post" enctype="multipart/form-data" novalidate>
   {% csrf_token %}
+  {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
 
   <div class="row g-4">
 
@@ -222,7 +223,7 @@
         <div class="row g-3">
 
           <div class="col-md-6">
-            <label class="fleet-label">Numer rejestracyjny</label>
+            <label class="fleet-label required" for="{{ form.registration_number.id_for_label }}">Numer rejestracyjny</label>
             {{ form.registration_number }}
             {% if form.registration_number.errors %}
               <div class="text-danger small mt-1">{{ form.registration_number.errors.0 }}</div>
@@ -240,22 +241,26 @@
           <div class="col-md-6">
             <label class="fleet-label">Marka</label>
             {{ form.brand }}
+            {{ form.brand.errors }}
           </div>
 
           <div class="col-md-6">
             <label class="fleet-label">Model</label>
             {{ form.model }}
+            {{ form.model.errors }}
           </div>
 
           <div class="col-md-6">
             <label class="fleet-label">Aktualny przebieg</label>
             {{ form.current_mileage }}
+            {{ form.current_mileage.errors }}
             <div class="fleet-help">Podaj aktualny przebieg w kilometrach.</div>
           </div>
 
           <div class="col-md-6">
             <label class="fleet-label">Zdjęcie pojazdu</label>
             {{ form.photo }}
+            {{ form.photo.errors }}
             <div class="fleet-help">Zdjęcie będzie widoczne na liście i w szczegółach.</div>
           </div>
 
@@ -282,16 +287,19 @@
           <div class="col-md-6">
             <label class="fleet-label">Ubezpieczenie ważne do</label>
             {{ form.insurance_valid_until }}
+            {{ form.insurance_valid_until.errors }}
           </div>
 
           <div class="col-md-6">
             <label class="fleet-label">Przegląd ważny do</label>
             {{ form.inspection_valid_until }}
+            {{ form.inspection_valid_until.errors }}
           </div>
 
           <div class="col-12">
             <div class="form-check mt-2">
               {{ form.is_active }}
+              {{ form.is_active.errors }}
               <label class="form-check-label fw-semibold">
                 Pojazd aktywny
               </label>

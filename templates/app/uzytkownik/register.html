@@ -3,6 +3,7 @@
 {% block content %}
 
 <style>
+    .form-label.required::after { content: " *"; color: #dc3545; font-weight: 700; }
     /* --- KARTY PAKIETÓW --- */
     .package-card {
         border-radius: 1.25rem;
@@ -234,7 +235,7 @@
                 </div>
                 
                 <div class="mb-4">
-                    <label for="email" class="form-label">Email</label>
+                    <label for="email" class="form-label required">Email</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                         {{ user_form.email }}
@@ -243,7 +244,7 @@
                 
                 <div class="row g-3 mb-4">
                     <div class="col-md-6">
-                        <label for="password1" class="form-label">Hasło</label>
+                        <label for="password1" class="form-label required">Hasło</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                             {{ user_form.password1 }}
@@ -286,7 +287,7 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <label for="password2" class="form-label">Potwierdź hasło</label>
+                        <label for="password2" class="form-label required">Potwierdź hasło</label>
                         <div class="input-group">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                             {{ user_form.password2 }}
@@ -318,7 +319,7 @@
                 <p class="form-subtitle">Wprowadź informacje o firmie</p>
                 
                 <div class="mb-4">
-                    <label for="company-name" class="form-label">Nazwa firmy</label>
+                    <label for="company-name" class="form-label required">Nazwa firmy</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-building"></i></span>
                         {{ company_form.name }}

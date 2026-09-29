@@ -41,7 +41,7 @@
         {% if field.field.widget.input_type == "checkbox" %}
           <div class="form-check">{{ field }} <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>
         {% else %}
-          <label class="stock-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          <label class="stock-label{% if field.name == 'name' %} required{% endif %}" for="{{ field.id_for_label }}">{{ field.label }}</label>
           {{ field }}
         {% endif %}
         {{ field.errors }}

@@ -123,7 +123,7 @@
 
           <div class="row g-3">
             <div class="col-md-6">
-              <label class="form-label">{{ form.source_type.label }}</label>
+              <label class="form-label{% if form.source_type.field.required %} required{% endif %}" for="{{ form.source_type.id_for_label }}">{{ form.source_type.label }}</label>
               {{ form.source_type }}
               {% if form.source_type.errors %}
                 <div class="invalid-feedback d-block">{{ form.source_type.errors|striptags }}</div>
@@ -131,7 +131,7 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">{{ form.name.label }}</label>
+              <label class="form-label{% if form.name.field.required %} required{% endif %}" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
               {{ form.name }}
               {% if form.name.errors %}
                 <div class="invalid-feedback d-block">{{ form.name.errors|striptags }}</div>

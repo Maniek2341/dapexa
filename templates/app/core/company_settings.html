@@ -2,6 +2,7 @@
 
 {% block content %}
 <style>
+  #rcp .form-label::after,#billing .form-label::after,#protocols .form-label::after,#services .form-label::after{content:" *";color:var(--danger);font-weight:700}
 .settings-head { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; }
 .settings-title-wrap { display:flex; align-items:center; gap:1rem; }
 .settings-title-icon { width:62px; height:62px; display:flex; align-items:center; justify-content:center; color:#1468f5; font-size:1.55rem; background:rgba(20,104,245,.12); border:1px solid rgba(20,104,245,.2); border-radius:20px; }
@@ -82,7 +83,7 @@
         <div class="settings-grid">
           {% for field in company_form %}
             <div class="{% if field.name == 'name' or field.name == 'logo' %}wide{% endif %}">
-              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              <label class="form-label{% if field.field.required %} required{% endif %}" for="{{ field.id_for_label }}">{{ field.label }}</label>
               {% if field.name == "logo" and company_form.instance.logo %}
                 <div class="logo-preview">
                   <img src="{{ company_form.instance.logo.url }}" alt="Aktualne logo firmy">
@@ -116,7 +117,7 @@
         <div class="settings-grid">
           {% for field in address_form %}
             <div class="{% if field.name == 'street' or field.name == 'country' %}wide{% endif %}">
-              <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              <label class="form-label{% if field.field.required %} required{% endif %}" for="{{ field.id_for_label }}">{{ field.label }}</label>
               {{ field }}
               {% if field.errors %}<div class="field-errors">{{ field.errors }}</div>{% endif %}
             </div>

@@ -212,7 +212,7 @@
 
       <div class="row g-3">
         <div class="col-12 col-lg-6">
-          <label class="form-label" for="{{ form.warehouse.id_for_label }}">
+          <label class="form-label required" for="{{ form.warehouse.id_for_label }}">
             {{ form.warehouse.label }}
           </label>
           {{ form.warehouse }}
@@ -220,7 +220,7 @@
         </div>
 
         <div class="col-12 col-lg-6">
-          <label class="form-label" for="{{ form.product.id_for_label }}">
+          <label class="form-label required" for="{{ form.product.id_for_label }}">
             {{ form.product.label }}
           </label>
           {{ form.product }}
@@ -228,7 +228,7 @@
         </div>
 
         <div class="col-12 col-md-6">
-          <label class="form-label" for="{{ form.quantity.id_for_label }}">
+          <label class="form-label required" for="{{ form.quantity.id_for_label }}">
             {{ form.quantity.label }}
           </label>
           {{ form.quantity }}
@@ -239,7 +239,7 @@
         </div>
 
         <div class="col-12 col-md-6">
-          <label class="form-label" for="{{ form.min_quantity.id_for_label }}">
+          <label class="form-label{% if form.min_quantity.field.required %} required{% endif %}" for="{{ form.min_quantity.id_for_label }}">
             {{ form.min_quantity.label }}
           </label>
           {{ form.min_quantity }}

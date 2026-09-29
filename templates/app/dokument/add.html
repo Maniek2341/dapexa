@@ -32,7 +32,7 @@
       {% csrf_token %}
 
       <div class="mb-4">
-        <label class="form-label fw-semibold">Nazwa dokumentu</label>
+        <label class="form-label fw-semibold required" for="{{ form.name.id_for_label }}">Nazwa dokumentu</label>
         {{ form.name }}
 
         {% for error in form.name.errors %}
@@ -55,7 +55,7 @@
       {% endif %}
 
       <div class="mb-4">
-        <label class="form-label fw-semibold">
+        <label class="form-label fw-semibold{% if not object %} required{% endif %}" for="{{ form.file.id_for_label }}">
           {% if object %}Podmień plik{% else %}Plik{% endif %}
         </label>
 

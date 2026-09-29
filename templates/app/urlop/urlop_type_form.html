@@ -354,14 +354,18 @@
           <div class="row g-3">
 
             <div class="col-md-6">
-              <label class="form-label leave-label">
+              <label class="form-label leave-label required" for="{{ form.pool.id_for_label }}">Pula limitu</label>
+              {{ form.pool }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label leave-label required" for="{{ form.name.id_for_label }}">
                 Nazwa
               </label>
               {{ form.name }}
             </div>
 
             <div class="col-md-6">
-              <label class="form-label leave-label">
+              <label class="form-label leave-label required" for="{{ form.code.id_for_label }}">
                 Kod
               </label>
               {{ form.code }}
@@ -384,7 +388,7 @@
 </div>
 
             <div class="col-md-6">
-              <label class="form-label leave-label">
+              <label class="form-label leave-label{% if form.annual_limit_days.field.required %} required{% endif %}" for="{{ form.annual_limit_days.id_for_label }}">
                 Limit roczny (dni)
               </label>
               {{ form.annual_limit_days }}
