@@ -582,6 +582,74 @@
 .icon-btn-danger:hover{
   background:rgba(220,53,69,.12);
 }
+
+.client-pagination .pagination{
+  flex-wrap:wrap;
+  gap:.4rem;
+}
+
+.client-pagination .page-link{
+  min-width:2.65rem;
+  min-height:2.65rem;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:.35rem;
+  padding:.55rem .8rem;
+  border:1px solid var(--border);
+  border-radius:12px !important;
+  background:var(--card-2);
+  color:var(--text);
+  font-weight:800;
+  text-decoration:none;
+  transition:transform .16s ease, box-shadow .16s ease, background .16s ease, border-color .16s ease;
+}
+
+.client-pagination .page-item:not(.disabled):not(.active) .page-link:hover{
+  transform:translateY(-1px);
+  border-color:rgba(20,104,245,.5);
+  background:rgba(20,104,245,.12);
+  color:var(--text);
+  box-shadow:0 7px 18px rgba(20,104,245,.14);
+}
+
+.client-pagination .page-item.active .page-link{
+  border-color:transparent;
+  background:linear-gradient(135deg,#08b8ee 0%,#1468f5 58%,#9b4dff 100%);
+  color:#fff;
+  box-shadow:0 8px 20px rgba(20,104,245,.28);
+}
+
+.client-pagination .page-item.disabled .page-link{
+  border-color:var(--border);
+  background:rgba(255,255,255,.025);
+  color:var(--muted);
+  opacity:.55;
+}
+
+.client-pagination .page-link:focus-visible{
+  outline:3px solid rgba(20,104,245,.35);
+  outline-offset:2px;
+  box-shadow:none;
+}
+
+@media(max-width:575px){
+  .client-pagination .pagination{
+    gap:.25rem;
+  }
+
+  .client-pagination .page-link{
+    min-width:2.35rem;
+    min-height:2.35rem;
+    padding:.45rem .6rem;
+    font-size:.85rem;
+  }
+
+  .client-pagination .pagination-edge,
+  .client-pagination .pagination-label{
+    display:none;
+  }
+}
 </style>
 
 <div class="page-header">
@@ -812,9 +880,9 @@
     </div>
 
     {% if is_paginated %}
-      <nav aria-label="Paginacja listy klientów" class="mt-4">
+      <nav aria-label="Paginacja listy klientów" class="client-pagination mt-4">
         <ul class="pagination justify-content-center mb-0">
-          <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+          <li class="page-item pagination-edge {% if not page_obj.has_previous %}disabled{% endif %}">
             {% if page_obj.has_previous %}
               <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page=1" aria-label="Pierwsza strona">«</a>
             {% else %}
@@ -823,9 +891,9 @@
           </li>
           <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
             {% if page_obj.has_previous %}
-              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Poprzednia</a>
+              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}"><span aria-hidden="true">‹</span><span class="pagination-label">Poprzednia</span></a>
             {% else %}
-              <span class="page-link">Poprzednia</span>
+              <span class="page-link"><span aria-hidden="true">‹</span><span class="pagination-label">Poprzednia</span></span>
             {% endif %}
           </li>
 
@@ -855,12 +923,12 @@
 
           <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
             {% if page_obj.has_next %}
-              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Następna</a>
+              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}"><span class="pagination-label">Następna</span><span aria-hidden="true">›</span></a>
             {% else %}
-              <span class="page-link">Następna</span>
+              <span class="page-link"><span class="pagination-label">Następna</span><span aria-hidden="true">›</span></span>
             {% endif %}
           </li>
-          <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+          <li class="page-item pagination-edge {% if not page_obj.has_next %}disabled{% endif %}">
             {% if page_obj.has_next %}
               <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.paginator.num_pages }}" aria-label="Ostatnia strona">»</a>
             {% else %}
