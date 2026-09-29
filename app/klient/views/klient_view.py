@@ -1,5 +1,6 @@
 # app/clients/views.py
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -40,14 +41,28 @@ class KlientView(LoginRequiredMixin, View):
             "client_type",
             "name",
             "last_name",
-            "first_name"
+            "first_name",
+            "pk",
         )
 
         company_count = clients.filter(client_type="company").count()
         private_count = clients.filter(client_type="private").count()
+        paginator = Paginator(clients, 30)
+        page_obj = paginator.get_page(request.GET.get("page"))
+        query_params = request.GET.copy()
+        query_params.pop("page", None)
+        page_numbers = range(
+            max(1, page_obj.number - 2),
+            min(paginator.num_pages, page_obj.number + 2) + 1,
+        )
 
         context = {
-            "clients": clients,
+            "clients": page_obj.object_list,
+            "page_obj": page_obj,
+            "page_numbers": page_numbers,
+            "pagination_query": query_params.urlencode(),
+            "is_paginated": paginator.num_pages > 1,
+            "total_count": paginator.count,
             "company_count": company_count,
             "private_count": private_count,
             "q": q,

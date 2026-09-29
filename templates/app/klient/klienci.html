@@ -614,7 +614,7 @@
 <div class="stats-grid">
   <div class="stat-card">
     <div class="stat-label">Łącznie klientów</div>
-    <div class="stat-value">{{ clients|length }}</div>
+    <div class="stat-value">{{ total_count }}</div>
   </div>
 
   <div class="stat-card">
@@ -700,10 +700,10 @@
 
                   <div>
                     <a href="{% url 'klient_detail' client.pk %}" class="client-title">
-                      {% if client.client_type == 'company' %}
-                        {{ client.name|default:"—" }}
-                      {% else %}
+                      {% if client.client_type != 'company' and client.first_name and client.last_name %}
                         {{ client.first_name }} {{ client.last_name }}
+                      {% else %}
+                        {{ client.name|default:"—" }}
                       {% endif %}
                     </a>
 
@@ -770,10 +770,10 @@
 
             <div>
               <a href="{% url 'klient_detail' client.pk %}" class="mobile-card-title">
-                {% if client.client_type == 'company' %}
-                  {{ client.name|default:"—" }}
-                {% else %}
+                {% if client.client_type != 'company' and client.first_name and client.last_name %}
                   {{ client.first_name }} {{ client.last_name }}
+                {% else %}
+                  {{ client.name|default:"—" }}
                 {% endif %}
               </a>
 
@@ -810,6 +810,66 @@
         </div>
       {% endfor %}
     </div>
+
+    {% if is_paginated %}
+      <nav aria-label="Paginacja listy klientów" class="mt-4">
+        <ul class="pagination justify-content-center mb-0">
+          <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+            {% if page_obj.has_previous %}
+              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page=1" aria-label="Pierwsza strona">«</a>
+            {% else %}
+              <span class="page-link" aria-hidden="true">«</span>
+            {% endif %}
+          </li>
+          <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}">
+            {% if page_obj.has_previous %}
+              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Poprzednia</a>
+            {% else %}
+              <span class="page-link">Poprzednia</span>
+            {% endif %}
+          </li>
+
+          {% if page_obj.number > 3 %}
+            <li class="page-item">
+              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page=1">1</a>
+            </li>
+            {% if page_obj.number > 4 %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+          {% endif %}
+
+          {% for page_number in page_numbers %}
+            <li class="page-item {% if page_number == page_obj.number %}active{% endif %}">
+              {% if page_number == page_obj.number %}
+                <span class="page-link" aria-current="page">{{ page_number }}</span>
+              {% else %}
+                <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_number }}">{{ page_number }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+
+          {% if page_obj.number < page_obj.paginator.num_pages|add:"-2" %}
+            {% if page_obj.number < page_obj.paginator.num_pages|add:"-3" %}<li class="page-item disabled"><span class="page-link">…</span></li>{% endif %}
+            <li class="page-item">
+              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
+            </li>
+          {% endif %}
+
+          <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+            {% if page_obj.has_next %}
+              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Następna</a>
+            {% else %}
+              <span class="page-link">Następna</span>
+            {% endif %}
+          </li>
+          <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}">
+            {% if page_obj.has_next %}
+              <a class="page-link" href="?{% if pagination_query %}{{ pagination_query }}&amp;{% endif %}page={{ page_obj.paginator.num_pages }}" aria-label="Ostatnia strona">»</a>
+            {% else %}
+              <span class="page-link" aria-hidden="true">»</span>
+            {% endif %}
+          </li>
+        </ul>
+      </nav>
+    {% endif %}
 
   {% else %}
 
